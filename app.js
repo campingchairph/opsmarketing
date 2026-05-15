@@ -164,6 +164,9 @@ function renderChecklist(containerId, items, sectionCountId) {
       div.classList.toggle('done');
       if (sectionCountId) updateSectionCount(containerId, items, sectionCountId);
       updateAllStats();
+      // refresh page progress bar
+      const activePage = document.querySelector('.nav-item.active')?.dataset?.page;
+      if (activePage) updatePageProgress(activePage);
     });
 
     container.appendChild(div);
@@ -254,6 +257,37 @@ function navigate(pageId) {
 
   // Init calendar if needed
   if (pageId === 'timesheet') { setTimeout(initCalendar, 50); }
+
+  // Update page-level progress bar
+  updatePageProgress(pageId);
+}
+
+function updatePageProgress(pageId) {
+  const state = loadState();
+  const bar  = document.getElementById('page-progress-bar');
+  const label = document.getElementById('page-progress-label');
+  if (!bar || !label) return;
+
+  const pageItems = {
+    daily:     [...CHECKLISTS.morning, ...CHECKLISTS.core, ...CHECKLISTS.eod],
+    campaigns: [...CHECKLISTS.campaign_collateral],
+    events:    [...CHECKLISTS.event_setup, ...CHECKLISTS.event_materials, ...CHECKLISTS.event_post],
+    brand:     [...CHECKLISTS.qc_brand, ...CHECKLISTS.qc_copy, ...CHECKLISTS.qc_layout, ...CHECKLISTS.qc_preflight, ...CHECKLISTS.compliance_qc],
+  };
+
+  const items = pageItems[pageId];
+  if (!items || items.length === 0) {
+    bar.style.width = '0%';
+    label.textContent = '';
+    document.getElementById('page-progress-wrap')?.style.setProperty('display','none');
+    return;
+  }
+
+  document.getElementById('page-progress-wrap')?.style.removeProperty('display');
+  const done = items.filter(i => state[i.id]).length;
+  const pct = Math.round(done / items.length * 100);
+  bar.style.width = pct + '%';
+  label.textContent = `${done} / ${items.length} tasks · ${pct}%`;
 }
 
 // ── RENDER ALL ──────────────────────────────────────────────────
@@ -420,6 +454,22 @@ function hidePanic() {
 }
 
 // ── TEMPLATE COPY ───────────────────────────────────────────────
+function copyTplCard(el, text) {
+  const decoded = text.replace(/\\n/g, '\n');
+  navigator.clipboard.writeText(decoded).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = decoded;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  const pill = el.querySelector('.tpl-copy-pill');
+  if (pill) { pill.textContent = '✓ Copied'; pill.style.background = 'var(--sage)'; pill.style.color = '#fff'; setTimeout(() => { pill.textContent = 'Copy'; pill.style.background = ''; pill.style.color = ''; }, 2000); }
+  const toast = document.getElementById('copy-toast');
+  if (toast) { toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000); }
+}
+
 function copyTemplate(el, text) {
   navigator.clipboard.writeText(text).then(() => {
     const btn = el.querySelector('.tpl-copy-btn');
@@ -446,14 +496,40 @@ function copyTemplate(el, text) {
     document.body.removeChild(ta);
   });
 }
+// ── THEME ────────────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('msc_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeBtn(saved);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('msc_theme', next);
+  updateThemeBtn(next);
+}
+
+function updateThemeBtn(theme) {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀ Light' : '☾ Dark';
+}
+
+// ── DATE / DUAL CLOCK ────────────────────────────────────────────
 function updateDateTime() {
   const now = new Date();
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
   const dateStr = now.toLocaleDateString('en-AU', opts);
-  const timeStr = now.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' });
-
   document.querySelectorAll('.live-date').forEach(el => el.textContent = dateStr);
-  document.querySelectorAll('.live-time').forEach(el => el.textContent = timeStr);
+
+  // Manila — Asia/Manila (UTC+8)
+  const manilaTime = now.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Manila' });
+  // Sydney — Australia/Sydney (UTC+10/11)
+  const sydTime = now.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit', timeZone:'Australia/Sydney' });
+
+  document.querySelectorAll('.clock-manila').forEach(el => el.textContent = manilaTime);
+  document.querySelectorAll('.clock-sydney').forEach(el => el.textContent = sydTime);
 }
 
 // ── TIMESHEET STORAGE ───────────────────────────────────────────
@@ -609,9 +685,10 @@ function renderTsSummary() {
 
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   checkDailyReset();
   updateDateTime();
-  setInterval(updateDateTime, 60000);
+  setInterval(updateDateTime, 10000);
 
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => navigate(item.dataset.page));
