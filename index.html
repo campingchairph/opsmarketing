@@ -814,6 +814,44 @@
             </div>
           </div>
         </div>
+
+        <!-- CSV EXPORT -->
+        <div class="csv-export-card">
+          <div class="csv-export-header">
+            <div>
+              <div class="csv-title">Export Timesheet to CSV</div>
+              <div class="csv-sub">Pick a date range — opens as a file you can save and open in Excel or Google Sheets</div>
+            </div>
+          </div>
+          <div class="csv-form">
+            <div class="csv-row">
+              <div class="csv-field">
+                <label class="csv-label">From</label>
+                <input type="date" class="form-input" id="csv-from" onchange="onCsvDateChange()"/>
+              </div>
+              <div class="csv-field">
+                <label class="csv-label">To</label>
+                <input type="date" class="form-input" id="csv-to" onchange="onCsvDateChange()"/>
+              </div>
+              <div class="csv-shortcuts">
+                <button class="csv-shortcut-btn" onclick="setRange('thisweek')">This week</button>
+                <button class="csv-shortcut-btn" onclick="setRange('lastweek')">Last week</button>
+                <button class="csv-shortcut-btn" onclick="setRange('thismonth')">This month</button>
+                <button class="csv-shortcut-btn" onclick="setRange('lastmonth')">Last month</button>
+                <button class="csv-shortcut-btn" onclick="setRange('all')">All time</button>
+              </div>
+            </div>
+            <div class="csv-actions">
+              <button class="btn-csv" onclick="exportCSV()">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="11"/><polyline points="4,7 8,11 12,7"/><line x1="3" y1="14" x2="13" y2="14"/></svg>
+                Download CSV
+              </button>
+              <div class="csv-preview-wrap">
+                <div class="csv-preview-label" id="csv-preview-label">Select a range to preview</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div><!-- /content -->

@@ -683,6 +683,138 @@ function renderTsSummary() {
   setEl('ts-stat-entries', totalEntries);
 }
 
+// ── CSV EXPORT ──────────────────────────────────────────────────
+function setRange(preset) {
+  const now = new Date();
+  let from, to;
+
+  if (preset === 'thisweek') {
+    const dow = now.getDay();
+    from = new Date(now); from.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+    to = new Date(now);
+  } else if (preset === 'lastweek') {
+    const dow = now.getDay();
+    to = new Date(now); to.setDate(now.getDate() - (dow === 0 ? 7 : dow));
+    from = new Date(to); from.setDate(to.getDate() - 6);
+  } else if (preset === 'thismonth') {
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+    to = new Date(now);
+  } else if (preset === 'lastmonth') {
+    from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    to   = new Date(now.getFullYear(), now.getMonth(), 0);
+  } else if (preset === 'all') {
+    // Find earliest entry
+    const ts = loadTimesheet();
+    const keys = Object.keys(ts).sort();
+    from = keys.length ? new Date(keys[0]) : new Date(now.getFullYear(), now.getMonth(), 1);
+    to   = new Date(now);
+  }
+
+  const fmt = d => d.toISOString().split('T')[0];
+  const fromEl = document.getElementById('csv-from');
+  const toEl   = document.getElementById('csv-to');
+  if (fromEl) fromEl.value = fmt(from);
+  if (toEl)   toEl.value   = fmt(to);
+  updateCsvPreview();
+}
+
+function updateCsvPreview() {
+  const fromVal = document.getElementById('csv-from')?.value;
+  const toVal   = document.getElementById('csv-to')?.value;
+  const label   = document.getElementById('csv-preview-label');
+  if (!label) return;
+
+  if (!fromVal || !toVal) { label.textContent = 'Select a range to preview'; return; }
+
+  const ts = loadTimesheet();
+  const from = new Date(fromVal);
+  const to   = new Date(toVal);
+  to.setHours(23,59,59);
+
+  let totalEntries = 0, totalMins = 0;
+  Object.entries(ts).forEach(([key, entries]) => {
+    const [y,m,d] = key.split('-').map(Number);
+    const date = new Date(y, m-1, d);
+    if (date >= from && date <= to) {
+      totalEntries += entries.length;
+      totalMins += entries.reduce((s,e) => s + (e.minutes||0), 0);
+    }
+  });
+
+  if (totalEntries === 0) {
+    label.textContent = 'No entries found in this range';
+    label.style.color = 'var(--rust)';
+  } else {
+    label.textContent = `${totalEntries} entr${totalEntries > 1 ? 'ies' : 'y'} · ${fmtMins(totalMins)} total — ready to export`;
+    label.style.color = 'var(--sage)';
+  }
+}
+
+function exportCSV() {
+  const fromVal = document.getElementById('csv-from')?.value;
+  const toVal   = document.getElementById('csv-to')?.value;
+
+  if (!fromVal || !toVal) {
+    const label = document.getElementById('csv-preview-label');
+    if (label) { label.textContent = 'Please select a From and To date first'; label.style.color = 'var(--rust)'; }
+    return;
+  }
+
+  const ts   = loadTimesheet();
+  const from = new Date(fromVal);
+  const to   = new Date(toVal);
+  to.setHours(23,59,59);
+
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const rows = [['Date','Day','Task','Category','Hours','Minutes','Total Hours','Total Decimal','Notes']];
+
+  const keys = Object.keys(ts).sort();
+  keys.forEach(key => {
+    const [y,m,d] = key.split('-').map(Number);
+    const date = new Date(y, m-1, d);
+    if (date < from || date > to) return;
+
+    const dayName = DAYS[date.getDay()];
+    const entries = ts[key];
+
+    entries.forEach(entry => {
+      const hrs  = Math.floor((entry.minutes||0) / 60);
+      const mins = (entry.minutes||0) % 60;
+      const dec  = ((entry.minutes||0) / 60).toFixed(2);
+      const notes = (entry.notes || '').replace(/"/g, '""');
+      const task  = (entry.title || '').replace(/"/g, '""');
+      rows.push([key, dayName, `"${task}"`, entry.category, hrs, mins, `${hrs}h ${mins}m`, dec, `"${notes}"`]);
+    });
+  });
+
+  if (rows.length === 1) {
+    const label = document.getElementById('csv-preview-label');
+    if (label) { label.textContent = 'No entries found in this range'; label.style.color = 'var(--rust)'; }
+    return;
+  }
+
+  const csvContent = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+
+  const fromLabel = fromVal.replace(/-/g,'');
+  const toLabel   = toVal.replace(/-/g,'');
+  a.href     = url;
+  a.download = `timesheet_${fromLabel}_${toLabel}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Feedback
+  const label = document.getElementById('csv-preview-label');
+  if (label) { label.textContent = `✓ Downloaded timesheet_${fromLabel}_${toLabel}.csv`; label.style.color = 'var(--sage)'; }
+}
+
+// Wire up live preview on date input change (called from HTML onchange)
+function onCsvDateChange() { updateCsvPreview(); }
+
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
