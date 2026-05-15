@@ -237,6 +237,7 @@ function navigate(pageId) {
     firstweek:  ['First Week Guide', 'Day-by-day remote survival plan'],
     panic:      ['Panic Button 🆘', 'Step-by-step for when things go wrong'],
     templates:  ['Message Templates', 'Ready-to-copy professional messages'],
+    timesheet:  ['Timesheet', 'Log work, track hours, backtrack any day'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -250,6 +251,9 @@ function navigate(pageId) {
   // Re-render all checklists for the active page
   renderAll();
   updateAllStats();
+
+  // Init calendar if needed
+  if (pageId === 'timesheet') { setTimeout(initCalendar, 50); }
 }
 
 // ── RENDER ALL ──────────────────────────────────────────────────
@@ -452,17 +456,166 @@ function updateDateTime() {
   document.querySelectorAll('.live-time').forEach(el => el.textContent = timeStr);
 }
 
+// ── TIMESHEET STORAGE ───────────────────────────────────────────
+const TS_KEY = 'msc_timesheet_v1';
+function loadTimesheet() { try { return JSON.parse(localStorage.getItem(TS_KEY)) || {}; } catch { return {}; } }
+function saveTimesheet(d) { localStorage.setItem(TS_KEY, JSON.stringify(d)); }
+function tsDateKey(y, m, d) { return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+
+let calYear, calMonth, calSelectedDate;
+
+function initCalendar() {
+  const now = new Date();
+  calYear  = now.getFullYear();
+  calMonth = now.getMonth();
+  calSelectedDate = tsDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  renderCalendar();
+  renderDetail(calSelectedDate);
+  renderTsSummary();
+}
+
+function renderCalendar() {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  setEl('cal-month-label', `${MONTHS[calMonth]} ${calYear}`);
+  const ts = loadTimesheet();
+  const today = new Date();
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+  const grid = document.getElementById('cal-days-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  for (let i = firstDay-1; i >= 0; i--) {
+    const d = daysInPrev-i;
+    const k = tsDateKey(calYear, calMonth-1, d);
+    addCalDay(grid, d, 'other-month', k);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const k = tsDateKey(calYear, calMonth, d);
+    const isToday = (d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear());
+    addCalDay(grid, d, isToday ? 'today' : '', k);
+  }
+  const total = firstDay + daysInMonth;
+  const rem = total % 7 === 0 ? 0 : 7-(total%7);
+  for (let d = 1; d <= rem; d++) {
+    const k = tsDateKey(calYear, calMonth+1, d);
+    addCalDay(grid, d, 'other-month', k);
+  }
+}
+
+function addCalDay(grid, d, extra, key) {
+  const ts = loadTimesheet();
+  const div = document.createElement('div');
+  let cls = 'cal-day';
+  if (extra) cls += ' ' + extra;
+  if (key === calSelectedDate) cls += ' selected';
+  if (ts[key]?.length) cls += ' has-entries';
+  div.className = cls;
+  div.textContent = d;
+  div.onclick = () => selectDate(key);
+  grid.appendChild(div);
+}
+
+function calPrev() { calMonth--; if (calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext() { calMonth++; if (calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function selectDate(key) { calSelectedDate = key; renderCalendar(); renderDetail(key); }
+
+function renderDetail(key) {
+  const el = document.getElementById('cal-detail-date');
+  const sub = document.getElementById('cal-detail-sub');
+  if (!el) return;
+  const [y,m,d] = key.split('-').map(Number);
+  const date = new Date(y, m-1, d);
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MON  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  el.textContent = `${DAYS[date.getDay()]}, ${MON[m-1]} ${d}`;
+  const ts = loadTimesheet();
+  const entries = ts[key] || [];
+  const totalMins = entries.reduce((s,e)=>s+(e.minutes||0),0);
+  if (sub) sub.textContent = entries.length ? `${entries.length} entr${entries.length>1?'ies':'y'} · ${fmtMins(totalMins)} logged` : 'No entries yet — add below';
+  const list = document.getElementById('cal-entries-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!entries.length) { list.innerHTML = '<div class="cal-empty">No work logged for this day.</div>'; return; }
+  entries.forEach((entry, idx) => {
+    const row = document.createElement('div');
+    row.className = 'entry-row';
+    row.innerHTML = `
+      <div class="entry-cat ${entry.category}">${entry.category}</div>
+      <div class="entry-body">
+        <div class="entry-title">${entry.title}</div>
+        <div class="entry-meta">${fmtMins(entry.minutes||0)}</div>
+        ${entry.notes ? `<div class="entry-notes">${entry.notes}</div>` : ''}
+      </div>
+      <div class="entry-actions">
+        <button class="entry-btn delete" title="Delete" onclick="deleteEntry('${key}',${idx})">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+        </button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function fmtMins(mins) {
+  if (!mins) return '0m';
+  const h = Math.floor(mins/60), m = mins%60;
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+}
+
+function addEntry() {
+  const title = document.getElementById('ts-title')?.value?.trim();
+  const cat   = document.getElementById('ts-cat')?.value;
+  const hrs   = parseInt(document.getElementById('ts-hrs')?.value||'0')||0;
+  const mins  = parseInt(document.getElementById('ts-mins')?.value||'0')||0;
+  const notes = document.getElementById('ts-notes')?.value?.trim();
+  if (!title) { document.getElementById('ts-title')?.focus(); return; }
+  const ts = loadTimesheet();
+  if (!ts[calSelectedDate]) ts[calSelectedDate] = [];
+  ts[calSelectedDate].push({ title, category: cat||'admin', minutes: hrs*60+mins, notes: notes||'' });
+  saveTimesheet(ts);
+  ['ts-title','ts-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['ts-hrs','ts-mins'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  renderDetail(calSelectedDate);
+  renderCalendar();
+  renderTsSummary();
+}
+
+function deleteEntry(key, idx) {
+  const ts = loadTimesheet();
+  if (ts[key]) { ts[key].splice(idx,1); if(!ts[key].length) delete ts[key]; saveTimesheet(ts); renderDetail(key); renderCalendar(); renderTsSummary(); }
+}
+
+function renderTsSummary() {
+  const ts = loadTimesheet();
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate()-(dow===0?6:dow-1));
+  let weekMins=0, weekDays=0, totalEntries=0, monthMins=0;
+  Object.entries(ts).forEach(([key, entries]) => {
+    const [y,m,d] = key.split('-').map(Number);
+    const date = new Date(y,m-1,d);
+    const dayMins = entries.reduce((s,e)=>s+(e.minutes||0),0);
+    totalEntries += entries.length;
+    if (date>=mon && date<=now) { weekMins+=dayMins; if(dayMins>0) weekDays++; }
+    if (date.getFullYear()===now.getFullYear()&&date.getMonth()===now.getMonth()) monthMins+=dayMins;
+  });
+  setEl('ts-stat-week',    fmtMins(weekMins));
+  setEl('ts-stat-days',    weekDays+' days');
+  setEl('ts-stat-month',   fmtMins(monthMins));
+  setEl('ts-stat-entries', totalEntries);
+}
+
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   checkDailyReset();
   updateDateTime();
   setInterval(updateDateTime, 60000);
 
-  // Wire nav clicks
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => navigate(item.dataset.page));
   });
 
-  // Default page
   navigate('daily');
 });
