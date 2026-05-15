@@ -815,12 +815,267 @@ function exportCSV() {
 // Wire up live preview on date input change (called from HTML onchange)
 function onCsvDateChange() { updateCsvPreview(); }
 
+// ── TEMPLATES DATA ──────────────────────────────────────────────
+const TEMPLATES = [
+  {
+    id: 'approval',
+    badge: 'Approval', badgeStyle: 'background:var(--sage-dim);color:var(--sage)',
+    title: 'Standard approval request',
+    sub: 'Collateral, emails, event materials, website updates',
+    variants: [
+      { tone: 'Formal',
+        preview: '"I\'ve completed [task] and it\'s ready for your review…"',
+        text: "Hi [Name],\n\nI've completed [task/material name] and it's ready for your review.\n\n[Attach file or link here]\n\nPlease let me know if any changes are needed or if I'm good to proceed.\n\nThanks,\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"[Task] is done — ready for review. Let me know if anything needs adjusting."',
+        text: "Hi [Name],\n\n[Task] is done and ready for your review — [link/file attached].\n\nLet me know if anything needs adjusting.\n\n[Your name]" },
+      { tone: 'Warm',
+        preview: '"Just finished [task] — I think it\'s looking good! Would love your feedback."',
+        text: "Hi [Name],\n\nJust finished [task] — I think it's looking good! Would love your feedback before we move forward.\n\n[Link/file attached]\n\nNo rush, but let me know when you've had a chance to look.\n\nThanks,\n[Your name]" },
+      { tone: 'Detailed',
+        preview: '"Here\'s a quick summary of what was done before you review…"',
+        text: "Hi [Name],\n\nI've completed [task] and it's ready for review. Here's a quick summary:\n\n- [Key point 1]\n- [Key point 2]\n\n[Link/file attached]\n\nHappy to walk you through it or make any changes.\n\nThanks,\n[Your name]" },
+      { tone: 'Concise',
+        preview: '"[Task] ready. [Link]. Approve or flag changes?"',
+        text: "[Name] — [task] is ready for review. [Link]. Approve or flag changes?\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'urgent',
+    badge: 'Urgent', badgeStyle: 'background:var(--rust-dim);color:var(--rust)',
+    title: 'Urgent approval — deadline today',
+    sub: 'Use when you need a same-day response',
+    variants: [
+      { tone: 'Standard',
+        preview: '"Quick one — I need your sign-off before I can move forward. Deadline: [time]."',
+        text: "Hi [Name],\n\nQuick one — I need your sign-off on [task] before I can move forward. Deadline is [date/time].\n\n[Attach file or link]\n\nHappy to jump on a call if easier.\n\nThanks,\n[Your name]" },
+      { tone: 'Assertive',
+        preview: '"[Task] needs to go out by [time]. File is ready — can you review ASAP?"',
+        text: "Hi [Name],\n\n[Task] needs to go out by [time] today and I need your approval to proceed. File is ready — [link].\n\nCan you review in the next [X] minutes?\n\n[Your name]" },
+      { tone: 'Calm',
+        preview: '"Flagging a time-sensitive one — [task] is due [time] and needs your sign-off."',
+        text: "Hi [Name],\n\nFlagging a time-sensitive one — [task] is due [time] and needs your sign-off before I can send/publish.\n\n[Link attached]\n\nEven a quick \"looks good\" works. Thanks!\n\n[Your name]" },
+      { tone: 'Collaborative',
+        preview: '"Want to make sure we hit the [time] deadline — file is ready, happy to call if faster."',
+        text: "Hi [Name],\n\nWant to make sure we hit the [time] deadline on [task]. I've got the file ready — [link].\n\nHappy to jump on a quick call to walk you through it if that's faster than reviewing async.\n\nThanks,\n[Your name]" },
+      { tone: 'Brief',
+        preview: '"[Task] due [time]. Ready for review: [link]. Need approval to proceed."',
+        text: "[Name] — [task] due [time]. Ready for review: [link]. Need your approval to proceed.\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'delay',
+    badge: 'Delay', badgeStyle: 'background:var(--gold-dim);color:var(--gold)',
+    title: 'Flagging a delay proactively',
+    sub: 'Always send before the deadline, not after',
+    variants: [
+      { tone: 'Standard',
+        preview: '"Heads up — [task] is at risk of missing the [date] deadline. Hold-up: [reason]."',
+        text: "Hi [Name],\n\nHeads up — [task] is at risk of missing the [date] deadline. Hold-up: [reason].\n\nI'm currently [action]. Est. resolution: [time].\n\nLet me know if you'd like me to escalate.\n\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"[Task] is running behind — [reason]. New ETA: [time]. I\'m on it."',
+        text: "Hi [Name],\n\n[Task] is running behind — [reason]. Current ETA: [new time].\n\nI'm [what you're doing to fix it] and will update you when resolved.\n\n[Your name]" },
+      { tone: 'Proactive',
+        preview: '"Flagging early — [task] may be delayed. My plan: [action]. Does that work?"',
+        text: "Hi [Name],\n\nFlagging early — [task] may be delayed due to [reason]. I wanted to let you know before it became a problem.\n\nMy plan: [action]. Does that work, or would you prefer a different approach?\n\n[Your name]" },
+      { tone: 'Collaborative',
+        preview: '"Running into a snag with [task] — flagging while we still have options."',
+        text: "Hi [Name],\n\nRunning into a snag with [task] — [brief reason]. I don't think it'll impact the final deadline but I wanted to flag it now while we have options.\n\nI'm thinking [proposed solution] — let me know if you'd prefer a different approach.\n\n[Your name]" },
+      { tone: 'Brief',
+        preview: '"Heads up on [task]. Delay: [reason]. New ETA: [time]. On it."',
+        text: "[Name] — heads up on [task]. Delay: [reason]. New ETA: [time]. On it.\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'error',
+    badge: 'Error', badgeStyle: 'background:var(--rust-dim);color:var(--rust)',
+    title: 'Flagging a mistake',
+    sub: 'Lead with facts, follow with your proposed fix',
+    variants: [
+      { tone: 'Standard',
+        preview: '"I want to flag an issue with [task]. [Factual one sentence]…"',
+        text: "Hi [Name],\n\nI want to flag an issue with [task]. [One factual sentence].\n\nI've [action taken]. Suggested next step: [recommendation].\n\nPlease let me know how you'd like to proceed.\n\n[Your name]" },
+      { tone: 'Transparent',
+        preview: '"I need to flag a mistake on [task]. Here\'s what happened and what I\'ve done."',
+        text: "Hi [Name],\n\nI need to flag a mistake on [task]. [What happened — one sentence].\n\nI've already [action taken to fix or contain it]. The impact is [minimal/describe].\n\nHappy to talk through it — let me know how you'd like to handle it.\n\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"[Issue] — flagging immediately. I\'ve [what you\'ve done]. Next step: [recommendation]."',
+        text: "Hi [Name],\n\n[Issue] — flagging immediately. I've [what you've done to address it]. Recommended next step: [recommendation].\n\nSorry for the inconvenience. Let me know how to proceed.\n\n[Your name]" },
+      { tone: 'Calm',
+        preview: '"Flagging something from [task] I want to make sure we address."',
+        text: "Hi [Name],\n\nFlagging something from [task] I want to make sure we address. [What happened].\n\nI'm [what you're doing]. Let me know if you'd like me to handle it differently.\n\nThanks,\n[Your name]" },
+      { tone: 'Brief',
+        preview: '"Issue with [task]: [one sentence]. Fixed/in progress: [action]. Flagging so you\'re aware."',
+        text: "[Name] — issue with [task]: [one sentence]. Fixed/in progress: [action]. Flagging so you're aware.\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'followup',
+    badge: 'Follow-up', badgeStyle: 'background:var(--lav-dim);color:var(--lavender)',
+    title: 'Following up — unanswered message',
+    sub: 'Wait 24–48 hrs before sending',
+    variants: [
+      { tone: 'Standard',
+        preview: '"Following up re: [topic] — making sure it didn\'t get buried."',
+        text: "Hi [Name],\n\nFollowing up on my message from [date] re: [topic]. Just checking if you've had a chance to review.\n\nNo rush — just want to make sure it didn't get buried.\n\nThanks,\n[Your name]" },
+      { tone: 'Friendly',
+        preview: '"Just bumping this up in your inbox in case it got lost!"',
+        text: "Hi [Name],\n\nJust bumping this up in your inbox in case it got lost! Re: [topic] from [date].\n\nLet me know when you get a chance — no urgency.\n\nThanks,\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"Following up on [topic] — still waiting on [what you need] before I can move forward."',
+        text: "Hi [Name],\n\nFollowing up on [topic] — sent [date]. Still waiting on [what you need] before I can move forward.\n\nLet me know if you need anything from my end.\n\n[Your name]" },
+      { tone: 'Contextual',
+        preview: '"Circling back on [topic] — flagging because [deadline reason]."',
+        text: "Hi [Name],\n\nCircling back on [topic] — I sent this on [date] and wanted to check it wasn't missed. Flagging because [brief reason — e.g., deadline approaching].\n\nHappy to resend or clarify anything if needed.\n\nThanks,\n[Your name]" },
+      { tone: 'Concise',
+        preview: '"Checking in on [topic] from [date]. Any update?"',
+        text: "[Name] — checking in on [topic] from [date]. Any update?\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'chase',
+    badge: 'Chase', badgeStyle: 'background:var(--lav-dim);color:var(--lavender)',
+    title: 'Chasing a dependency',
+    sub: 'Waiting on someone else — professional, not pushy',
+    variants: [
+      { tone: 'Standard',
+        preview: '"Still waiting on this before I can move [next step] forward…"',
+        text: "Hi [Name],\n\nJust checking in on [task/approval] — still waiting on this before I can move [next step] forward.\n\nCurrent status: [what's ready, what's blocked].\n\nThanks,\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"[Next step] is on hold until I have [what you need] from you. ETA?"',
+        text: "Hi [Name],\n\n[Next step] is on hold until I have [what you need] from you. Can you give me an ETA?\n\nHappy to help move it along if there's anything blocking you.\n\n[Your name]" },
+      { tone: 'Collaborative',
+        preview: '"I\'m ready on my end — just need [specific item] from you to proceed."',
+        text: "Hi [Name],\n\nI want to keep [project] moving — I'm ready on my end but need [specific item] from you to proceed.\n\nNo pressure, just flagging so it doesn't sneak up on us closer to deadline.\n\nThanks,\n[Your name]" },
+      { tone: 'Detailed',
+        preview: '"Here\'s where things stand: ✓ Done / ⏳ Waiting on you / → Next step…"',
+        text: "Hi [Name],\n\nFollowing up on [task] — here's where things stand:\n\n✓ Done: [what you've completed]\n⏳ Waiting on: [what you need from them]\n→ Next step once received: [what you'll do]\n\nLet me know if there's anything I can do to help move this along.\n\nThanks,\n[Your name]" },
+      { tone: 'Concise',
+        preview: '"Waiting on [item] to move forward on [task]. Any update on timing?"',
+        text: "[Name] — waiting on [item] to move forward on [task]. Any update on timing?\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'eow',
+    badge: 'EOW', badgeStyle: 'background:var(--teal-dim);color:var(--teal)',
+    title: 'Friday EOW summary',
+    sub: 'Send every Friday — builds trust faster than anything else',
+    variants: [
+      { tone: 'Standard',
+        preview: '"Completed: [tasks]. In progress: [tasks]. Waiting on: [items]…"',
+        text: "Hi [Name],\n\nEnd-of-week wrap:\n\nCompleted:\n- [task 1]\n- [task 2]\n\nIn progress:\n- [task] on track for [date]\n\nWaiting on:\n- [item from whom]\n\nHave a good weekend,\n[Your name]" },
+      { tone: 'Friendly',
+        preview: '"Here\'s my wrap for the week — ✅ Done / 🔄 In progress / ⏳ Blocked…"',
+        text: "Hi [Name],\n\nHere's my wrap for the week:\n\n✅ Done: [task 1], [task 2]\n🔄 In progress: [task] — on track\n⏳ Blocked/waiting: [item]\n\nAnything you need from me before I sign off? Have a great weekend!\n\n[Your name]" },
+      { tone: 'Detailed',
+        preview: '"Weekly summary with outcomes, status, dependencies, and next week\'s focus…"',
+        text: "Hi [Name],\n\nWeekly summary:\n\nCompleted this week:\n- [Task 1] — [brief outcome]\n- [Task 2] — [brief outcome]\n\nIn progress (carrying to next week):\n- [Task] — [status + ETA]\n\nItems I need from others:\n- [What] from [who] by [when]\n\nFocus for next week:\n- [Priority 1]\n- [Priority 2]\n\nLet me know if you'd like to discuss anything.\n\nHave a great weekend,\n[Your name]" },
+      { tone: 'Bullet',
+        preview: '"→ Done | → In progress | → Blocked | → Next week priority"',
+        text: "Week ending [date]:\n\n→ Done: [task 1] | [task 2] | [task 3]\n→ In progress: [task] (due [date])\n→ Blocked: [item] — waiting on [person]\n→ Next week priority: [task]\n\n[Your name]" },
+      { tone: 'Concise',
+        preview: '"[Task 1] done, [task 2] done. [Task 3] in progress. Waiting on [item]."',
+        text: "EOW — [task 1] done, [task 2] done. [Task 3] in progress, on track for [date]. Waiting on [item] from [person].\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'supplier',
+    badge: 'Supplier', badgeStyle: 'background:var(--sage-dim);color:var(--sage)',
+    title: 'Sending a supplier brief',
+    sub: 'Attach the file — always use pre-approved briefs',
+    variants: [
+      { tone: 'Standard',
+        preview: '"Brief attached. Deliverable: [X]. Deadline: [date]. Please confirm receipt."',
+        text: "Hi [Supplier],\n\nRe: [job name]. Brief attached.\n\nDeliverable: [what]\nSpecs: [format/size/qty]\nDeadline: [date]\n\nPlease confirm receipt and ability to deliver by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Detailed',
+        preview: '"Please find attached the brief for [job name]. Summary of key specs inside…"',
+        text: "Hi [Supplier],\n\nPlease find attached the brief for [job name].\n\nSummary:\n- Deliverable: [what]\n- Format/specs: [details]\n- Quantity: [if applicable]\n- Deadline: [date]\n\nPlease acknowledge receipt and confirm you can meet the deadline. Flag any concerns by [date] so we have time to adjust.\n\nThanks,\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"[Job name] brief attached. Confirm you can deliver [deliverable] by [date]."',
+        text: "Hi [Supplier],\n\nBrief for [job name] attached. Please review and confirm you can deliver by [date].\n\nKey specs: [format], [size], [qty].\n\nLet me know if you have any questions.\n\n[Your name]" },
+      { tone: 'Relationship',
+        preview: '"Hope you\'re well — same format as last time. Deadline: [date]."',
+        text: "Hi [Supplier],\n\nHope you're well! Brief for [job name] is attached — same format as last time.\n\nDeadline: [date]. Let me know if you have any questions or need anything clarified.\n\nThanks as always,\n[Your name]" },
+      { tone: 'Concise',
+        preview: '"[Job name] brief attached. Need [deliverable] in [format] by [date]. Confirm?"',
+        text: "[Supplier] — [job name] brief attached. Need [deliverable] in [format] by [date]. Please confirm receipt.\n\n[Your name]" },
+    ]
+  },
+  {
+    id: 'revision',
+    badge: 'Revision', badgeStyle: 'background:var(--sage-dim);color:var(--sage)',
+    title: 'Requesting supplier revision',
+    sub: 'Be specific — vague feedback means more rounds',
+    variants: [
+      { tone: 'Standard',
+        preview: '"After review, the following needs to be addressed: [issues]…"',
+        text: "Hi [Supplier],\n\nThank you for sending [deliverable]. After review, the following needs to be addressed:\n\n- [Issue 1 — be specific]\n- [Issue 2 if applicable]\n\nPlease revise and resend by [time/date].\n\nThanks,\n[Your name]" },
+      { tone: 'Direct',
+        preview: '"Reviewed [deliverable] — a few things need fixing before we\'re good."',
+        text: "Hi [Supplier],\n\nReviewed [deliverable] — a few things need fixing:\n\n1. [Issue 1]\n2. [Issue 2]\n\nPlease resend revised version by [date].\n\n[Your name]" },
+      { tone: 'Firm',
+        preview: '"[Deliverable] does not meet brief. Required changes listed — please confirm receipt."',
+        text: "Hi [Supplier],\n\n[Deliverable] does not meet brief. Required changes:\n\n- [Issue 1 — specific]\n- [Issue 2 — specific]\n\nWe need the corrected file by [specific time], [date]. Please confirm receipt of this feedback.\n\n[Your name]" },
+      { tone: 'Detailed',
+        preview: '"Thank you for the [deliverable]. I\'ve reviewed it and have the following feedback…"',
+        text: "Hi [Supplier],\n\nThank you for the [deliverable]. I've reviewed it and have the following feedback:\n\n1. [Issue 1] — [specific detail/what's needed]\n2. [Issue 2] — [specific detail/what's needed]\n3. [Issue 3 if applicable]\n\nPlease address all points and resend by [date]. Questions? Reach me at [email].\n\nThanks,\n[Your name]" },
+      { tone: 'Collaborative',
+        preview: '"Thanks for getting this over — just a couple of tweaks and we\'re good to go."',
+        text: "Hi [Supplier],\n\nThanks for getting [deliverable] over. A couple of things to tweak before we're good to go:\n\n- [Issue 1]\n- [Issue 2]\n\nNot major — just need those fixed. Can you turn it around by [date]?\n\nThanks,\n[Your name]" },
+    ]
+  },
+];
+
+// ── TEMPLATE RENDERING ──────────────────────────────────────────
+function renderTemplates() {
+  const grid = document.getElementById('tpl-grid');
+  if (!grid) return;
+  grid.innerHTML = TEMPLATES.map(tpl => `
+    <div class="tpl-card">
+      <div class="tpl-card-header">
+        <span class="tpl-cat-badge" style="${tpl.badgeStyle}">${tpl.badge}</span>
+        <div class="tpl-card-title">${tpl.title}</div>
+        <div class="tpl-card-sub">${tpl.sub}</div>
+      </div>
+      <div class="tpl-variants">
+        ${tpl.variants.map((v, i) => `
+          <div class="tpl-variant">
+            <div class="tpl-variant-left">
+              <span class="tpl-variant-tone">${v.tone}</span>
+              <div class="tpl-variant-preview">${v.preview}</div>
+            </div>
+            <button class="tpl-variant-btn" onclick="copyVariant(this,'${tpl.id}',${i})">Copy</button>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function copyVariant(btn, tplId, variantIdx) {
+  const tpl = TEMPLATES.find(t => t.id === tplId);
+  if (!tpl) return;
+  const text = tpl.variants[variantIdx].text;
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  btn.textContent = '✓ Copied';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  const toast = document.getElementById('copy-toast');
+  if (toast) { toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000); }
+}
+
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   checkDailyReset();
   updateDateTime();
   setInterval(updateDateTime, 10000);
+  renderTemplates();
 
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => navigate(item.dataset.page));
