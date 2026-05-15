@@ -231,16 +231,17 @@ function navigate(pageId) {
 
   // Update topbar title
   const titles = {
-    daily:      ['Daily Ops', 'Morning, core tasks & end-of-day'],
-    campaigns:  ['Campaigns', 'Email execution & collateral'],
-    events:     ['Events',    'Setup, materials & post-event'],
-    brand:      ['Brand & Compliance', 'QC checklist + InDesign preflight'],
-    tools:      ['Tools & Skills',  'Your tech stack reference'],
-    monday:     ['Monday.com', 'Your task management hub'],
-    firstweek:  ['First Week Guide', 'Day-by-day remote survival plan'],
-    panic:      ['Panic Button 🆘', 'Step-by-step for when things go wrong'],
-    templates:  ['Message Templates', 'Ready-to-copy professional messages'],
-    timesheet:  ['Timesheet', 'Log work, track hours, backtrack any day'],
+    daily:        ['Daily Ops', 'Morning, core tasks & end-of-day'],
+    campaigns:    ['Campaigns', 'Email execution & collateral'],
+    events:       ['Events',    'Setup, materials & post-event'],
+    brand:        ['Brand & Compliance', 'QC checklist + InDesign preflight'],
+    taskbuilder:  ['Task Builder', 'Generate a custom plan for any task'],
+    tools:        ['Tools & Skills',  'Your tech stack reference'],
+    monday:       ['Monday.com', 'Your task management hub'],
+    firstweek:    ['First Week Guide', 'Day-by-day remote survival plan'],
+    panic:        ['Panic Button 🆘', 'Step-by-step for when things go wrong'],
+    templates:    ['Message Templates', 'Ready-to-copy professional messages'],
+    timesheet:    ['Timesheet', 'Log work, track hours, backtrack any day'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -257,6 +258,7 @@ function navigate(pageId) {
 
   // Init calendar if needed
   if (pageId === 'timesheet') { setTimeout(initCalendar, 50); }
+  if (pageId === 'taskbuilder') { renderTaskBuilderPage(); }
 
   // Update page-level progress bar
   updatePageProgress(pageId);
@@ -1067,6 +1069,357 @@ function copyVariant(btn, tplId, variantIdx) {
   setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
   const toast = document.getElementById('copy-toast');
   if (toast) { toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000); }
+}
+
+// ── TASK TYPE MAP ───────────────────────────────────────────────
+const TASK_TYPE_MAP = {
+  email_campaign: {
+    label: 'Email Campaign',
+    checklistKeys: ['campaign_collateral', 'compliance_qc'],
+    guideSteps: [
+      { title: 'Receive approved brief + content', desc: 'Never start without written approval. Confirm: subject line, sender name, send time, list segment.' },
+      { title: 'Build list in CRM / email platform', desc: 'Upload contacts, apply segmentation. Check compliance — consent, opt-outs, financial services rules.' },
+      { title: 'Set up email using approved template', desc: 'Apply correct logo, disclaimer, formatting. No off-template design decisions.' },
+      { title: 'Send test + run QC checklist', desc: 'Broken links? Correct sender? Disclaimer visible? Rendering on mobile? Do not skip this step.' },
+      { title: 'Get final sign-off before scheduling', desc: 'Document approval (email or shared doc). Only then schedule the send.' },
+      { title: 'Post-send: pull performance report', desc: 'Open rate, clicks, bounces, unsubscribes. Add to tracker. Brief Marketing Lead on results.' },
+    ],
+    templateIds: ['approval', 'urgent', 'delay'],
+  },
+  indesign_collateral: {
+    label: 'InDesign Collateral',
+    checklistKeys: ['qc_brand', 'qc_copy', 'qc_layout', 'qc_preflight'],
+    guideSteps: [
+      { title: 'Receive approved brief + copy', desc: 'Get written confirmation of: format, dimensions, approved copy, target audience, and delivery date.' },
+      { title: 'Open the correct approved template', desc: 'Never recreate from scratch. Open the designated template file and check master pages match.' },
+      { title: 'Place approved content only', desc: 'Paste approved copy — no edits without sign-off. Place all images at correct resolution.' },
+      { title: 'Apply brand standards throughout', desc: 'Logo version, font, colour palette. Check Swatches panel. No off-brand elements.' },
+      { title: 'Run full QC checklist', desc: 'Brand, copy, layout, and preflight sections. Resolve all preflight errors. Zero errors = proceed.' },
+      { title: 'Export + send for approval', desc: 'Export PDF to correct spec. Attach to approval request. Get sign-off before sending to supplier or publishing.' },
+    ],
+    templateIds: ['approval', 'revision'],
+  },
+  event_setup: {
+    label: 'Event Setup',
+    checklistKeys: ['event_setup', 'event_materials'],
+    guideSteps: [
+      { title: 'Confirm event details with Marketing Lead', desc: 'Date, time, venue, expected headcount, guest list source, key message. Get written confirmation.' },
+      { title: 'Add to shared calendar + notify team', desc: 'Calendar invite to all relevant team members. Include location, agenda, and lead-time notes.' },
+      { title: 'Build and approve invitation list', desc: 'Pull from CRM using agreed criteria. Submit list for Marketing Lead approval before sending anything.' },
+      { title: 'Prepare and send invitations', desc: 'Use approved template only. Personalise where required. Send in approved batches.' },
+      { title: 'Set up RSVP tracking', desc: 'Create spreadsheet or CRM record. Log all responses. Update daily as RSVPs come in.' },
+      { title: 'Coordinate supplier deliverables', desc: 'AV, catering, venue, materials. Confirm all via approved brief. Follow up 48 hrs before event.' },
+    ],
+    templateIds: ['supplier', 'approval'],
+  },
+  post_event: {
+    label: 'Post-Event',
+    checklistKeys: ['event_post'],
+    guideSteps: [
+      { title: 'Reconcile attendance immediately after event', desc: 'Compare final sign-in list vs confirmed RSVPs. Note no-shows and unexpected attendees.' },
+      { title: 'Update CRM within 24 hours', desc: 'Log attendance records. Tag contacts with event attendance. Note any conversations requiring follow-up.' },
+      { title: 'Prepare follow-up list for Marketing Lead', desc: 'Flag VIPs, prospects, or contacts requiring action. Include any feedback collected on the day.' },
+      { title: 'Submit all supplier invoices for approval', desc: 'Collect all invoices. Match against approved quotes. Submit within 2 business days of event.' },
+      { title: 'Archive all event materials', desc: 'Save invitations, signage, badge list, attendance records, photos to designated shared folder. Name correctly.' },
+    ],
+    templateIds: ['eow', 'followup'],
+  },
+  supplier_brief: {
+    label: 'Supplier Brief',
+    checklistKeys: ['compliance_qc'],
+    guideSteps: [
+      { title: 'Confirm brief is approved before sending', desc: 'Never send a brief to a supplier without written sign-off from Marketing Lead.' },
+      { title: 'Prepare brief using approved template', desc: 'Include: deliverable, specs, deadline, contact details. Be specific — vague briefs cause revision rounds.' },
+      { title: 'Send brief + request confirmation', desc: 'Email the supplier. Ask them to confirm receipt and ability to deliver by the deadline.' },
+      { title: 'Monitor delivery and follow up', desc: 'If no confirmation within 24 hours, follow up. Set a reminder 48 hours before deadline.' },
+      { title: 'Review deliverable on receipt', desc: 'Check against brief point-by-point. Use the QC checklist before accepting. Document any issues.' },
+      { title: 'Confirm delivery to Marketing Lead', desc: 'Notify lead when supplier deliverable is received and QC\'d. Escalate any issues immediately.' },
+    ],
+    templateIds: ['supplier', 'revision'],
+  },
+  website_content: {
+    label: 'Website / Content Update',
+    checklistKeys: ['compliance_qc', 'campaign_collateral'],
+    guideSteps: [
+      { title: 'Receive approved content + instructions', desc: 'Get written approval for: copy, images, page location, go-live date. Nothing goes live without sign-off.' },
+      { title: 'QC content before uploading', desc: 'Check: copy matches brief, images are correct resolution, no placeholder text, disclaimer present if required.' },
+      { title: 'Make update in CMS', desc: 'Apply update per instructions. Screenshot before/after. No design changes without prior approval.' },
+      { title: 'QC the live or staging page', desc: 'Check on desktop and mobile. Verify all links, images, and text display correctly. Check for broken layouts.' },
+      { title: 'Get approval before going live', desc: 'Send screenshot or staging link for sign-off. Document approval before publishing.' },
+      { title: 'Confirm live and update tracker', desc: 'Notify Marketing Lead once live. Add to campaign tracker with publish date and link.' },
+    ],
+    templateIds: ['approval', 'delay'],
+  },
+  general_admin: {
+    label: 'General Admin',
+    checklistKeys: ['compliance_qc'],
+    guideSteps: [
+      { title: 'Clarify the task scope and deadline', desc: 'If the brief is unclear, ask before starting. Write down: what needs to be done, when it\'s due, who approves it.' },
+      { title: 'Check for dependencies', desc: 'Does this task require input or approval from someone else first? Identify blockers early and flag them.' },
+      { title: 'Complete the task using approved process', desc: 'Follow the established procedure. If no procedure exists, ask your lead before improvising.' },
+      { title: 'QC your own work before submitting', desc: 'Check: correct template used, all required fields complete, no errors, output matches brief.' },
+      { title: 'Submit for approval with context', desc: 'Don\'t just send the file — include what was done and what you need from the approver.' },
+      { title: 'Update tracker and file output', desc: 'Log completed task in Monday.com. Save all files to the correct shared folder. Mark task as Done.' },
+    ],
+    templateIds: ['approval', 'followup', 'chase'],
+  },
+};
+
+const PRIORITY_ITEMS = {
+  high: [
+    { id: 'p_hi_1', label: 'Notify Marketing Lead of this task immediately', sub: 'Send a quick message: task name, deadline, and your starting point.', badge: 'critical' },
+    { id: 'p_hi_2', label: 'Flag any blockers within 1 hour — do not absorb delays silently', sub: 'If anything is unclear or missing, message your lead now, not later.', badge: 'critical' },
+  ],
+  medium: [],
+  low: [],
+};
+
+// ── TASK BUILDER STORAGE ────────────────────────────────────────
+const TASKS_KEY = 'msc_tasks_v1';
+function loadTasks() { try { return JSON.parse(localStorage.getItem(TASKS_KEY)) || {}; } catch { return {}; } }
+function saveTasks(data) { localStorage.setItem(TASKS_KEY, JSON.stringify(data)); }
+
+function generateTaskPlan(formData) {
+  const { name, type, details, deadline, priority } = formData;
+  const map = TASK_TYPE_MAP[type];
+  if (!map) return null;
+
+  const priorityItems = (PRIORITY_ITEMS[priority] || []);
+  const typeItems = map.checklistKeys.flatMap(key => (CHECKLISTS[key] || []).map(item => ({ ...item })));
+  const checklist = [...priorityItems, ...typeItems];
+
+  const task = {
+    id: 'task_' + Date.now(),
+    name, type, details, deadline, priority,
+    createdAt: new Date().toISOString(),
+    checklist,
+    guideSteps: map.guideSteps,
+    templateIds: map.templateIds,
+    checkState: {},
+  };
+
+  const tasks = loadTasks();
+  tasks[task.id] = task;
+  saveTasks(tasks);
+  return task;
+}
+
+function handleGenerateTask() {
+  const name     = document.getElementById('tb-name')?.value?.trim();
+  const type     = document.getElementById('tb-type')?.value;
+  const priority = document.getElementById('tb-priority')?.value;
+  const deadline = document.getElementById('tb-deadline')?.value;
+  const details  = document.getElementById('tb-details')?.value?.trim();
+
+  if (!name) { document.getElementById('tb-name')?.focus(); return; }
+  if (!type) { document.getElementById('tb-type')?.focus(); return; }
+
+  const task = generateTaskPlan({ name, type, details, deadline, priority: priority || 'medium' });
+  if (!task) return;
+
+  ['tb-name', 'tb-details'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['tb-type', 'tb-priority'].forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  const deadlineEl = document.getElementById('tb-deadline');
+  if (deadlineEl) deadlineEl.value = '';
+
+  renderTaskBuilderPage();
+  renderTaskDetail(task.id);
+}
+
+function toggleTaskItem(taskId, itemId) {
+  const tasks = loadTasks();
+  if (!tasks[taskId]) return;
+  if (tasks[taskId].checkState[itemId]) delete tasks[taskId].checkState[itemId];
+  else tasks[taskId].checkState[itemId] = true;
+  saveTasks(tasks);
+
+  const el = document.querySelector(`.check-item[data-task-id="${taskId}"][data-item-id="${itemId}"]`);
+  if (el) el.classList.toggle('done');
+  updateTaskProgress(taskId);
+}
+
+function updateTaskProgress(taskId) {
+  const tasks = loadTasks();
+  const task = tasks[taskId];
+  if (!task) return;
+  const total = task.checklist.length;
+  const done  = task.checklist.filter(i => task.checkState[i.id]).length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+  const bar   = document.getElementById('task-progress-bar-' + taskId);
+  if (bar) bar.style.width = pct + '%';
+  const wrap  = bar?.closest('.task-gen-progress');
+  if (wrap) {
+    const lbl = wrap.querySelector('.progress-label span:first-child');
+    if (lbl) lbl.textContent = done + ' / ' + total + ' checklist items complete';
+  }
+  const block = document.getElementById('task-checklist-' + taskId)?.closest('.section-block');
+  if (block) { const cnt = block.querySelector('.sh-count'); if (cnt) cnt.textContent = done + '/' + total; }
+  const saved = document.querySelector('[data-saved-id="' + taskId + '"] .saved-task-meta');
+  if (saved) {
+    const map = TASK_TYPE_MAP[task.type];
+    saved.textContent = (map?.label || task.type) + ' · Due ' + formatDeadline(task.deadline) + ' · ' + done + '/' + total + ' done';
+  }
+}
+
+function deleteTask(taskId) {
+  const tasks = loadTasks();
+  delete tasks[taskId];
+  saveTasks(tasks);
+  document.getElementById('taskbuilder-output').innerHTML = '';
+  renderTaskBuilderPage();
+}
+
+function openSavedTask(taskId) {
+  renderTaskDetail(taskId);
+}
+
+function closeTaskDetail() {
+  document.getElementById('taskbuilder-output').innerHTML = '';
+  document.getElementById('taskbuilder-output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function formatDeadline(dateStr) {
+  if (!dateStr) return 'No deadline';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return MON[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+}
+
+// ── TASK BUILDER RENDER ─────────────────────────────────────────
+function renderTaskBuilderPage() {
+  const saved = document.getElementById('taskbuilder-saved');
+  if (!saved) return;
+
+  const tasks = loadTasks();
+  const taskList = Object.values(tasks).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  if (!taskList.length) { saved.innerHTML = ''; return; }
+
+  saved.innerHTML = `
+    <div class="tb-saved-header">Saved Task Plans</div>
+    <div class="saved-tasks-list">
+      ${taskList.map(task => {
+        const map  = TASK_TYPE_MAP[task.type];
+        const done = task.checklist.filter(i => task.checkState[i.id]).length;
+        return `
+          <div class="saved-task-card" data-saved-id="${task.id}">
+            <div class="saved-task-left" onclick="openSavedTask('${task.id}')">
+              <span class="priority-badge ${task.priority}">${task.priority}</span>
+              <div>
+                <div class="saved-task-name">${task.name}</div>
+                <div class="saved-task-meta">${map?.label || task.type} · Due ${formatDeadline(task.deadline)} · ${done}/${task.checklist.length} done</div>
+              </div>
+            </div>
+            <button class="saved-task-delete" onclick="deleteTask('${task.id}')" title="Delete task">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+            </button>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderTaskDetail(taskId) {
+  const tasks = loadTasks();
+  const task  = tasks[taskId];
+  if (!task) return;
+  const output = document.getElementById('taskbuilder-output');
+  if (!output) return;
+
+  const map   = TASK_TYPE_MAP[task.type];
+  const total = task.checklist.length;
+  const done  = task.checklist.filter(i => task.checkState[i.id]).length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+
+  const checklistHTML = task.checklist.map(item => {
+    const isDone = !!task.checkState[item.id];
+    let badgeHTML = '';
+    if (item.badge === 'critical')      badgeHTML = '<span class="ci-badge critical">critical</span>';
+    else if (item.badge === 'warn')     badgeHTML = '<span class="ci-badge warn">flag</span>';
+    else if (item.badge === 'common miss') badgeHTML = '<span class="ci-badge warn">common miss</span>';
+    else if (item.badge === 'print')    badgeHTML = '<span class="ci-badge print">print only</span>';
+    return `
+      <div class="check-item${isDone ? ' done' : ''}" data-task-id="${taskId}" data-item-id="${item.id}" onclick="toggleTaskItem('${taskId}','${item.id}')">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
+        <div>
+          <div class="ci-label">${item.label}${badgeHTML}</div>
+          ${item.sub ? `<div class="ci-sub">${item.sub}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  const guideHTML = task.guideSteps.map((step, i) => `
+    <div class="phase-row">
+      <div class="phase-num">${i + 1}</div>
+      <div>
+        <div class="phase-title">${step.title}</div>
+        <div class="phase-desc">${step.desc}</div>
+      </div>
+    </div>`).join('');
+
+  const templatesHTML = task.templateIds.map(tplId => {
+    const tpl = TEMPLATES.find(t => t.id === tplId);
+    if (!tpl) return '';
+    return `
+      <div class="tpl-card">
+        <div class="tpl-card-header">
+          <span class="tpl-cat-badge" style="${tpl.badgeStyle}">${tpl.badge}</span>
+          <div class="tpl-card-title">${tpl.title}</div>
+          <div class="tpl-card-sub">${tpl.sub}</div>
+        </div>
+        <div class="tpl-variants">
+          ${tpl.variants.map((v, i) => `
+            <div class="tpl-variant">
+              <div class="tpl-variant-left">
+                <span class="tpl-variant-tone">${v.tone}</span>
+                <div class="tpl-variant-preview">${v.preview}</div>
+              </div>
+              <button class="tpl-variant-btn" onclick="copyVariant(this,'${tpl.id}',${i})">Copy</button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  output.innerHTML = `
+    <div class="task-gen-output">
+      <div class="task-gen-header">
+        <div class="task-gen-title-row">
+          <span class="priority-badge ${task.priority}">${task.priority}</span>
+          <div class="task-gen-name">${task.name}</div>
+          <button class="btn-reset" onclick="closeTaskDetail()" style="margin-left:auto;margin-top:0">← Back</button>
+        </div>
+        <div class="task-gen-meta">${map?.label || task.type} · Due ${formatDeadline(task.deadline)}</div>
+        ${task.details ? `<div class="task-gen-details">${task.details}</div>` : ''}
+        <div class="task-gen-progress">
+          <div class="progress-label"><span>${done} / ${total} checklist items complete</span><span>${pct}%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="task-progress-bar-${taskId}" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+      <div class="section-block task-gen-block">
+        <div class="section-block-header">
+          <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
+          <span class="sh-title">Task Checklist</span>
+          <span class="sh-count" id="task-count-${taskId}">${done}/${total}</span>
+        </div>
+        <div id="task-checklist-${taskId}">${checklistHTML}</div>
+      </div>
+      <div class="section-block task-gen-block">
+        <div class="section-block-header">
+          <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="2" x2="8" y2="14"/><line x1="4" y1="6" x2="12" y2="6"/><line x1="4" y1="10" x2="10" y2="10"/></svg></div>
+          <span class="sh-title">Step-by-Step Guide</span>
+        </div>
+        <div class="phase-list">${guideHTML}</div>
+      </div>
+      <div class="section-block task-gen-block task-gen-block-last">
+        <div class="section-block-header">
+          <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div>
+          <span class="sh-title">Message Templates</span>
+        </div>
+        <div class="task-templates-grid">${templatesHTML}</div>
+      </div>
+    </div>`;
+
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── INIT ────────────────────────────────────────────────────────

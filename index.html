@@ -234,6 +234,11 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l5 2v6q0 4-5 6Q3 13 3 9V3Z"/></svg>
       Brand & Compliance
     </div>
+    <div class="nav-item" data-page="taskbuilder">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="13" rx="1"/><line x1="6" y1="6" x2="10" y2="6"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="8" y2="12"/><circle cx="11.5" cy="11.5" r="2.5"/><line x1="11.5" y1="10.5" x2="11.5" y2="12.5"/><line x1="10.5" y1="11.5" x2="12.5" y2="11.5"/></svg>
+      Task Builder
+      <span class="nav-badge" style="background:var(--teal)">New</span>
+    </div>
 
     <div class="sidebar-section-label">Reference</div>
     <div class="nav-item" data-page="tools">
@@ -488,6 +493,50 @@
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
           Reset QC checklist
         </button>
+      </div>
+
+      <!-- ── TASK BUILDER ── -->
+      <div id="page-taskbuilder" class="page">
+        <div class="section-block task-builder-form">
+          <div class="section-block-header">
+            <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="2" width="10" height="13" rx="1"/><line x1="6" y1="6" x2="10" y2="6"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="8" y2="12"/></svg></div>
+            <span class="sh-title">Generate a Task Plan</span>
+          </div>
+          <div class="tb-form-body">
+            <div class="form-row" style="grid-template-columns:1fr">
+              <input class="form-input" id="tb-name" placeholder="Task name (e.g. Q2 Rate Card Update, June Event Invitations)"/>
+            </div>
+            <div class="form-row">
+              <select class="form-select" id="tb-type">
+                <option value="">Select task type…</option>
+                <option value="email_campaign">Email Campaign</option>
+                <option value="indesign_collateral">InDesign Collateral</option>
+                <option value="event_setup">Event Setup</option>
+                <option value="post_event">Post-Event</option>
+                <option value="supplier_brief">Supplier Brief</option>
+                <option value="website_content">Website / Content Update</option>
+                <option value="general_admin">General Admin</option>
+              </select>
+              <select class="form-select" id="tb-priority">
+                <option value="medium">Medium priority</option>
+                <option value="high">High priority</option>
+                <option value="low">Low priority</option>
+              </select>
+            </div>
+            <div class="form-row" style="grid-template-columns:1fr 1fr">
+              <div>
+                <label class="csv-label" style="display:block;margin-bottom:5px">Deadline (optional)</label>
+                <input type="date" class="form-input" id="tb-deadline"/>
+              </div>
+            </div>
+            <textarea class="form-textarea" id="tb-details" style="width:100%;margin-bottom:8px" placeholder="Details / notes — what did your manager tell you about this task? The more context, the better your guide."></textarea>
+            <button class="btn-add" onclick="handleGenerateTask()">
+              Generate Task Plan →
+            </button>
+          </div>
+        </div>
+        <div id="taskbuilder-output"></div>
+        <div id="taskbuilder-saved"></div>
       </div>
 
       <!-- ── TOOLS & SKILLS ── -->
