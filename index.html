@@ -280,12 +280,31 @@
         <div class="topbar-subtitle" id="topbar-subtitle">Morning, core tasks &amp; end-of-day</div>
       </div>
       <div class="topbar-right">
-        <div class="topbar-date">
-          <div class="live-date"></div>
-          <div class="live-time"></div>
+        <div class="dual-clock">
+          <div class="clock-item">
+            <span class="clock-city">MNL</span>
+            <span class="clock-time clock-manila"></span>
+          </div>
+          <div class="clock-divider"></div>
+          <div class="clock-item">
+            <span class="clock-city">SYD</span>
+            <span class="clock-time clock-sydney"></span>
+          </div>
         </div>
+        <div class="topbar-date live-date"></div>
+        <button id="theme-toggle" class="theme-btn" onclick="toggleTheme()">☀ Light</button>
       </div>
     </header>
+
+    <!-- PAGE PROGRESS STRIP -->
+    <div id="page-progress-wrap" class="page-progress-wrap" style="display:none">
+      <div class="page-progress-inner">
+        <span id="page-progress-label" class="page-progress-label"></span>
+        <div class="page-progress-track">
+          <div id="page-progress-bar" class="page-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
 
     <div class="content">
 
@@ -615,18 +634,96 @@
         </div>
 
         <div id="panic-menu">
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">What's going wrong right now?</span></div>
-            <div style="padding:8px 0">
-              <div class="panic-item" onclick="showPanic('urgent')">🔥 I have multiple urgent tasks and don't know which to do first</div>
-              <div class="panic-item" onclick="showPanic('mistake')">😱 I made a mistake — something wrong already went out or got sent</div>
-              <div class="panic-item" onclick="showPanic('silent')">🔇 Slack is silent and I don't know if I'm doing things right</div>
-              <div class="panic-item" onclick="showPanic('deadline')">⏰ A deadline is today and my lead is unavailable</div>
-              <div class="panic-item" onclick="showPanic('approval')">⏳ I'm waiting on approval and it's been too long</div>
-              <div class="panic-item" onclick="showPanic('supplier')">📦 A supplier sent the wrong thing / missed a deadline</div>
-              <div class="panic-item" onclick="showPanic('unclear')">❓ I was given a task but the brief is unclear and I don't want to bother anyone</div>
-              <div class="panic-item" onclick="showPanic('feedback')">💬 I got negative feedback on my work</div>
-              <div class="panic-item" onclick="showPanic('overwhelmed')">🌀 I'm completely overwhelmed and don't know where to start</div>
+          <div class="panic-card-grid">
+            <div class="panic-card" onclick="showPanic('urgent')">
+              <div class="panic-card-icon" style="background:var(--rust-dim);color:var(--rust)">🔥</div>
+              <div class="panic-card-date">Situation 01</div>
+              <div class="panic-card-type">Priority</div>
+              <div class="panic-card-title">Multiple urgent tasks — don't know which to do first</div>
+              <div class="panic-card-loc">Triage protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><line x1="10" y1="70" x2="110" y2="10" stroke="var(--rust)" stroke-width="1.5" opacity="0.6"/><line x1="10" y1="55" x2="110" y2="25" stroke="var(--rust)" stroke-width="1" opacity="0.4"/><line x1="10" y1="40" x2="110" y2="40" stroke="var(--rust)" stroke-width="0.8" opacity="0.3"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('mistake')">
+              <div class="panic-card-icon" style="background:var(--pink-dim);color:var(--pink)">😱</div>
+              <div class="panic-card-date">Situation 02</div>
+              <div class="panic-card-type">Crisis</div>
+              <div class="panic-card-title">Made a mistake — something wrong already went out</div>
+              <div class="panic-card-loc">Recovery protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><circle cx="90" cy="55" r="35" stroke="var(--pink)" stroke-width="1" opacity="0.3"/><circle cx="90" cy="55" r="22" stroke="var(--pink)" stroke-width="1" opacity="0.5"/><circle cx="90" cy="55" r="10" stroke="var(--pink)" stroke-width="1.5" opacity="0.7"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('silent')">
+              <div class="panic-card-icon" style="background:var(--lav-dim);color:var(--lavender)">🔇</div>
+              <div class="panic-card-date">Situation 03</div>
+              <div class="panic-card-type">Remote</div>
+              <div class="panic-card-title">Slack is silent — don't know if I'm doing it right</div>
+              <div class="panic-card-loc">Visibility protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><path d="M10 70 Q35 10 60 40 Q85 70 110 20" stroke="var(--lavender)" stroke-width="1.5" opacity="0.6" fill="none"/><path d="M10 60 Q35 20 60 50 Q85 60 110 30" stroke="var(--lavender)" stroke-width="1" opacity="0.3" fill="none"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('deadline')">
+              <div class="panic-card-icon" style="background:var(--gold-dim);color:var(--gold)">⏰</div>
+              <div class="panic-card-date">Situation 04</div>
+              <div class="panic-card-type">Deadline</div>
+              <div class="panic-card-title">Deadline today and lead is unavailable</div>
+              <div class="panic-card-loc">Escalation protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><line x1="10" y1="75" x2="30" y2="45" stroke="var(--gold)" stroke-width="2" opacity="0.5"/><line x1="30" y1="45" x2="55" y2="60" stroke="var(--gold)" stroke-width="2" opacity="0.5"/><line x1="55" y1="60" x2="80" y2="25" stroke="var(--gold)" stroke-width="2" opacity="0.7"/><line x1="80" y1="25" x2="110" y2="10" stroke="var(--gold)" stroke-width="2" opacity="0.9"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('approval')">
+              <div class="panic-card-icon" style="background:var(--teal-dim);color:var(--teal)">⏳</div>
+              <div class="panic-card-date">Situation 05</div>
+              <div class="panic-card-type">Waiting</div>
+              <div class="panic-card-title">Waiting on approval — it's been too long</div>
+              <div class="panic-card-loc">Follow-up protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><rect x="20" y="15" width="12" height="50" rx="2" fill="var(--teal)" opacity="0.2"/><rect x="40" y="30" width="12" height="35" rx="2" fill="var(--teal)" opacity="0.35"/><rect x="60" y="20" width="12" height="45" rx="2" fill="var(--teal)" opacity="0.5"/><rect x="80" y="10" width="12" height="55" rx="2" fill="var(--teal)" opacity="0.7"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('supplier')">
+              <div class="panic-card-icon" style="background:var(--sage-dim);color:var(--sage)">📦</div>
+              <div class="panic-card-date">Situation 06</div>
+              <div class="panic-card-type">Supplier</div>
+              <div class="panic-card-title">Supplier sent wrong thing or missed deadline</div>
+              <div class="panic-card-loc">Vendor protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><circle cx="20" cy="60" r="5" fill="var(--sage)" opacity="0.4"/><circle cx="40" cy="40" r="8" fill="var(--sage)" opacity="0.4"/><circle cx="65" cy="55" r="5" fill="var(--sage)" opacity="0.4"/><circle cx="82" cy="25" r="12" fill="var(--sage)" opacity="0.4"/><circle cx="108" cy="45" r="7" fill="var(--sage)" opacity="0.4"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('unclear')">
+              <div class="panic-card-icon" style="background:var(--gold-dim);color:var(--gold)">❓</div>
+              <div class="panic-card-date">Situation 07</div>
+              <div class="panic-card-type">Clarity</div>
+              <div class="panic-card-title">Brief is unclear — don't want to bother anyone</div>
+              <div class="panic-card-loc">Clarification protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><line x1="15" y1="75" x2="105" y2="75" stroke="var(--gold)" stroke-width="1" opacity="0.3"/><line x1="15" y1="60" x2="105" y2="60" stroke="var(--gold)" stroke-width="1" opacity="0.3"/><line x1="15" y1="45" x2="75" y2="45" stroke="var(--gold)" stroke-width="1.5" opacity="0.6"/><line x1="15" y1="30" x2="55" y2="30" stroke="var(--gold)" stroke-width="1.5" opacity="0.6"/><line x1="15" y1="15" x2="90" y2="15" stroke="var(--gold)" stroke-width="2" opacity="0.9"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('feedback')">
+              <div class="panic-card-icon" style="background:var(--pink-dim);color:var(--pink)">💬</div>
+              <div class="panic-card-date">Situation 08</div>
+              <div class="panic-card-type">Feedback</div>
+              <div class="panic-card-title">Got negative feedback on my work</div>
+              <div class="panic-card-loc">Recovery mindset</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><path d="M15 65 L35 35 L55 50 L80 15 L105 30" stroke="var(--pink)" stroke-width="2" opacity="0.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="35" cy="35" r="3" fill="var(--pink)" opacity="0.7"/><circle cx="55" cy="50" r="3" fill="var(--pink)" opacity="0.7"/><circle cx="80" cy="15" r="3" fill="var(--pink)" opacity="0.7"/></svg>
+              </div>
+            </div>
+            <div class="panic-card" onclick="showPanic('overwhelmed')">
+              <div class="panic-card-icon" style="background:var(--rust-dim);color:var(--rust)">🌀</div>
+              <div class="panic-card-date">Situation 09</div>
+              <div class="panic-card-type">Reset</div>
+              <div class="panic-card-title">Completely overwhelmed — don't know where to start</div>
+              <div class="panic-card-loc">Reset protocol</div>
+              <div class="panic-card-art">
+                <svg viewBox="0 0 120 80" fill="none"><line x1="20" y1="20" x2="100" y2="20" stroke="var(--rust)" stroke-width="1.5" opacity="0.7" stroke-dasharray="4 4"/><line x1="20" y1="35" x2="100" y2="35" stroke="var(--rust)" stroke-width="1.5" opacity="0.55" stroke-dasharray="4 4"/><line x1="20" y1="50" x2="100" y2="50" stroke="var(--rust)" stroke-width="1.5" opacity="0.4" stroke-dasharray="4 4"/><line x1="20" y1="65" x2="100" y2="65" stroke="var(--rust)" stroke-width="1.5" opacity="0.25" stroke-dasharray="4 4"/></svg>
+              </div>
             </div>
           </div>
         </div>
@@ -639,81 +736,19 @@
 
       <!-- ── TEMPLATES ── -->
       <div id="page-templates" class="page">
-        <div class="alert-box info">
-          <div class="alert-title">Remote communication is your visibility</div>
-          <p>When you're WFH, every message is a signal. These templates are calibrated for remote professional tone — clear, direct, not over-apologetic, not overly casual.</p>
+        <div class="alert-box info"><div class="alert-title">Remote communication is your visibility</div><p>Every message is a signal when you're WFH. Click any card to copy the template instantly.</p></div>
+        <div class="tpl-grid">
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nI've completed [task/material name] and it's ready for your review.\n\n[Attach file or link here]\n\nPlease let me know if any changes are needed or if I'm good to proceed.\n\nThanks,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--sage-dim);color:var(--sage)">Approval</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Standard approval request</div><div class="tpl-card-sub">Collateral, emails, event materials, website updates</div><div class="tpl-card-preview">"I've completed [task] and it's ready for your review…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nQuick one — I need your sign-off on [task] before I can move forward. Deadline is [date/time].\n\n[Attach file or link]\n\nHappy to jump on a call if easier.\n\nThanks,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--rust-dim);color:var(--rust)">Urgent</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Urgent approval — deadline today</div><div class="tpl-card-sub">Use when you need a same-day response</div><div class="tpl-card-preview">"I need your sign-off before I can move forward. Deadline is [time]…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nHeads up — [task] is at risk of missing the [date] deadline. Hold-up: [reason].\n\nI'm currently [action]. Est. resolution: [time].\n\nLet me know if you'd like me to escalate.\n\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--gold-dim);color:var(--gold)">Delay</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Flagging a delay proactively</div><div class="tpl-card-sub">Always send before the deadline, not after</div><div class="tpl-card-preview">"Heads up — [task] is at risk of missing the [date] deadline…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nI want to flag an issue with [task]. [One factual sentence].\n\nI've [action taken]. Suggested next step: [recommendation].\n\nPlease let me know how you'd like to proceed.\n\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--rust-dim);color:var(--rust)">Error</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Flagging a mistake</div><div class="tpl-card-sub">Lead with facts, follow with your proposed fix</div><div class="tpl-card-preview">"I want to flag an issue with [task]. [Factual one sentence]…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nFollowing up on my message from [date] re: [topic]. Just checking if you've had a chance to review.\n\nNo rush — just want to make sure it didn't get buried.\n\nThanks,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--lav-dim);color:var(--lavender)">Follow-up</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Following up — unanswered message</div><div class="tpl-card-sub">Wait 24–48 hrs before sending</div><div class="tpl-card-preview">"Following up re: [topic] — making sure it didn't get buried…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nJust checking in on [task/approval] — still waiting on this before I can move [next step] forward.\n\nCurrent status: [what's ready, what's blocked].\n\nThanks,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--lav-dim);color:var(--lavender)">Chase</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Chasing a dependency</div><div class="tpl-card-sub">Waiting on someone else — professional, not pushy</div><div class="tpl-card-preview">"Still waiting on this before I can move [next step] forward…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Name],\n\nEnd-of-week wrap:\n\nCompleted:\n- [task 1]\n- [task 2]\n\nIn progress:\n- [task] on track for [date]\n\nWaiting on:\n- [item from whom]\n\nHave a good weekend,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--teal-dim);color:var(--teal)">EOW</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Friday EOW summary</div><div class="tpl-card-sub">Send every Friday — builds trust faster than anything else</div><div class="tpl-card-preview">"Completed: [tasks]. In progress: [tasks]. Waiting on: [items]…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Supplier],\n\nRe: [job name]. Brief attached.\n\nDeliverable: [what]\nSpecs: [format/size/qty]\nDeadline: [date]\n\nPlease confirm receipt and ability to deliver by [date].\n\nThanks,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--sage-dim);color:var(--sage)">Supplier</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Sending a supplier brief</div><div class="tpl-card-sub">Attach the file — always use pre-approved briefs</div><div class="tpl-card-preview">"Brief attached. Deliverable: [X]. Deadline: [date]…"</div></div>
+          <div class="tpl-card" onclick='copyTplCard(this,"Hi [Supplier],\n\nThank you for sending [deliverable]. After review, the following needs to be addressed:\n\n- [Issue 1 — be specific]\n- [Issue 2 if applicable]\n\nPlease revise and resend by [time/date].\n\nThanks,\n[Your name]")'><div class="tpl-card-top"><span class="tpl-cat-badge" style="background:var(--sage-dim);color:var(--sage)">Revision</span><span class="tpl-copy-pill">Copy</span></div><div class="tpl-card-title">Requesting supplier revision</div><div class="tpl-card-sub">Be specific — vague feedback means more rounds</div><div class="tpl-card-preview">"After review, the following needs to be addressed: [issues]…"</div></div>
         </div>
-
-        <div id="template-list">
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div><span class="sh-title">Asking for approval</span></div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nI\'ve completed [task/material name] and it\'s ready for your review.\n\n[Attach file or link here]\n\nPlease let me know if any changes are needed or if I\'m good to proceed.\n\nThanks,\n[Your name]')">
-              <div class="tpl-label">Standard approval request</div>
-              <div class="tpl-sub">Use for: collateral, emails, event materials, website updates</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nQuick one — I need your sign-off on [task] before I can move forward. Deadline is [date/time].\n\n[Attach file or link]\n\nHappy to jump on a call if it\'s easier to review together.\n\nThanks,\n[Your name]')">
-              <div class="tpl-label">Urgent approval (deadline today)</div>
-              <div class="tpl-sub">Use when: you need a response same-day</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">Flagging a delay or problem</span></div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nHeads up — [task/campaign] is at risk of missing the [date] deadline. The hold-up is [brief reason: waiting on X / issue with Y].\n\nI\'m currently [what you\'re doing to resolve it]. Estimated resolution: [time/date].\n\nLet me know if you\'d like me to escalate or take a different approach.\n\n[Your name]')">
-              <div class="tpl-label">Flagging a delay proactively</div>
-              <div class="tpl-sub">Always send this before the deadline, not after</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nI want to flag an issue with [task]. [Briefly describe what happened — one sentence, factual, no over-explaining].\n\nI\'ve [what you\'ve done so far to address it]. My suggested next step is [your recommendation].\n\nPlease let me know how you\'d like to proceed.\n\n[Your name]')">
-              <div class="tpl-label">Flagging a mistake or error</div>
-              <div class="tpl-sub">Lead with facts, follow with your proposed fix</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v12M4 6h8M4 10h6"/></svg></div><span class="sh-title">Following up</span></div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nFollowing up on my message from [date] re: [topic]. Just checking if you\'ve had a chance to review.\n\nNo rush if you\'re busy — just want to make sure it didn\'t get buried.\n\nThanks,\n[Your name]')">
-              <div class="tpl-label">Following up on an unanswered message</div>
-              <div class="tpl-sub">Wait 24–48 hrs before sending this</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nJust checking in on [task/approval/file] — still waiting on this before I can move [next step] forward.\n\nCurrent status on my end: [what\'s ready, what\'s blocked]. Happy to provide any additional info needed.\n\nThanks,\n[Your name]')">
-              <div class="tpl-label">Chasing a dependency (waiting on someone else)</div>
-              <div class="tpl-sub">Professional, not pushy</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg></div><span class="sh-title">End-of-week check-in</span></div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nHere\'s my end-of-week wrap:\n\n✅ Completed this week:\n– [task 1]\n– [task 2]\n– [task 3]\n\n🔄 In progress:\n– [task] — on track for [date]\n\n⏳ Waiting on:\n– [what you need and from whom]\n\n❓ Still unclear on:\n– [question — save this for your check-in, not urgent]\n\nHave a good weekend,\n[Your name]')">
-              <div class="tpl-label">Friday EOW summary to your Marketing Lead</div>
-              <div class="tpl-sub">Send every Friday. This one message builds more trust than almost anything else.</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h8l2 4-6 8-6-8z"/></svg></div><span class="sh-title">Supplier communication</span></div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Supplier name],\n\nI\'m reaching out regarding [job/project name]. Please find the brief attached.\n\nKey details:\n– Deliverable: [what you need]\n– Specs: [size, format, quantity if applicable]\n– Deadline: [date]\n\nPlease confirm receipt and your ability to deliver by [date].\n\nThanks,\n[Your name]\n[Company]')">
-              <div class="tpl-label">Sending a supplier brief</div>
-              <div class="tpl-sub">Always use pre-approved briefs. Attach the file, don't paste into the email.</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-            <div class="template-item" onclick="copyTemplate(this,'Hi [Supplier name],\n\nThank you for sending through [deliverable]. After review, we\'ve identified the following that needs to be addressed:\n\n– [Issue 1 — be specific: wrong colour, incorrect logo version, etc.]\n– [Issue 2 if applicable]\n\nPlease revise and resend by [date/time].\n\nThanks,\n[Your name]')">
-              <div class="tpl-label">Requesting supplier revision</div>
-              <div class="tpl-sub">Be specific about what's wrong — vague feedback = more rounds</div>
-              <div class="tpl-copy-btn">Copy</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="copy-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:10px 20px;border-radius:var(--radius);font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
-          ✓ Copied to clipboard
-        </div>
+        <div id="copy-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--sage);color:#fff;padding:10px 20px;border-radius:var(--radius);font-size:13px;z-index:999;">✓ Copied</div>
       </div>
 
       <!-- ── TIMESHEET ── -->
