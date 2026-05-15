@@ -697,6 +697,88 @@ body {
 .btn-reset:hover { background: var(--cream-dark); color: var(--ink); }
 .btn-reset svg   { width: 14px; height: 14px; }
 
+/* ── PANIC ITEMS ── */
+.panic-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--cream-dark);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ink);
+  transition: background 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panic-item:last-child { border-bottom: none; }
+.panic-item:hover { background: var(--rust-pale); }
+
+/* ── TEMPLATE ITEMS ── */
+.template-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--cream-dark);
+  cursor: pointer;
+  transition: background 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.template-item:last-child { border-bottom: none; }
+.template-item:hover { background: var(--cream); }
+
+.tpl-label { font-size: 13.5px; font-weight: 500; color: var(--ink); flex: 1; }
+.tpl-sub   { font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; }
+
+.tpl-copy-btn {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border: 1px solid var(--cream-dark);
+  border-radius: 20px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.template-item:hover .tpl-copy-btn {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.tpl-copy-btn.copied {
+  background: var(--sage);
+  color: #fff;
+  border-color: var(--sage);
+}
+
+/* ── PANIC DETAIL ── */
+.panic-step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--cream-dark);
+  align-items: flex-start;
+}
+
+.panic-step:last-child { border-bottom: none; }
+
+.ps-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--rust-pale);
+  color: var(--rust);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ps-title { font-size: 13.5px; font-weight: 500; color: var(--ink); }
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .home-grid { grid-template-columns: repeat(2, 1fr); padding: 24px; }
