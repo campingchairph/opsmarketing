@@ -233,7 +233,10 @@ function navigate(pageId) {
     events:     ['Events',    'Setup, materials & post-event'],
     brand:      ['Brand & Compliance', 'QC checklist + InDesign preflight'],
     tools:      ['Tools & Skills',  'Your tech stack reference'],
-    crm:        ['CRM',        'Salesforce & contact management'],
+    monday:     ['Monday.com', 'Your task management hub'],
+    firstweek:  ['First Week Guide', 'Day-by-day remote survival plan'],
+    panic:      ['Panic Button 🆘', 'Step-by-step for when things go wrong'],
+    templates:  ['Message Templates', 'Ready-to-copy professional messages'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -285,7 +288,160 @@ function resetQC() {
   resetSection(ids);
 }
 
-// ── DATE/TIME ───────────────────────────────────────────────────
+// ── PANIC SCENARIOS ────────────────────────────────────────────
+const PANIC_SCENARIOS = {
+  urgent: {
+    title: '🔥 Multiple urgent tasks — how to triage',
+    steps: [
+      { title: 'Stop and list everything', desc: 'Write out every "urgent" task in front of you. Do not start any of them yet. Get them all visible in one place.' },
+      { title: 'Apply the 3-question filter', desc: '1. Does this have a hard external deadline today (client, supplier, published send time)? → Do first. 2. Is someone blocked until I finish this? → Do second. 3. Is this internal with flexible timing? → Do last.' },
+      { title: 'Message your lead — don\'t guess', desc: 'Send: "I have [X], [Y], and [Z] all marked urgent. In my view the order should be X → Y → Z based on [reason]. Does that work for you?" This shows judgment AND confirms priorities.' },
+      { title: 'Do one task at a time, fully', desc: 'Close everything else. Finish task 1. Update Monday. Then move to task 2. Context-switching kills quality.' },
+      { title: 'Update statuses as you go', desc: 'As you start each task, change Monday status to "In Progress". As you finish, mark Done + attach output. Your lead can see you\'re moving without you messaging them.' },
+    ]
+  },
+  mistake: {
+    title: '😱 I made a mistake — what to do right now',
+    steps: [
+      { title: 'Don\'t panic, don\'t hide it', desc: 'Every experienced person in marketing has sent the wrong file, uploaded to the wrong page, or emailed the wrong list. What separates good coordinators is how they handle it, not that it happened.' },
+      { title: 'Assess the actual impact', desc: 'Has it gone public (live on website, email sent, file shared with client)? Or is it still internal? Internal = lower urgency. External/live = act immediately.' },
+      { title: 'If it\'s live — flag your lead first, then fix', desc: 'Do not quietly fix it and say nothing. Message your lead: "[Thing] went out with [issue]. I\'m [what you\'re doing to fix it] right now. Flagging so you\'re aware." Then fix it.' },
+      { title: 'Use the mistake template', desc: 'Go to Templates tab → "Flagging a mistake or error". Send it. Lead with facts, follow with your fix. One sentence on what happened, one on what you\'re doing. No over-apologising.' },
+      { title: 'After it\'s resolved — add it to your personal SOP', desc: 'Write down what happened and what check would have caught it. Add it to your QC checklist mentally. This is how experienced coordinators develop their process.' },
+    ]
+  },
+  silent: {
+    title: '🔇 Slack is quiet and I don\'t know if I\'m doing it right',
+    steps: [
+      { title: 'Silence ≠ problem — understand remote norms', desc: 'In remote teams, silence is normal. Your lead is busy. No news is usually good news. Anxiety about silence is the #1 WFH new-starter trap.' },
+      { title: 'Check Monday.com first', desc: 'Are your tasks assigned and active? Are statuses current? If Monday looks healthy, you\'re probably fine. If tasks are overdue or blank, that\'s the issue.' },
+      { title: 'Send a proactive check-in — don\'t wait', desc: 'If you\'ve been quiet for more than a day, send: "Hi [Name], just checking in — I\'m currently working on [tasks]. Anything you need from me or any priority shifts?" Short. Professional. Not anxious.' },
+      { title: 'Create your own visibility', desc: 'Update Monday tasks. Share a quick EOD message. Ask one clear question. You don\'t need permission to communicate — remote workers who stay visible get the best outcomes.' },
+      { title: 'Ask for feedback explicitly in Week 1–2', desc: 'In your first 1:1 or check-in: "Is there anything I should be doing differently or communicating better?" Most leads won\'t say this unprompted. Asking shows maturity.' },
+    ]
+  },
+  deadline: {
+    title: '⏰ Deadline today and lead is unavailable',
+    steps: [
+      { title: 'Check if there\'s a documented approval process', desc: 'Is there a backup approver? A documented process for when your lead is out? Check your onboarding notes, the team handbook, or Monday for any instructions.' },
+      { title: 'Send a message anyway — create a record', desc: 'Even if they\'re unavailable, send: "Hi [Name], I have [task] due today at [time]. I\'ve completed it and it\'s ready — [link/file]. Proceeding unless I hear otherwise by [time]." This covers you.' },
+      { title: 'Do not miss the external deadline without telling someone', desc: 'If the deadline is with a supplier, client, or platform, contact them directly: "We\'re experiencing an internal approval delay. Can we have [X extra hours]?" Most will say yes if asked proactively.' },
+      { title: 'If the task cannot proceed without approval — document and hold', desc: 'Don\'t send unapproved work. Keep it ready. Document that it\'s complete and awaiting approval with a timestamp. When your lead is back, you\'re ready to go in 30 seconds.' },
+      { title: 'Learn from it — ask about backup approval process', desc: 'After this resolves, ask your lead: "What\'s the protocol if I need approval and you\'re unavailable?" Having this answer before the next time is what matters.' },
+    ]
+  },
+  approval: {
+    title: '⏳ Waiting on approval — it\'s been too long',
+    steps: [
+      { title: 'How long is too long?', desc: 'Same-day tasks: follow up after 3–4 hours. Multi-day tasks: follow up after 24–48 hours. Urgent/deadline-sensitive: follow up after 1–2 hours with a note about the deadline.' },
+      { title: 'Follow up — once, clearly', desc: 'Use the "Following up on an unanswered message" template from the Templates tab. Be factual. State the deadline. Don\'t apologise for following up.' },
+      { title: 'Flag the dependency in Monday', desc: 'Add an update comment on the task: "Submitted for approval [date/time]. Awaiting sign-off before proceeding." This documents the delay is not on you.' },
+      { title: 'If deadline is imminent — escalate the urgency', desc: 'Use the "Urgent approval" template. Make the deadline visible. "This needs to go out by [time] — can you review in the next [X] minutes?"' },
+      { title: 'If you still can\'t get a response — check for backup', desc: 'Is there another person who can approve? A documented backup process? If so, use it and note that you did. If not, document that you held the task pending approval.' },
+    ]
+  },
+  supplier: {
+    title: '📦 Supplier sent wrong thing or missed their deadline',
+    steps: [
+      { title: 'Check the original brief first', desc: 'Before you escalate anything, re-read the brief you sent. Was the error in your brief or theirs? If it was in your brief, own it, correct it, and resend. If it was theirs, proceed.' },
+      { title: 'Contact the supplier immediately — be specific', desc: 'Use the "Requesting supplier revision" template from the Templates tab. List exactly what\'s wrong. Not "this doesn\'t look right" — be specific: wrong logo version, incorrect dimensions, missing bleed.' },
+      { title: 'Set a firm revised deadline', desc: '"Please resend the corrected file by [specific time]. We have a hard deadline of [date]." Specific > vague. Vague gets deprioritised.' },
+      { title: 'Flag your lead immediately with timeline', desc: 'Don\'t absorb the problem quietly. Message: "Supplier [name] delivered [incorrect item]. I\'ve contacted them requesting correction by [time]. Should not impact our deadline, but flagging so you\'re aware."' },
+      { title: 'If it will impact your deadline — say so now', desc: 'The earlier you flag a supplier issue, the more options your lead has. Every hour you wait narrows the options. Flag early, always.' },
+    ]
+  },
+  unclear: {
+    title: '❓ Brief is unclear — how to get clarity without being annoying',
+    steps: [
+      { title: 'Attempt the task first — 15 minutes', desc: 'Before asking, spend 15 minutes with what you have. Try to identify specifically what you\'re unclear on. "I don\'t understand this task" is a vague question. "Is the deadline end of day Thursday AEST?" is a good one.' },
+      { title: 'Write your specific questions', desc: 'List every blocker as a specific question. Not "what do I do?" but "Should I use template A or template B for this?" and "Is the target audience the same as the last campaign?"' },
+      { title: 'Batch them in one message', desc: '"Hi [Name], I\'ve started on [task] and have a couple of quick questions before I go further: [1] [2] [3]. Happy to proceed on my best guess if you\'re tied up — just let me know."' },
+      { title: 'State your assumption if you have to move forward', desc: 'If you can\'t wait: "Proceeding with [your assumption] unless I hear otherwise. Please let me know if that\'s not right." This shows initiative and protects you if the assumption is wrong.' },
+      { title: 'Document the answer when you get it', desc: 'After you get clarity, note it down. Next time a similar task comes up, you\'ll already know. Over time this becomes your personal SOP.' },
+    ]
+  },
+  feedback: {
+    title: '💬 I got negative feedback on my work',
+    steps: [
+      { title: 'Don\'t respond immediately if you feel defensive', desc: 'Take 5 minutes. Read the feedback again. Your first instinct will be to justify yourself. That instinct is usually wrong. Don\'t send a reactive response.' },
+      { title: 'Separate the feedback from your feelings about it', desc: 'Is the feedback about the work or about you? Almost always it\'s the work. "This layout doesn\'t match the template" is not a personal attack. Treat it like a task to fix.' },
+      { title: 'Acknowledge, ask, act', desc: 'Respond with: "Thanks for the feedback — understood. To make sure I get this right: [specific clarifying question if needed]. I\'ll have the revised version to you by [time]."' },
+      { title: 'Fix it and come back faster than expected', desc: 'If they expected it tomorrow, deliver it today. Recovering well from feedback builds more trust than getting it right the first time. The speed of your recovery matters.' },
+      { title: 'Ask what good looks like', desc: 'If feedback is recurring on the same thing, ask: "Can you show me an example of what you\'re looking for?" Most leads will happily show you. Most new starters never ask.' },
+    ]
+  },
+  overwhelmed: {
+    title: '🌀 Completely overwhelmed — reset protocol',
+    steps: [
+      { title: 'Step away for 5 minutes — literally', desc: 'Stand up. Walk away from your screen. Get water. Overwhelm makes everything feel equally urgent and important. It is not. A 5-minute break resets your ability to prioritise.' },
+      { title: 'Do a brain dump — write everything down', desc: 'Open a blank doc or grab a piece of paper. Write every task, worry, and open loop in your head. Get it all out. Your brain is trying to hold too many things. Externalise them.' },
+      { title: 'Sort into: must do today vs can wait', desc: 'From your list: what genuinely cannot wait until tomorrow? What has a hard external deadline? Circle those. That\'s your actual today list. Everything else waits.' },
+      { title: 'Tell your lead — briefly', desc: '"Hi [Name], I want to flag that I have a heavy load today. I\'m prioritising [X and Y] — is that right? Anything I should drop or push?" Most leads will respect this and help you prioritise.' },
+      { title: 'Do the hardest or most anxiety-inducing task first', desc: 'The thing you\'re most dreading is probably the source of the overwhelm. Do it first. Not the easiest task — the most important one. Everything else will feel lighter afterwards.' },
+    ]
+  }
+};
+
+// ── PANIC FUNCTIONS ─────────────────────────────────────────────
+function showPanic(key) {
+  const scenario = PANIC_SCENARIOS[key];
+  if (!scenario) return;
+
+  const content = document.getElementById('panic-content');
+  content.innerHTML = `
+    <div class="section-block">
+      <div class="section-block-header" style="background:var(--rust-pale)">
+        <span class="sh-title" style="font-size:15px;color:var(--rust)">${scenario.title}</span>
+      </div>
+      <div class="phase-list">
+        ${scenario.steps.map((s, i) => `
+          <div class="panic-step">
+            <div class="ps-num">${i + 1}</div>
+            <div>
+              <div class="ps-title">${s.title}</div>
+              <div class="ps-desc">${s.desc}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('panic-menu').style.display = 'none';
+  document.getElementById('panic-detail').style.display = 'block';
+  document.querySelector('.content').scrollTop = 0;
+}
+
+function hidePanic() {
+  document.getElementById('panic-menu').style.display = 'block';
+  document.getElementById('panic-detail').style.display = 'none';
+}
+
+// ── TEMPLATE COPY ───────────────────────────────────────────────
+function copyTemplate(el, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.querySelector('.tpl-copy-btn');
+    if (btn) {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+    const toast = document.getElementById('copy-toast');
+    if (toast) {
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 2000);
+    }
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
 function updateDateTime() {
   const now = new Date();
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
