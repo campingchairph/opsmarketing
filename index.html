@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MSC Dashboard — Marketing Support Coordinator</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════ -->
+<div id="home-page" class="home-page">
+
+  <div class="home-header">
+    <div class="home-header-left">
+      <h1>Marketing Support Coordinator</h1>
+      <div class="tagline">Your daily<br>command centre.</div>
+    </div>
+    <div class="home-date">
+      <div class="live-date" style="font-weight:500"></div>
+      <div class="live-time"></div>
+      <div style="margin-top:6px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#aaa">Australian Eastern Time</div>
+    </div>
+  </div>
+
+  <div class="home-grid">
+
+    <!-- Daily Ops -->
+    <div class="tile tile-daily" onclick="openDashboard('daily')">
+      <div class="tile-illustration">
+        <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
+          <!-- Clock / sun motif -->
+          <circle cx="90" cy="90" r="60"/>
+          <circle cx="90" cy="90" r="4" fill="#7A9E72"/>
+          <line x1="90" y1="90" x2="90" y2="42"/>
+          <line x1="90" y1="90" x2="118" y2="100"/>
+          <!-- tick marks -->
+          <line x1="90" y1="32" x2="90" y2="40"/>
+          <line x1="90" y1="140" x2="90" y2="148"/>
+          <line x1="32" y1="90" x2="40" y2="90"/>
+          <line x1="140" y1="90" x2="148" y2="90"/>
+          <!-- checklist lines -->
+          <line x1="60" y1="115" x2="120" y2="115"/>
+          <line x1="60" y1="122" x2="105" y2="122"/>
+          <!-- rays -->
+          <line x1="90" y1="12" x2="90" y2="22"/>
+          <line x1="148" y1="52" x2="140" y2="58"/>
+          <line x1="168" y1="90" x2="158" y2="90"/>
+        </svg>
+      </div>
+      <div class="tile-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#D6E8D0" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+      </div>
+      <div class="tile-content">
+        <div class="tile-tag">01 — Daily</div>
+        <div class="tile-title">Daily Ops</div>
+        <div class="tile-desc">Morning routine, core tasks & EOD wrap</div>
+      </div>
+    </div>
+
+    <!-- Campaigns -->
+    <div class="tile tile-campaign" onclick="openDashboard('campaigns')">
+      <div class="tile-illustration">
+        <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
+          <!-- megaphone / broadcast motif -->
+          <path d="M 50 75 L 50 105 L 80 105 L 110 130 L 110 50 L 80 75 Z"/>
+          <line x1="50" y1="105" x2="45" y2="120"/>
+          <line x1="65" y1="105" x2="60" y2="120"/>
+          <!-- signal arcs -->
+          <path d="M 118 68 Q 135 90 118 112" fill="none"/>
+          <path d="M 126 58 Q 150 90 126 122" fill="none"/>
+          <path d="M 134 50 Q 162 90 134 130" fill="none"/>
+          <!-- envelope lines -->
+          <rect x="30" y="135" width="50" height="30" rx="3"/>
+          <polyline points="30,135 55,155 80,135"/>
+        </svg>
+      </div>
+      <div class="tile-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#2A1A08" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+      </div>
+      <div class="tile-content">
+        <div class="tile-tag">02 — Campaigns</div>
+        <div class="tile-title">Campaigns</div>
+        <div class="tile-desc">Email execution & collateral production</div>
+      </div>
+    </div>
+
+    <!-- Events -->
+    <div class="tile tile-events" onclick="openDashboard('events')">
+      <div class="tile-illustration">
+        <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
+          <!-- badge / ribbon motif -->
+          <circle cx="90" cy="80" r="48"/>
+          <circle cx="90" cy="80" r="36"/>
+          <!-- ribbon tails -->
+          <path d="M 70 126 L 60 160 L 90 145 L 120 160 L 110 126"/>
+          <!-- star inside -->
+          <polygon points="90,55 96,72 114,72 100,83 105,100 90,90 75,100 80,83 66,72 84,72"/>
+          <!-- dots around -->
+          <circle cx="90" cy="28" r="3" fill="none"/>
+          <circle cx="138" cy="56" r="3" fill="none"/>
+          <circle cx="138" cy="104" r="3" fill="none"/>
+          <circle cx="42" cy="56" r="3" fill="none"/>
+          <circle cx="42" cy="104" r="3" fill="none"/>
+        </svg>
+      </div>
+      <div class="tile-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#2A1A0E" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+      </div>
+      <div class="tile-content">
+        <div class="tile-tag">03 — Events</div>
+        <div class="tile-title">Events</div>
+        <div class="tile-desc">Setup, materials & post-event tasks</div>
+      </div>
+    </div>
+
+    <!-- Brand & Compliance -->
+    <div class="tile tile-brand" onclick="openDashboard('brand')">
+      <div class="tile-illustration">
+        <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
+          <!-- shield / seal motif -->
+          <path d="M 90 25 L 145 50 L 145 100 Q 145 145 90 165 Q 35 145 35 100 L 35 50 Z"/>
+          <path d="M 90 42 L 128 60 L 128 100 Q 128 132 90 148 Q 52 132 52 100 L 52 60 Z"/>
+          <!-- check mark -->
+          <polyline points="70,95 84,110 115,75" stroke-width="2.5" fill="none"/>
+          <!-- decorative dots top -->
+          <circle cx="90" cy="18" r="4" fill="none"/>
+          <circle cx="78" cy="20" r="2.5" fill="none"/>
+          <circle cx="102" cy="20" r="2.5" fill="none"/>
+        </svg>
+      </div>
+      <div class="tile-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#0A2020" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+      </div>
+      <div class="tile-content">
+        <div class="tile-tag">04 — Brand</div>
+        <div class="tile-title">Brand &amp;<br>Compliance</div>
+        <div class="tile-desc">QC checklist + InDesign preflight</div>
+      </div>
+    </div>
+
+    <!-- Tools & Skills -->
+    <div class="tile tile-tools" onclick="openDashboard('tools')">
+      <div class="tile-illustration">
+        <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
+          <!-- compass / instrument motif -->
+          <circle cx="90" cy="90" r="58"/>
+          <circle cx="90" cy="90" r="6" fill="none"/>
+          <!-- compass arms -->
+          <line x1="90" y1="36" x2="90" y2="84"/>
+          <line x1="90" y1="96" x2="90" y2="144"/>
+          <line x1="36" y1="90" x2="84" y2="90"/>
+          <line x1="96" y1="90" x2="144" y2="90"/>
+          <!-- needle -->
+          <polygon points="90,40 86,90 90,84 94,90"/>
+          <!-- degree marks -->
+          <line x1="90" y1="32" x2="90" y2="38"/>
+          <line x1="90" y1="142" x2="90" y2="148"/>
+          <line x1="32" y1="90" x2="38" y2="90"/>
+          <line x1="142" y1="90" x2="148" y2="90"/>
+          <!-- diagonal ticks -->
+          <line x1="131" y1="49" x2="127" y2="54"/>
+          <line x1="49" y1="131" x2="53" y2="126"/>
+          <line x1="49" y1="49" x2="53" y2="54"/>
+          <line x1="131" y1="131" x2="127" y2="126"/>
+        </svg>
+      </div>
+      <div class="tile-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#1A0A30" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+      </div>
+      <div class="tile-content">
+        <div class="tile-tag">05 — Tools</div>
+        <div class="tile-title">Tools &amp;<br>Skills</div>
+        <div class="tile-desc">Your tech stack reference guide</div>
+      </div>
+    </div>
+
+    <!-- First Week -->
+    <div class="tile tile-crm" onclick="openDashboard('firstweek')">
+      <div class="tile-illustration">
+        <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
+          <polygon points="90,28 96,50 120,50 101,63 108,86 90,74 72,86 79,63 60,50 84,50"/>
+          <circle cx="90" cy="90" r="55" fill="none"/>
+          <line x1="90" y1="35" x2="90" y2="145"/>
+          <line x1="35" y1="90" x2="145" y2="90"/>
+          <circle cx="90" cy="55" r="4" fill="none"/>
+          <circle cx="125" cy="90" r="4" fill="none"/>
+          <circle cx="90" cy="125" r="4" fill="none"/>
+          <circle cx="55" cy="90" r="4" fill="none"/>
+        </svg>
+      </div>
+      <div class="tile-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#D0D8EB" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+      </div>
+      <div class="tile-content">
+        <div class="tile-tag">07 — Onboarding</div>
+        <div class="tile-title">First Week<br>Guide</div>
+        <div class="tile-desc">Day-by-day remote survival guide</div>
+      </div>
+    </div>
+
+  </div><!-- /home-grid -->
+</div><!-- /home-page -->
+
+
+<!-- ══════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════ -->
+<div id="dashboard-page" class="dashboard" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-label">MSC Dashboard</div>
+      <div class="brand-name">Command Centre</div>
+    </div>
+
+    <div class="sidebar-section-label">Workflow</div>
+    <div class="nav-item" data-page="daily">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="8,4 8,8 11,10"/></svg>
+      Daily Ops
+    </div>
+    <div class="nav-item" data-page="campaigns">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5l5 3 5-3M3 5v7h10V5"/></svg>
+      Campaigns
+    </div>
+    <div class="nav-item" data-page="events">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+      Events
+    </div>
+    <div class="nav-item" data-page="brand">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l5 2v6q0 4-5 6Q3 13 3 9V3Z"/></svg>
+      Brand & Compliance
+    </div>
+
+    <div class="sidebar-section-label">Reference</div>
+    <div class="nav-item" data-page="tools">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/></svg>
+      Tools & Skills
+    </div>
+    <div class="nav-item" data-page="monday">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="8" cy="5" rx="5" ry="2"/><path d="M3 5v3c0 1.1 2.2 2 5 2s5-.9 5-2V5"/><path d="M3 8v3c0 1.1 2.2 2 5 2s5-.9 5-2V8"/></svg>
+      Monday.com
+    </div>
+
+    <div class="sidebar-section-label">Survival Kit</div>
+    <div class="nav-item" data-page="firstweek">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l1.5 3 3.5.5-2.5 2.5.5 3.5L8 9l-3 1.5.5-3.5L3 4.5l3.5-.5z"/></svg>
+      First Week Guide
+    </div>
+    <div class="nav-item" data-page="panic">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+      Panic Button
+      <span class="nav-badge" style="background:#C4522A">SOS</span>
+    </div>
+    <div class="nav-item" data-page="templates">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
+      Message Templates
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" onclick="goHome(); return false;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 6L8 1l6 5v8H10V9H6v4H2Z"/></svg>
+        Home
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Daily Ops</div>
+        <div class="topbar-subtitle" id="topbar-subtitle">Morning, core tasks &amp; end-of-day</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date">
+          <div class="live-date"></div>
+          <div class="live-time"></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ── DAILY OPS ── -->
+      <div id="page-daily" class="page">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-card-label">Done today</div><div class="stat-card-value green" id="stat-daily-done">0</div></div>
+          <div class="stat-card"><div class="stat-card-label">Total tasks</div><div class="stat-card-value" id="stat-daily-total">14</div></div>
+          <div class="stat-card"><div class="stat-card-label">Completion</div><div class="stat-card-value" id="stat-daily-pct">0%</div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Daily progress</span><span id="stat-daily-done2"></span></div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-daily" style="width:0%"></div></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 1a7 7 0 100 14A7 7 0 008 1z"/><polyline points="8,4 8,8 11,10"/></svg></div>
+            <span class="sh-title">Morning routine — first 30 min</span>
+            <span class="sh-count" id="count-morning">0/5</span>
+          </div>
+          <div id="list-morning"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg></div>
+            <span class="sh-title">Core daily tasks</span>
+            <span class="sh-count" id="count-core">0/5</span>
+          </div>
+          <div id="list-core"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 14s-6-3-6-8a6 6 0 0112 0c0 5-6 8-6 8z"/></svg></div>
+            <span class="sh-title">End-of-day wrap</span>
+            <span class="sh-count" id="count-eod">0/4</span>
+          </div>
+          <div id="list-eod"></div>
+        </div>
+
+        <button class="btn-reset" onclick="resetDaily()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
+          Reset daily checklists
+        </button>
+      </div>
+
+      <!-- ── CAMPAIGNS ── -->
+      <div id="page-campaigns" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Your role in campaigns</div>
+          <p>You execute, not decide. Every campaign action requires prior written approval from the Marketing Lead. Flawless execution and proactive status communication is your job.</p>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div>
+            <span class="sh-title">Email campaign — 6-phase execution flow</span>
+          </div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">1</div><div><div class="phase-title">Receive approved brief + content</div><div class="phase-desc">Never start without written approval. Confirm: subject line, sender name, send time, list segment.</div></div></div>
+            <div class="phase-row"><div class="phase-num">2</div><div><div class="phase-title">Build list in CRM / email platform</div><div class="phase-desc">Upload contacts, apply segmentation. Check compliance — consent, opt-outs, financial services rules.</div></div></div>
+            <div class="phase-row"><div class="phase-num">3</div><div><div class="phase-title">Set up email using approved template</div><div class="phase-desc">Apply correct logo, disclaimer, formatting. No off-template design decisions.</div></div></div>
+            <div class="phase-row"><div class="phase-num">4</div><div><div class="phase-title">Send test + QC checklist <span class="ci-badge critical">always</span></div><div class="phase-desc">Broken links? Correct sender? Disclaimer visible? Rendering on mobile?</div></div></div>
+            <div class="phase-row"><div class="phase-num">5</div><div><div class="phase-title">Get final sign-off before scheduling</div><div class="phase-desc">Document approval (email or shared doc). Only then schedule.</div></div></div>
+            <div class="phase-row"><div class="phase-num">6</div><div><div class="phase-title">Post-send: pull performance report</div><div class="phase-desc">Open rate, clicks, bounces, unsubscribes. Add to tracker. Brief Marketing Lead on results.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h8l2 3-6 9-6-9z"/><line x1="8" y1="5" x2="8" y2="14"/><line x1="4" y1="5" x2="12" y2="5"/></svg></div>
+            <span class="sh-title">Collateral production checklist</span>
+            <span class="sh-count" id="count-collateral">0/6</span>
+          </div>
+          <div id="list-collateral"></div>
+        </div>
+      </div>
+
+      <!-- ── EVENTS ── -->
+      <div id="page-events" class="page">
+        <div class="alert-box warn">
+          <div class="alert-title">Detail is everything in finance events</div>
+          <p>Wrong name on a badge, missed RSVP, wrong room — small errors reflect directly on the brand in front of clients. Over-communicate and over-prepare.</p>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg></div>
+            <span class="sh-title">Event setup</span>
+            <span class="sh-count" id="count-evsetup">0/6</span>
+          </div>
+          <div id="list-ev-setup"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="2" width="10" height="13" rx="1"/><line x1="6" y1="6" x2="10" y2="6"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="8" y2="12"/></svg></div>
+            <span class="sh-title">Pre-event materials</span>
+            <span class="sh-count" id="count-evmat">0/4</span>
+          </div>
+          <div id="list-ev-mat"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="2" x2="8" y2="10"/><polyline points="4,6 8,10 12,6"/><line x1="3" y1="13" x2="13" y2="13"/></svg></div>
+            <span class="sh-title">Post-event</span>
+            <span class="sh-count" id="count-evpost">0/5</span>
+          </div>
+          <div id="list-ev-post"></div>
+        </div>
+      </div>
+
+      <!-- ── BRAND & COMPLIANCE ── -->
+      <div id="page-brand" class="page">
+        <div class="alert-box warn">
+          <div class="alert-title">Financial services = extra compliance stakes</div>
+          <p>Wrong disclaimers, unapproved claims, or missing logos can have legal consequences. When in doubt, flag it — don't fix it yourself.</p>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
+            <span class="sh-title">Brand & compliance QC — every material</span>
+            <span class="sh-count" id="count-compliance">0/8</span>
+          </div>
+          <div id="list-compliance"></div>
+        </div>
+
+        <div class="section-block" style="margin-top:28px">
+          <div class="section-block-header" style="background:var(--ink);border-bottom-color:rgba(255,255,255,0.1)">
+            <div class="sh-icon" style="background:rgba(255,255,255,0.1)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg>
+            </div>
+            <span class="sh-title" style="color:#fff;font-family:var(--font-display);font-size:15px">InDesign QC — run before every submission</span>
+          </div>
+
+          <div style="padding:0">
+            <div class="section-block-header" style="background:var(--cream);padding:12px 20px">
+              <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/></svg></div>
+              <span class="sh-title">Brand &amp; identity</span>
+              <span class="sh-count" id="count-qcbrand">0/5</span>
+            </div>
+            <div id="list-qc-brand"></div>
+
+            <div class="section-block-header" style="background:var(--cream);padding:12px 20px;border-top:1px solid var(--cream-dark)">
+              <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v12M4 6h8M4 10h6"/></svg></div>
+              <span class="sh-title">Copy &amp; content</span>
+              <span class="sh-count" id="count-qccopy">0/5</span>
+            </div>
+            <div id="list-qc-copy"></div>
+
+            <div class="section-block-header" style="background:var(--cream);padding:12px 20px;border-top:1px solid var(--cream-dark)">
+              <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="1"/></svg></div>
+              <span class="sh-title">Layout &amp; typography</span>
+              <span class="sh-count" id="count-qclayout">0/6</span>
+            </div>
+            <div id="list-qc-layout"></div>
+
+            <div class="section-block-header" style="background:var(--cream);padding:12px 20px;border-top:1px solid var(--cream-dark)">
+              <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2l4 8H4z"/><line x1="8" y1="10" x2="8" y2="14"/></svg></div>
+              <span class="sh-title">Preflight &amp; export</span>
+              <span class="sh-count" id="count-qcpreflight">0/5</span>
+            </div>
+            <div id="list-qc-preflight"></div>
+          </div>
+        </div>
+
+        <div class="stat-grid" style="margin-top:20px">
+          <div class="stat-card"><div class="stat-card-label">QC passed</div><div class="stat-card-value green" id="stat-qc-done">0</div></div>
+          <div class="stat-card"><div class="stat-card-label">Total checks</div><div class="stat-card-value" id="stat-qc-total">21</div></div>
+          <div class="stat-card"><div class="stat-card-label">Ready to submit</div><div class="stat-card-value" id="stat-qc-ready">Not yet</div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="bar-qc" style="width:0%"></div></div>
+        </div>
+
+        <button class="btn-reset" onclick="resetQC()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
+          Reset QC checklist
+        </button>
+      </div>
+
+      <!-- ── TOOLS & SKILLS ── -->
+      <div id="page-tools" class="page">
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2l2 2-7 7-3 1 1-3z"/></svg></div>
+            <span class="sh-title">Core tool stack</span>
+          </div>
+          <table class="tools-table">
+            <thead><tr><th style="width:130px">Tool</th><th>What you use it for</th></tr></thead>
+            <tbody>
+              <tr><td class="tool-name">Adobe InDesign</td><td class="tool-desc">Edit rate cards, brochures, PDFs — always from approved templates. Export press-ready or digital PDFs. This is your strongest value-add in the role.</td></tr>
+              <tr><td class="tool-name">Adobe Acrobat</td><td class="tool-desc">Minor PDF edits, form preparation, preflight checks, merging documents for approval submissions.</td></tr>
+              <tr><td class="tool-name">Salesforce / Pardot</td><td class="tool-desc">Upload and manage contacts, build email lists, ensure consent and opt-out compliance, pull marketing reports.</td></tr>
+              <tr><td class="tool-name">Google Analytics</td><td class="tool-desc">Pull website metrics for campaign reports. Track traffic, conversions, and page performance.</td></tr>
+              <tr><td class="tool-name">CMS (Framer / WP)</td><td class="tool-desc">Upload approved content and update pages per instructions. No design changes without prior approval.</td></tr>
+              <tr><td class="tool-name">Microsoft Office</td><td class="tool-desc">Campaign trackers in Excel, briefs in Word, stakeholder decks in PowerPoint — always using approved templates.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-block" style="margin-top:20px">
+          <div class="section-block-header">
+            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="8,2 10,6 14,6 11,9 12,13 8,11 4,13 5,9 2,6 6,6"/></svg></div>
+            <span class="sh-title">Skills that make you indispensable</span>
+          </div>
+          <div class="skills-grid">
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><polyline points="5,7 7,9 10,5"/></svg>Obsessive QC</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><polyline points="7,4 7,7 9,9"/></svg>Never misses a deadline</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h10v7H2z"/><line x1="5" y1="12" x2="9" y2="12"/><line x1="7" y1="10" x2="7" y2="12"/></svg>Proactive updates</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1"/><line x1="5" y1="5" x2="9" y2="5"/><line x1="5" y1="8" x2="7" y2="8"/></svg>Template discipline</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="7" cy="4" rx="4" ry="1.5"/><path d="M3 4v3c0 .8 1.8 1.5 4 1.5s4-.7 4-1.5V4"/><path d="M3 7v3c0 .8 1.8 1.5 4 1.5s4-.7 4-1.5V7"/></svg>CRM data hygiene</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1l4 2v4q0 4-4 6Q3 11 3 7V3Z"/></svg>Approval-first mindset</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="7" y1="12" x2="7" y2="4"/><polyline points="4,7 7,4 10,7"/></svg>Knows when to escalate</div>
+            <div class="skill-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1h8v12H3z"/><line x1="5" y1="5" x2="9" y2="5"/><line x1="5" y1="8" x2="7" y2="8"/></svg>Impeccable filing</div>
+          </div>
+        </div>
+
+        <div class="alert-box info" style="margin-top:20px">
+          <div class="alert-title">Your InDesign + Acrobat edge</div>
+          <p>Marked "mandatory" and "highly preferred" in the JD — most admin coordinators can't do this. It's your strongest differentiator. Keep your production skills sharp and always deliver clean, preflight-ready exports.</p>
+        </div>
+      </div>
+
+      <!-- ── MONDAY.COM ── -->
+      <div id="page-monday" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Monday.com — your task hub</div>
+          <p>Monday.com is where your work lives. Think of it as a shared whiteboard your whole team can see. Your job: keep it accurate and up to date at all times.</p>
+        </div>
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg></div>
+            <span class="sh-title">What each view means</span>
+          </div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num" style="background:var(--rust-pale);color:var(--rust)">B</div><div><div class="phase-title">Board view</div><div class="phase-desc">The main view. Rows = tasks, columns = status, owner, deadline, priority. This is where you'll spend most of your time updating task statuses.</div></div></div>
+            <div class="phase-row"><div class="phase-num" style="background:var(--gold-pale);color:var(--gold)">K</div><div><div class="phase-title">Kanban view</div><div class="phase-desc">Same tasks shown as cards in columns (To Do → In Progress → Done). Useful for seeing what's blocked at a glance.</div></div></div>
+            <div class="phase-row"><div class="phase-num" style="background:var(--teal-pale);color:var(--teal)">G</div><div><div class="phase-title">Gantt / Timeline view</div><div class="phase-desc">Tasks shown across a calendar. Use this to spot deadline clashes and flag them early to your Marketing Lead.</div></div></div>
+            <div class="phase-row"><div class="phase-num" style="background:var(--sage-pale);color:var(--sage)">M</div><div><div class="phase-title">My Work view</div><div class="phase-desc">Shows only tasks assigned to you across all boards. Check this first every morning — it's your personal task list.</div></div></div>
+          </div>
+        </div>
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
+            <span class="sh-title">Your Monday.com daily habits</span>
+          </div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">1</div><div><div class="phase-title">Start of day — check "My Work"</div><div class="phase-desc">See everything assigned to you. Sort by deadline. This is your task list for the day.</div></div></div>
+            <div class="phase-row"><div class="phase-num">2</div><div><div class="phase-title">When you start a task — update status to "In Progress"</div><div class="phase-desc">Never leave a task on "To Do" while you're working on it. Your lead needs to see real-time status.</div></div></div>
+            <div class="phase-row"><div class="phase-num">3</div><div><div class="phase-title">When something is blocked — add an update comment</div><div class="phase-desc">Don't just leave it. Click the task → Updates tab → write what's blocking you and tag your lead. This creates a paper trail.</div></div></div>
+            <div class="phase-row"><div class="phase-num">4</div><div><div class="phase-title">When done — mark complete + attach the output file</div><div class="phase-desc">Change status to Done. Attach the PDF, doc, or link directly in the task card. Never just say "done" in chat — attach proof.</div></div></div>
+            <div class="phase-row"><div class="phase-num">5</div><div><div class="phase-title">End of day — check for overdue or at-risk tasks</div><div class="phase-desc">Anything turning red (overdue)? Flag it to your lead before you log off. Never let a deadline pass silently.</div></div></div>
+          </div>
+        </div>
+        <div class="alert-box warn">
+          <div class="alert-title">The golden rule of Monday.com</div>
+          <p>If it's not updated in Monday, it doesn't exist. Your lead manages the team based on what they see in the board. An outdated status = they think you haven't started. Update it constantly, even when work feels obvious.</p>
+        </div>
+      </div>
+
+      <!-- ── FIRST WEEK ── -->
+      <div id="page-firstweek" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Remote first week — the real playbook</div>
+          <p>You won't be able to read the room, pick up office culture, or overhear how things work. You have to be more deliberate. This guide tells you exactly what to do each day.</p>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg></div><span class="sh-title">Before Day 1 — do this at home</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Test your camera, mic, and internet</div><div class="phase-desc">Do a test Zoom/Teams call with anyone. Bad audio on your first day is a bad first impression. Fix it before.</div></div></div>
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Set up a clean, well-lit background</div><div class="phase-desc">Natural light in front of you, not behind. Remove clutter. You're in financial services — professional matters.</div></div></div>
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Install everything they tell you to install</div><div class="phase-desc">Monday.com, Slack, Teams, VPN — get it all working before Day 1. Don't troubleshoot during onboarding calls.</div></div></div>
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Prepare a notepad (physical or digital)</div><div class="phase-desc">You will be overwhelmed with names, tools, processes, and acronyms. Write everything down. You'll need it in Week 2.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><polyline points="8,8 11,10"/></svg></div><span class="sh-title">Day 1 — show up, absorb, ask one good question</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Log on 5 minutes early</div><div class="phase-desc">Remote first day: be in the waiting room before they are. It signals reliability immediately.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Your only job today: listen and take notes</div><div class="phase-desc">Don't try to impress. Don't volunteer opinions. Ask clarifying questions about your tasks, not strategic suggestions.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Ask: "What does a good first week look like to you?"</div><div class="phase-desc">Ask your Marketing Lead this on Day 1. It tells you exactly what they value and how they measure success. Most new starters never ask this.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Ask: "How do you prefer I communicate with you day to day?"</div><div class="phase-desc">Slack? Email? Monday comments? How urgent is urgent? Remote teams run on communication norms — learn theirs immediately.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Write down every acronym or tool name you don't recognise</div><div class="phase-desc">Look them up after the call. Never nod along and hope it becomes clear — it usually doesn't.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/></svg></div><span class="sh-title">Days 2–3 — start building habits</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Locate the brand asset folder — don't wait to be shown</div><div class="phase-desc">Ask where logos, templates, and approved copy live. Get access. You can't do your job without this.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Find the approvals process — how does a task get signed off?</div><div class="phase-desc">Who approves what? Where is it documented? If it's not documented, write it down as they explain it verbally.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Observe your lead's communication style and mirror it</div><div class="phase-desc">Short and direct? Detailed updates? Emoji-friendly or formal? Match their energy in Slack/email until you know the culture.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Batch your questions — don't ask one at a time all day</div><div class="phase-desc">Write down 3–5 questions, then send them in one Slack message. "Hey, I have a few quick questions when you have a moment" is gold.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12l4-4 3 3 5-6"/></svg></div><span class="sh-title">Days 4–5 — prove you're reliable</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Complete at least one task fully and without chasing</div><div class="phase-desc">Pick the clearest task on your list. Finish it, QC it, update Monday, notify your lead. This one moment builds more trust than anything else.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Send a Friday EOW message to your lead</div><div class="phase-desc">"Here's what I completed this week, here's what's in progress, here's what I need clarity on." 5 sentences. Use the template in the Templates tab.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Write down 3 things you're still unclear on</div><div class="phase-desc">Not to ask immediately — to ask in your Week 2 check-in. Shows self-awareness and forward thinking.</div></div></div>
+          </div>
+        </div>
+
+        <div class="alert-box warn">
+          <div class="alert-title">The #1 remote new-starter mistake</div>
+          <p>Going quiet. In-office, your presence is visible. Remote, if you don't communicate, you're invisible. Over-communicate in Week 1 — update Monday constantly, send EOD summaries, respond quickly. You can dial it back once trust is built. You can't recover a "where are they?" reputation easily.</p>
+        </div>
+      </div>
+
+      <!-- ── PANIC BUTTON ── -->
+      <div id="page-panic" class="page">
+        <div style="background:#C4522A;border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px">
+          <div style="font-size:32px">🆘</div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;margin-bottom:4px">Panic Button</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.8)">Pick your situation. Get the exact steps. Breathe.</div>
+          </div>
+        </div>
+
+        <div id="panic-menu">
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">What's going wrong right now?</span></div>
+            <div style="padding:8px 0">
+              <div class="panic-item" onclick="showPanic('urgent')">🔥 I have multiple urgent tasks and don't know which to do first</div>
+              <div class="panic-item" onclick="showPanic('mistake')">😱 I made a mistake — something wrong already went out or got sent</div>
+              <div class="panic-item" onclick="showPanic('silent')">🔇 Slack is silent and I don't know if I'm doing things right</div>
+              <div class="panic-item" onclick="showPanic('deadline')">⏰ A deadline is today and my lead is unavailable</div>
+              <div class="panic-item" onclick="showPanic('approval')">⏳ I'm waiting on approval and it's been too long</div>
+              <div class="panic-item" onclick="showPanic('supplier')">📦 A supplier sent the wrong thing / missed a deadline</div>
+              <div class="panic-item" onclick="showPanic('unclear')">❓ I was given a task but the brief is unclear and I don't want to bother anyone</div>
+              <div class="panic-item" onclick="showPanic('feedback')">💬 I got negative feedback on my work</div>
+              <div class="panic-item" onclick="showPanic('overwhelmed')">🌀 I'm completely overwhelmed and don't know where to start</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panic-detail" style="display:none">
+          <button class="btn-reset" onclick="hidePanic()" style="margin-bottom:16px">← Back to situations</button>
+          <div id="panic-content"></div>
+        </div>
+      </div>
+
+      <!-- ── TEMPLATES ── -->
+      <div id="page-templates" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Remote communication is your visibility</div>
+          <p>When you're WFH, every message is a signal. These templates are calibrated for remote professional tone — clear, direct, not over-apologetic, not overly casual.</p>
+        </div>
+
+        <div id="template-list">
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div><span class="sh-title">Asking for approval</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nI\'ve completed [task/material name] and it\'s ready for your review.\n\n[Attach file or link here]\n\nPlease let me know if any changes are needed or if I\'m good to proceed.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Standard approval request</div>
+              <div class="tpl-sub">Use for: collateral, emails, event materials, website updates</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nQuick one — I need your sign-off on [task] before I can move forward. Deadline is [date/time].\n\n[Attach file or link]\n\nHappy to jump on a call if it\'s easier to review together.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Urgent approval (deadline today)</div>
+              <div class="tpl-sub">Use when: you need a response same-day</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">Flagging a delay or problem</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nHeads up — [task/campaign] is at risk of missing the [date] deadline. The hold-up is [brief reason: waiting on X / issue with Y].\n\nI\'m currently [what you\'re doing to resolve it]. Estimated resolution: [time/date].\n\nLet me know if you\'d like me to escalate or take a different approach.\n\n[Your name]')">
+              <div class="tpl-label">Flagging a delay proactively</div>
+              <div class="tpl-sub">Always send this before the deadline, not after</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nI want to flag an issue with [task]. [Briefly describe what happened — one sentence, factual, no over-explaining].\n\nI\'ve [what you\'ve done so far to address it]. My suggested next step is [your recommendation].\n\nPlease let me know how you\'d like to proceed.\n\n[Your name]')">
+              <div class="tpl-label">Flagging a mistake or error</div>
+              <div class="tpl-sub">Lead with facts, follow with your proposed fix</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v12M4 6h8M4 10h6"/></svg></div><span class="sh-title">Following up</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nFollowing up on my message from [date] re: [topic]. Just checking if you\'ve had a chance to review.\n\nNo rush if you\'re busy — just want to make sure it didn\'t get buried.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Following up on an unanswered message</div>
+              <div class="tpl-sub">Wait 24–48 hrs before sending this</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nJust checking in on [task/approval/file] — still waiting on this before I can move [next step] forward.\n\nCurrent status on my end: [what\'s ready, what\'s blocked]. Happy to provide any additional info needed.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Chasing a dependency (waiting on someone else)</div>
+              <div class="tpl-sub">Professional, not pushy</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg></div><span class="sh-title">End-of-week check-in</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nHere\'s my end-of-week wrap:\n\n✅ Completed this week:\n– [task 1]\n– [task 2]\n– [task 3]\n\n🔄 In progress:\n– [task] — on track for [date]\n\n⏳ Waiting on:\n– [what you need and from whom]\n\n❓ Still unclear on:\n– [question — save this for your check-in, not urgent]\n\nHave a good weekend,\n[Your name]')">
+              <div class="tpl-label">Friday EOW summary to your Marketing Lead</div>
+              <div class="tpl-sub">Send every Friday. This one message builds more trust than almost anything else.</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h8l2 4-6 8-6-8z"/></svg></div><span class="sh-title">Supplier communication</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Supplier name],\n\nI\'m reaching out regarding [job/project name]. Please find the brief attached.\n\nKey details:\n– Deliverable: [what you need]\n– Specs: [size, format, quantity if applicable]\n– Deadline: [date]\n\nPlease confirm receipt and your ability to deliver by [date].\n\nThanks,\n[Your name]\n[Company]')">
+              <div class="tpl-label">Sending a supplier brief</div>
+              <div class="tpl-sub">Always use pre-approved briefs. Attach the file, don't paste into the email.</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Supplier name],\n\nThank you for sending through [deliverable]. After review, we\'ve identified the following that needs to be addressed:\n\n– [Issue 1 — be specific: wrong colour, incorrect logo version, etc.]\n– [Issue 2 if applicable]\n\nPlease revise and resend by [date/time].\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Requesting supplier revision</div>
+              <div class="tpl-sub">Be specific about what's wrong — vague feedback = more rounds</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="copy-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:10px 20px;border-radius:var(--radius);font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
+          ✓ Copied to clipboard
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<script src="app.js"></script>
+<script>
+  function openDashboard(page) {
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('dashboard-page').style.display = 'flex';
+    navigate(page);
+  }
+
+  function goHome() {
+    document.getElementById('dashboard-page').style.display = 'none';
+    document.getElementById('home-page').style.display = 'flex';
+  }
+
+  // Update home date on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    document.querySelectorAll('.live-date').forEach(el => el.textContent = now.toLocaleDateString('en-AU', opts));
+    document.querySelectorAll('.live-time').forEach(el => el.textContent = now.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' }));
+  });
+</script>
+</body>
+</html>
