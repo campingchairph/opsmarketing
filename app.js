@@ -840,6 +840,51 @@ const TEMPLATES = [
       { tone: 'Concise',
         preview: '"[Task] ready. [Link]. Approve or flag changes?"',
         text: "[Name] — [task] is ready for review. [Link]. Approve or flag changes?\n\n[Your name]" },
+      { tone: 'Slack',
+        preview: '"Hey! [task] is done — [link]. Can you give it a quick look?"',
+        text: "Hey [Name]!\n\n[Task] is done — [link]. Can you give it a quick look when you have a moment?\n\nLet me know if anything needs changing.\n\n[Your name]" },
+      { tone: 'With options',
+        preview: '"Happy to adjust [A] or [B] — just let me know which direction works."',
+        text: "Hi [Name],\n\n[Task] is ready for your review — [link].\n\nI went with [approach A], but I'm happy to adjust to [option B] if you prefer. Just let me know which direction works better.\n\nThanks,\n[Your name]" },
+      { tone: 'New starter',
+        preview: '"I want to make sure I\'ve done this correctly — would you mind reviewing?"',
+        text: "Hi [Name],\n\nI've completed [task] — [link attached]. I want to make sure I've followed the right process, so I'd really appreciate a review before I move forward.\n\nPlease flag anything I should adjust.\n\nThanks,\n[Your name]" },
+      { tone: 'Post-meeting',
+        preview: '"Following up from our chat — [task] is now done. Ready for your sign-off."',
+        text: "Hi [Name],\n\nFollowing up from our conversation — I've completed [task] as discussed. [Link attached].\n\nReady for your sign-off when you get a chance.\n\nThanks,\n[Your name]" },
+      { tone: 'After hours',
+        preview: '"No rush on this — just sharing [task] so it\'s ready for you tomorrow."',
+        text: "Hi [Name],\n\nNo urgency on this — just sharing [task] so it's waiting in your inbox when you're ready. [Link attached].\n\nHappy to go over it whenever works for you.\n\n[Your name]" },
+      { tone: 'Monday comment',
+        preview: '"[Task] completed — file attached to this card. Please review and update status."',
+        text: "[Task] completed — [link/file] attached to this card.\n\nPlease review and update the status to Approved when signed off, or flag changes in the comments." },
+      { tone: 'With deadline context',
+        preview: '"Sharing now so we have time for revisions before the [date] deadline."',
+        text: "Hi [Name],\n\nSharing [task] now so we have time for any revisions before the [date] deadline. [Link attached].\n\nLet me know your thoughts as soon as you're able.\n\nThanks,\n[Your name]" },
+      { tone: 'Reassuring',
+        preview: '"I\'ve QC\'d this against the brief — it\'s clean and ready for your final sign-off."',
+        text: "Hi [Name],\n\nI've QC'd [task] against the brief and it's clean — no missing elements, all approved copy in place. Ready for your final sign-off. [Link attached].\n\nThanks,\n[Your name]" },
+      { tone: 'Cross-team',
+        preview: '"Looping you in for approval — [Name from your team] asked me to send this your way."',
+        text: "Hi [Name],\n\nLooping you in for approval on [task] — [Name] asked me to run this past you before we proceed. [Link attached].\n\nPlease let me know if you're happy for us to go ahead.\n\nThanks,\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"[Task] done. [Link]. Good to proceed?"',
+        text: "[Name] — [task] done. [Link]. Good to proceed?" },
+      { tone: 'Summary list',
+        preview: '"Quick summary before you review: what changed, what stayed the same…"',
+        text: "Hi [Name],\n\nQuick summary before you review [task]:\n\n✓ Changed: [what you updated]\n✓ Unchanged: [what stayed the same]\n✓ Flagged: [anything you want to draw attention to]\n\n[Link attached]\n\nLet me know if any adjustments are needed.\n\nThanks,\n[Your name]" },
+      { tone: 'Experienced',
+        preview: '"[Task] is solid — I\'m confident in the output. Happy for you to just approve."',
+        text: "Hi [Name],\n\n[Task] is ready — [link]. I'm confident it meets the brief and has been fully QC'd. Happy for you to sign off without changes, but flag me if anything looks off.\n\n[Your name]" },
+      { tone: 'With questions',
+        preview: '"Ready for review — I also have two quick questions before final submission."',
+        text: "Hi [Name],\n\n[Task] is ready for your review — [link].\n\nWhile I have you, two quick questions:\n1. [Question 1]\n2. [Question 2]\n\nHappy to discuss or just let me know in your reply.\n\nThanks,\n[Your name]" },
+      { tone: 'Revision round',
+        preview: '"I\'ve updated [task] based on your feedback — changes highlighted."',
+        text: "Hi [Name],\n\nI've updated [task] based on your feedback — [link to revised version].\n\nChanges made:\n- [Change 1]\n- [Change 2]\n\nLet me know if this is now good to proceed, or if any further adjustments are needed.\n\nThanks,\n[Your name]" },
+      { tone: 'Pre-vacation',
+        preview: '"I\'m wrapping up before [date off] — sending [task] now so nothing is held up."',
+        text: "Hi [Name],\n\nI'm signing off before [date] and wanted to make sure [task] doesn't hold anything up. [Link attached].\n\nIf you can review before [date], great — if not, [colleague] can follow up on my behalf.\n\nThanks,\n[Your name]" },
     ]
   },
   {
@@ -863,6 +908,51 @@ const TEMPLATES = [
       { tone: 'Brief',
         preview: '"[Task] due [time]. Ready for review: [link]. Need approval to proceed."',
         text: "[Name] — [task] due [time]. Ready for review: [link]. Need your approval to proceed.\n\n[Your name]" },
+      { tone: 'Slack',
+        preview: '"⚡ Urgent: [task] needs your approval by [time]. [Link] — quick look if you can!"',
+        text: "⚡ [Name] — [task] needs your approval by [time]. [Link] — quick look if you can. Even just \"approved\" works!\n\n[Your name]" },
+      { tone: 'Escalating',
+        preview: '"Following up on [task] — deadline in [X] hours and I still need your sign-off."',
+        text: "Hi [Name],\n\nFollowing up on [task] — I sent this earlier but haven't heard back. Deadline is in [X] hours.\n\n[Link]\n\nI need your approval to proceed. Please let me know ASAP.\n\n[Your name]" },
+      { tone: 'With backup plan',
+        preview: '"Deadline in [X] hours. If I don\'t hear back by [time] I\'ll [backup plan]."',
+        text: "Hi [Name],\n\n[Task] is due at [time] and ready for sign-off — [link].\n\nIf I don't hear back by [earlier time], I'll [backup plan, e.g., hold the send / check with [backup approver]]. Just want to make sure we're covered either way.\n\nThanks,\n[Your name]" },
+      { tone: 'Phone follow-up',
+        preview: '"Just tried calling — leaving this here too. [Task] needs approval by [time]."',
+        text: "Hi [Name],\n\nJust tried calling — leaving this here as well. [Task] needs your approval by [time] today.\n\n[Link]\n\nPlease respond as soon as you can.\n\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"URGENT: [task] due [time]. Approved? [Link]"',
+        text: "URGENT: [task] due [time]. Please approve: [link]\n\n[Your name]" },
+      { tone: 'With context',
+        preview: '"This is time-sensitive because [reason] — please prioritise if you can."',
+        text: "Hi [Name],\n\nThis is time-sensitive — [task] needs to go out by [time] because [reason].\n\nFile is ready: [link]\n\nPlease prioritise if you can — even a quick sign-off is enough.\n\nThanks,\n[Your name]" },
+      { tone: 'Two options',
+        preview: '"Either approve by [time] or let me know if you need more time — I\'ll adjust."',
+        text: "Hi [Name],\n\n[Task] is ready and due at [time] — [link].\n\nTwo options:\n1. Approve by [time] → I'll proceed as planned\n2. Let me know if you need more time → I'll adjust the timeline\n\nJust let me know either way.\n\n[Your name]" },
+      { tone: 'Client-facing deadline',
+        preview: '"This is going to a client at [time] — need your approval before then."',
+        text: "Hi [Name],\n\nImportant one — [task] is going to [client/external party] at [time] and needs your approval before I send it.\n\n[Link attached]\n\nPlease review as soon as you're able.\n\nThanks,\n[Your name]" },
+      { tone: 'Confident tone',
+        preview: '"Everything\'s in order — just need your green light and I\'ll hit send at [time]."',
+        text: "Hi [Name],\n\nEverything's in order on [task] — QC done, copy approved, file ready. Just need your green light and I'll hit send at [time].\n\n[Link]\n\n[Your name]" },
+      { tone: 'After hours',
+        preview: '"Sending this late because we have a [time] deadline tomorrow — apologies for the timing."',
+        text: "Hi [Name],\n\nApologies for the late message — [task] has a [time] deadline tomorrow and I wanted to get it in front of you now.\n\n[Link attached]\n\nNo need to respond tonight — just hoping to catch you first thing.\n\nThanks,\n[Your name]" },
+      { tone: 'Team channel',
+        preview: '"@[Name] quick action needed: [task] due [time]. [Link]. Approve to unblock."',
+        text: "@[Name] quick action needed — [task] due [time] and ready for sign-off. [Link]. Once approved I can proceed immediately.\n\n[Your name]" },
+      { tone: 'Reassuring',
+        preview: '"It\'s all ready — no changes needed from you, just a formal sign-off."',
+        text: "Hi [Name],\n\nNothing complicated here — [task] is fully ready, QC'd, and just needs your formal sign-off before I submit/send. [Link].\n\nDeadline: [time].\n\nThanks,\n[Your name]" },
+      { tone: 'Progress update',
+        preview: '"Update: [task] is [X]% done. On track for [time] — sign-off needed once I send the final."',
+        text: "Hi [Name],\n\nProgress update on [task]: [X]% done, on track for [time] deadline.\n\nI'll send the final for sign-off by [earlier time] — please keep [Y mins] free to review.\n\nThanks,\n[Your name]" },
+      { tone: 'Concise Slack',
+        preview: '"[task] → needs approval → due [time] → [link]"',
+        text: "[task] → ready for approval → due [time] → [link]\n\n@[Name] can you sign off?" },
+      { tone: 'Morning brief',
+        preview: '"Good morning — first priority today: [task] needs your sign-off before [time]."',
+        text: "Good morning [Name],\n\nFirst priority for today: [task] needs your sign-off before [time].\n\n[Link attached]\n\nI'll be standing by — let me know as soon as you've reviewed.\n\nThanks,\n[Your name]" },
     ]
   },
   {
@@ -886,6 +976,51 @@ const TEMPLATES = [
       { tone: 'Brief',
         preview: '"Heads up on [task]. Delay: [reason]. New ETA: [time]. On it."',
         text: "[Name] — heads up on [task]. Delay: [reason]. New ETA: [time]. On it.\n\n[Your name]" },
+      { tone: 'Transparent',
+        preview: '"I want to be upfront — [task] is behind and here\'s exactly why."',
+        text: "Hi [Name],\n\nI want to be upfront with you — [task] is running behind schedule. Here's exactly what happened: [reason].\n\nHere's my plan to catch up: [steps]. New ETA: [time].\n\nI'll update you as soon as it's resolved.\n\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"Delay on [task]. Reason: [X]. New ETA: [time]. Flagging now."',
+        text: "[Name] — delay on [task]. Reason: [X]. New ETA: [time]. Flagging so you're aware.\n\n[Your name]" },
+      { tone: 'With options',
+        preview: '"Two ways we could handle this — happy to go with whatever works for you."',
+        text: "Hi [Name],\n\n[Task] is running behind — [reason]. I see two ways we could handle this:\n\nOption A: [action] — delivers by [later date]\nOption B: [action] — delivers by [original date] but [trade-off]\n\nHappy to go with whatever works best for you.\n\n[Your name]" },
+      { tone: 'External hold',
+        preview: '"The delay is on [supplier/external party] — I\'m chasing it now."',
+        text: "Hi [Name],\n\nFlagging a delay on [task] — we're waiting on [supplier/external party] who hasn't delivered [item] yet. Deadline impact: [brief note].\n\nI've already followed up with them and am pushing for [revised date].\n\nI'll let you know as soon as it's resolved.\n\n[Your name]" },
+      { tone: 'Internal dependency',
+        preview: '"[Task] is held up waiting on [approval/input] — I\'m flagging in case you can unblock it."',
+        text: "Hi [Name],\n\n[Task] is currently held up waiting on [approval/content/info] from [person/team]. I've followed up but wanted to flag it in case you can help unblock.\n\nCurrent impact: [minimal/may push deadline].\n\nLet me know if you'd like to step in or if I should keep chasing.\n\n[Your name]" },
+      { tone: 'No impact yet',
+        preview: '"Early flag — this won\'t affect the final deadline if we address it now."',
+        text: "Hi [Name],\n\nEarly flag — [task] has hit a minor snag ([reason]), but it won't affect the final deadline as long as we address it in the next [timeframe].\n\nMy plan: [action].\n\nNo action needed from you right now — just keeping you in the loop.\n\n[Your name]" },
+      { tone: 'Will miss deadline',
+        preview: '"I need to be honest — [task] will not be ready by [date]. Here\'s why and what I\'m doing."',
+        text: "Hi [Name],\n\nI need to be honest with you — [task] will not be ready by the original [date] deadline. [Reason].\n\nMy revised ETA is [new date]. I'm doing [action] to minimise the impact.\n\nI'm sorry for the delay. Let me know how you'd like to handle it.\n\n[Your name]" },
+      { tone: 'Slack',
+        preview: '"Quick heads up — [task] is going to be a bit late. [Reason]. ETA: [time]."',
+        text: "Quick heads up [Name] — [task] is going to be a bit late. [Reason]. New ETA: [time]. I'll send it over as soon as it's ready.\n\n[Your name]" },
+      { tone: 'Positive framing',
+        preview: '"Good progress on [task] — we\'re nearly there, just need [X] more time."',
+        text: "Hi [Name],\n\nGood progress on [task] — nearly there. I just need [X] more time to [reason]. New ETA: [time].\n\nEverything else is on track. I'll have it with you by [time].\n\nThanks for your patience,\n[Your name]" },
+      { tone: 'After the fact',
+        preview: '"I missed the [date] deadline on [task] — here\'s what happened and the current status."',
+        text: "Hi [Name],\n\nI want to flag that I missed the [date] deadline on [task]. [Brief honest reason].\n\nCurrent status: [where it's at]. Expected completion: [new ETA].\n\nI'm sorry for not flagging this sooner. I'll make sure it doesn't happen again.\n\n[Your name]" },
+      { tone: 'Cascading impact',
+        preview: '"This delay may affect [related task] — here\'s my plan to limit the impact."',
+        text: "Hi [Name],\n\nFlagging a delay on [task] — [reason]. Worth noting this may affect [downstream task] if not resolved by [date].\n\nMy plan: [action to limit impact].\n\nWanted to give you full visibility while we can still course-correct.\n\nThanks,\n[Your name]" },
+      { tone: 'Request for help',
+        preview: '"I\'m stuck on [task] — I\'d like your input before I fall further behind."',
+        text: "Hi [Name],\n\nI'm stuck on [task] and wanted to flag it before the delay gets worse. [Brief description of blocker].\n\nI've tried [what you've done]. I'd value your input on the best way to proceed.\n\nThanks,\n[Your name]" },
+      { tone: 'Supplier brief',
+        preview: '"[Supplier] hasn\'t delivered — I\'m escalating and flagging impact on our timeline."',
+        text: "Hi [Name],\n\n[Supplier] hasn't delivered [item] — original deadline was [date]. I've followed up twice with no response.\n\nPotential impact on our timeline: [brief note].\n\nI'm escalating on my end — do you want me to loop you in or continue managing directly?\n\n[Your name]" },
+      { tone: 'Revised plan',
+        preview: '"New plan attached — I\'ve adjusted timelines so everything still lands on track."',
+        text: "Hi [Name],\n\n[Task] has hit a delay — [reason]. I've revised the plan to keep everything on track:\n\n[Updated step 1 — new date]\n[Updated step 2 — new date]\n\nFinal delivery still on target for [date].\n\nLet me know if you'd like to review the revised plan.\n\n[Your name]" },
+      { tone: 'Team update',
+        preview: '"Team heads up — [task] is behind. Here\'s the updated status for everyone."',
+        text: "Team heads up — [task] is running behind schedule. Updated status:\n\n- [What's done]\n- [What's delayed and why]\n- [New ETA]\n\nI'll share the final output as soon as it's ready.\n\n[Your name]" },
     ]
   },
   {
@@ -909,6 +1044,51 @@ const TEMPLATES = [
       { tone: 'Brief',
         preview: '"Issue with [task]: [one sentence]. Fixed/in progress: [action]. Flagging so you\'re aware."',
         text: "[Name] — issue with [task]: [one sentence]. Fixed/in progress: [action]. Flagging so you're aware.\n\n[Your name]" },
+      { tone: 'Already fixed',
+        preview: '"I made a mistake on [task] — I\'ve already fixed it. Here\'s what happened."',
+        text: "Hi [Name],\n\nI made a mistake on [task] — [what happened]. I've already fixed it: [what you did].\n\nThe corrected [file/version] is here: [link].\n\nFlagging so you're aware — apologies for the error.\n\n[Your name]" },
+      { tone: 'Not yet fixed',
+        preview: '"There\'s an issue with [task] that needs your input before I can fix it."',
+        text: "Hi [Name],\n\nThere's an issue with [task] that I need your input on before I can fix it. [What happened].\n\nI've paused [next step] until I hear from you — I don't want to make the wrong call here.\n\nWhat's your recommended approach?\n\n[Your name]" },
+      { tone: 'Public error',
+        preview: '"[Task] went live with an error — I\'m fixing it now and flagging immediately."',
+        text: "Hi [Name],\n\n[Task] went live with an error — [brief description]. I'm fixing it right now: [action].\n\nFlagging immediately so you're across it. ETA for fix: [time].\n\nSorry for the issue — I'll update you as soon as it's resolved.\n\n[Your name]" },
+      { tone: 'Wrong version',
+        preview: '"I sent/published the wrong version of [file] — correct version is ready."',
+        text: "Hi [Name],\n\nI sent [the wrong version / an outdated file] of [task]. [Brief context].\n\nCorrect version is ready here: [link].\n\nI've already [action taken — e.g., recalled the email, updated the page]. Apologies for the confusion.\n\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"Error on [task]: [one line]. Status: [fixed/in progress]. Flagged."',
+        text: "[Name] — error on [task]: [one sentence]. Status: [fixed / in progress]. Let me know if you need anything from me.\n\n[Your name]" },
+      { tone: 'No blame',
+        preview: '"I want to flag something — not pointing fingers, just making sure we fix it."',
+        text: "Hi [Name],\n\nI want to flag something on [task] — not pointing fingers, just want to make sure we address it properly. [What happened].\n\nMy recommended fix: [action].\n\nHappy to take ownership of this — just let me know how to proceed.\n\n[Your name]" },
+      { tone: 'With root cause',
+        preview: '"Here\'s what went wrong and what I\'m doing to make sure it doesn\'t happen again."',
+        text: "Hi [Name],\n\nFlagging a mistake on [task]. What went wrong: [brief explanation]. Root cause: [what caused it].\n\nFix: [action]. Already done? [Yes/in progress].\n\nTo prevent recurrence: [process change you're making].\n\nSorry for the error.\n\n[Your name]" },
+      { tone: 'Low impact',
+        preview: '"Minor issue caught — fixing now. Impact is minimal but wanted you to know."',
+        text: "Hi [Name],\n\nMinor issue caught on [task] — [brief description]. Impact is minimal but I wanted to flag it rather than quietly fix it.\n\nI'm correcting it now and it'll be back on track within [timeframe].\n\nThanks,\n[Your name]" },
+      { tone: 'Collaborative fix',
+        preview: '"I spotted an issue — I think the quickest fix is [X]. Can I go ahead?"',
+        text: "Hi [Name],\n\nI've spotted an issue with [task] — [brief description].\n\nI think the quickest fix is [proposed action]. Can I go ahead with that?\n\nAlternatively, if you'd prefer to handle it differently, let me know.\n\n[Your name]" },
+      { tone: 'After review',
+        preview: '"On reviewing [task] I noticed [issue] — flagging before it causes a problem."',
+        text: "Hi [Name],\n\nOn reviewing [task] I noticed [issue] that could cause a problem down the line. Flagging now before it gets further.\n\nProposed fix: [action].\n\nShould I go ahead or would you like to review first?\n\nThanks,\n[Your name]" },
+      { tone: 'Proactive audit',
+        preview: '"I was double-checking [task] and caught something — good news is it\'s easy to fix."',
+        text: "Hi [Name],\n\nI was doing a final check on [task] and caught something — [brief description]. Good news is it's easy to fix.\n\nI'll [action] and have it corrected by [time].\n\nFlagging so you're across it.\n\nThanks,\n[Your name]" },
+      { tone: 'Slack',
+        preview: '"Hey — spotted an issue on [task]. [One sentence]. Fixing now, will update."',
+        text: "Hey [Name] — spotted an issue on [task]. [One sentence description]. Fixing now, will update you shortly.\n\n[Your name]" },
+      { tone: 'Formal apology',
+        preview: '"I sincerely apologise for the error on [task]. Here is my account and corrective action."',
+        text: "Hi [Name],\n\nI sincerely apologise for the error on [task]. Here is my account:\n\nWhat happened: [factual description]\nImpact: [honest assessment]\nCorrective action: [what you've done or will do]\n\nI take full responsibility and will ensure this doesn't happen again.\n\nKind regards,\n[Your name]" },
+      { tone: 'Team-facing',
+        preview: '"Team — there was an error on [task]. Here\'s the status and what we\'re doing."',
+        text: "Team,\n\nThere was an error on [task] — [brief description]. Here's the current status:\n\n- What happened: [one sentence]\n- Impact: [minimal/moderate/significant]\n- Current fix status: [in progress / resolved]\n- ETA: [time]\n\nI'll update this thread when it's resolved.\n\n[Your name]" },
+      { tone: 'New starter',
+        preview: '"I think I made a mistake and wanted to tell you straight away — here\'s what happened."',
+        text: "Hi [Name],\n\nI think I made a mistake and wanted to tell you straight away rather than try to fix it quietly. [What happened].\n\nI'm not sure of the best way to fix it — could you advise?\n\nSorry for the error.\n\n[Your name]" },
     ]
   },
   {
@@ -932,6 +1112,51 @@ const TEMPLATES = [
       { tone: 'Concise',
         preview: '"Checking in on [topic] from [date]. Any update?"',
         text: "[Name] — checking in on [topic] from [date]. Any update?\n\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"Bump — [topic], sent [date]. Still need [X]."',
+        text: "[Name] — bump on [topic] from [date]. Still need [what you need] to move forward.\n\n[Your name]" },
+      { tone: 'Third follow-up',
+        preview: '"Third and final nudge on [topic] — let me know if this is no longer needed."',
+        text: "Hi [Name],\n\nThird and final nudge on [topic] from [date] — let me know if this is no longer needed or if it's been handled elsewhere.\n\nHappy to close it off on my end if so.\n\nThanks,\n[Your name]" },
+      { tone: 'Slack',
+        preview: '"Hey — just following up on [topic]. Did you get a chance to look?"',
+        text: "Hey [Name] — just following up on [topic] I sent on [date]. Did you get a chance to look? No rush, just didn't want it to get lost!\n\n[Your name]" },
+      { tone: 'With resend',
+        preview: '"Resending this in case it got buried — [topic] from [date]."',
+        text: "Hi [Name],\n\nResending this in case it got buried — re: [topic] from [date].\n\n[Brief summary of what you need]\n\nLet me know if you have any questions.\n\nThanks,\n[Your name]" },
+      { tone: 'Proactive',
+        preview: '"Checking in before the deadline — still waiting on [X] to move [task] forward."',
+        text: "Hi [Name],\n\nChecking in before [deadline/date] — I'm still waiting on [what you need] to move [task] forward.\n\nIf you're blocked or the priorities have shifted, let me know and I'll adjust.\n\nThanks,\n[Your name]" },
+      { tone: 'With deadline context',
+        preview: '"Following up with some urgency — [deadline] is coming up and I need [X]."',
+        text: "Hi [Name],\n\nFollowing up on [topic] from [date] — I want to flag that [deadline] is approaching and I still need [what you need] to proceed.\n\nLet me know if you need anything from my end to help move it along.\n\nThanks,\n[Your name]" },
+      { tone: 'Alternative channel',
+        preview: '"Tried email — following up here in case that\'s easier for you."',
+        text: "Hi [Name],\n\nTried email on [date] — following up here in case Slack/Teams is easier. Re: [topic].\n\nI need [what you need] to proceed. Happy to jump on a quick call if that's faster.\n\n[Your name]" },
+      { tone: 'Understanding',
+        preview: '"I know you\'re busy — just flagging this so [task] stays on track."',
+        text: "Hi [Name],\n\nI know you're busy — just flagging [topic] so [task] stays on track. I sent this on [date] and am still waiting on [what you need].\n\nNo pressure, just didn't want it to get lost in the shuffle.\n\nThanks,\n[Your name]" },
+      { tone: 'With summary',
+        preview: '"Quick recap of what I sent and what I\'m still waiting on."',
+        text: "Hi [Name],\n\nQuick recap of where things stand:\n\n📤 Sent: [what you sent, on what date]\n⏳ Still waiting on: [what you need]\n🎯 Impact: [what's blocked until you get it]\n\nLet me know when you get a chance.\n\nThanks,\n[Your name]" },
+      { tone: 'Close the loop',
+        preview: '"If this has been handled or is no longer needed, just let me know and I\'ll close it."',
+        text: "Hi [Name],\n\nFollowing up on [topic] from [date]. If this has been handled elsewhere or is no longer needed, just let me know and I'll close it off on my end.\n\nOtherwise, still waiting on [what you need].\n\nThanks,\n[Your name]" },
+      { tone: 'Via Monday',
+        preview: '"Updating this card to flag I\'m still waiting on a response — [date sent]."',
+        text: "@[Name] — following up on this. I sent [message/approval request] on [date] and haven't heard back yet.\n\nPlease review and update the status or leave a comment so I can move this forward. Thanks!" },
+      { tone: 'Formal',
+        preview: '"I am writing to follow up on my previous correspondence dated [date]."',
+        text: "Dear [Name],\n\nI am writing to follow up on my previous correspondence dated [date], regarding [topic].\n\nI have not yet received a response and would appreciate your guidance on how to proceed.\n\nPlease let me know at your earliest convenience.\n\nKind regards,\n[Your name]" },
+      { tone: 'New starter',
+        preview: '"I\'m not sure if I\'m following the right process — checking in on [topic]."',
+        text: "Hi [Name],\n\nI'm not sure if I've followed the right process here — checking in on [topic] I sent on [date].\n\nPlease let me know if I need to send it differently or if there's a better way to flag things for your review.\n\nThanks,\n[Your name]" },
+      { tone: 'No blame',
+        preview: '"I\'m sure it just got lost in a busy week — following up on [topic]."',
+        text: "Hi [Name],\n\nI'm sure it just got lost in a busy week — following up on [topic] from [date].\n\nNo urgency, just wanted to make sure it's on your radar.\n\nThanks,\n[Your name]" },
+      { tone: 'Decision needed',
+        preview: '"I need a decision on [topic] to unblock [task] — here are the options."',
+        text: "Hi [Name],\n\nFollowing up on [topic] — I need a decision to unblock [task].\n\nHere are the options:\n- [Option A]\n- [Option B]\n\nHappy with either — just let me know which direction to go.\n\n[Your name]" },
     ]
   },
   {
@@ -955,6 +1180,51 @@ const TEMPLATES = [
       { tone: 'Concise',
         preview: '"Waiting on [item] to move forward on [task]. Any update on timing?"',
         text: "[Name] — waiting on [item] to move forward on [task]. Any update on timing?\n\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"Chasing [item] for [task] — do you have an ETA?"',
+        text: "[Name] — chasing [item] for [task]. Do you have an ETA?\n\n[Your name]" },
+      { tone: 'With deadline',
+        preview: '"Our deadline for [task] is [date] — I need [item] by [date] to stay on track."',
+        text: "Hi [Name],\n\nOur deadline for [task] is [date]. To stay on track, I need [item] from you by [earlier date].\n\nCan you confirm whether that's achievable?\n\nThanks,\n[Your name]" },
+      { tone: 'Friendly',
+        preview: '"Just a gentle nudge — [task] is waiting on [item] from your end!"',
+        text: "Hi [Name],\n\nJust a gentle nudge — [task] is waiting on [item] from your end! No urgency yet, but I wanted to flag it before it becomes one.\n\nLet me know if you need anything from me.\n\nThanks,\n[Your name]" },
+      { tone: 'Slack',
+        preview: '"Hey — still waiting on [item] for [task]. Can you give me an ETA?"',
+        text: "Hey [Name] — still waiting on [item] for [task]. Can you give me an ETA? Don't want it to hold things up!\n\n[Your name]" },
+      { tone: 'With impact',
+        preview: '"Without [item], [next step] can\'t proceed — flagging before it hits the deadline."',
+        text: "Hi [Name],\n\nFlagging that [task] can't proceed until I receive [item] from you. Without it, [next step] is blocked.\n\nDeadline impact: [minimal/could push timeline].\n\nCan you give me an ETA so I can plan accordingly?\n\nThanks,\n[Your name]" },
+      { tone: 'Upstream dependency',
+        preview: '"[Person] needs [item] from me, which I can\'t provide until I have [X] from you."',
+        text: "Hi [Name],\n\nJust a heads up — [downstream person/team] needs [item] from me by [date], and I can't provide it until I have [what you need] from you.\n\nCould you share [X] by [earlier date] so I can keep things moving?\n\nThanks,\n[Your name]" },
+      { tone: 'Via Monday',
+        preview: '"@[Name] — this card is blocked waiting on [item]. Can you update with an ETA?"',
+        text: "@[Name] — this task is currently blocked waiting on [item]. Can you update this card with an ETA or leave a comment?\n\nI don't want to miss the [date] deadline." },
+      { tone: 'Offer to help',
+        preview: '"If there\'s something I can do to speed this along, I\'m happy to help."',
+        text: "Hi [Name],\n\nI'm following up on [item] for [task] — still blocked without it. If there's something I can do on my end to speed this along, I'm happy to help.\n\nOtherwise, just an ETA would be great.\n\nThanks,\n[Your name]" },
+      { tone: 'Second chase',
+        preview: '"Second follow-up on [item] — if it\'s held up, please let me know so I can flag the delay."',
+        text: "Hi [Name],\n\nSecond follow-up on [item] for [task]. If there's something holding it up, please let me know so I can flag the potential delay to [Marketing Lead].\n\nI'd rather flag early than miss the deadline.\n\nThanks,\n[Your name]" },
+      { tone: 'Formal',
+        preview: '"I am writing to request an update on the status of [item], required for [task]."',
+        text: "Dear [Name],\n\nI am writing to request an update on the status of [item], which is required for [task] with a deadline of [date].\n\nCould you please advise when I can expect to receive it?\n\nKind regards,\n[Your name]" },
+      { tone: 'List of needs',
+        preview: '"Here\'s everything I still need from you to wrap up [task]."',
+        text: "Hi [Name],\n\nHere's everything I still need from you to wrap up [task]:\n\n1. [Item 1] — needed by [date]\n2. [Item 2] — needed by [date]\n3. [Item 3 if applicable]\n\nHappy to jump on a call if it's easier to run through these together.\n\nThanks,\n[Your name]" },
+      { tone: 'With alternatives',
+        preview: '"If [item] isn\'t available, I can work with [alternative] as a stopgap."',
+        text: "Hi [Name],\n\nStill waiting on [item] for [task]. If it's not available yet, I can work with [alternative] as a stopgap to keep things moving.\n\nJust let me know which works for you.\n\nThanks,\n[Your name]" },
+      { tone: 'Polite escalation',
+        preview: '"I\'ve reached out a couple of times — would it help if [lead] followed up directly?"',
+        text: "Hi [Name],\n\nI've reached out a couple of times about [item] for [task] without a response — I just want to make sure it hasn't been missed.\n\nWould it help if [Marketing Lead/your manager] reached out directly to move it along?\n\nLet me know how you'd like to handle it.\n\nThanks,\n[Your name]" },
+      { tone: 'Brief status update',
+        preview: '"Quick status: [task] is [X]% done. Still blocked on [item]."',
+        text: "Hi [Name],\n\nQuick status update on [task]: [X]% complete.\n\nCurrently blocked on [item] from you. Once I have that, I can have the final output ready by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Gracious',
+        preview: '"I appreciate you\'re busy — just flagging [item] when you get a moment."',
+        text: "Hi [Name],\n\nI appreciate you're busy — just flagging [item] when you get a moment. I need it to complete [task] and the deadline is [date].\n\nNo rush before then, just wanted it on your radar.\n\nThanks,\n[Your name]" },
     ]
   },
   {
@@ -978,6 +1248,51 @@ const TEMPLATES = [
       { tone: 'Concise',
         preview: '"[Task 1] done, [task 2] done. [Task 3] in progress. Waiting on [item]."',
         text: "EOW — [task 1] done, [task 2] done. [Task 3] in progress, on track for [date]. Waiting on [item] from [person].\n\n[Your name]" },
+      { tone: 'Wins-focused',
+        preview: '"Big wins this week: [highlights]. Everything else on track."',
+        text: "Hi [Name],\n\nBig wins this week:\n- [Win 1]\n- [Win 2]\n\nEverything else on track:\n- [Task] — [status]\n\nWaiting on: [item] from [person]\n\nHave a good weekend!\n\n[Your name]" },
+      { tone: 'New starter',
+        preview: '"Week [X] wrap — here\'s what I worked on. Would love your feedback."',
+        text: "Hi [Name],\n\nWeek [X] wrap:\n\nWhat I worked on:\n- [Task 1] — [status/outcome]\n- [Task 2] — [status/outcome]\n\nQuestions / areas I'd like feedback on:\n- [Question 1]\n\nAnything I should be prioritising differently next week?\n\nThanks and have a great weekend,\n[Your name]" },
+      { tone: 'Minimal Slack',
+        preview: '"EOW: [task 1] ✓ [task 2] ✓ [task 3] in progress. Have a good one!"',
+        text: "EOW: [task 1] ✓ [task 2] ✓ [task 3] in progress (due [date]) — [item] waiting on [person]. Have a good weekend!\n\n[Your name]" },
+      { tone: 'With context',
+        preview: '"Here\'s what I delivered, what I learned, and what\'s up next week."',
+        text: "Hi [Name],\n\nEnd-of-week summary:\n\nDelivered:\n- [Task 1]\n- [Task 2]\n\nNoteworthy: [something you learned or improved]\n\nCarrying forward:\n- [Task] — ETA [date]\n\nNext week priority: [task]\n\nHave a great weekend,\n[Your name]" },
+      { tone: 'Challenges',
+        preview: '"Good week overall, though I want to flag [challenge] — here\'s how I\'m handling it."',
+        text: "Hi [Name],\n\nGood week overall.\n\nCompleted: [task 1], [task 2]\nIn progress: [task] — on track\n\nWant to flag: [challenge or blocker]. My plan: [action].\n\nAnything you'd like me to handle differently?\n\nHave a great weekend,\n[Your name]" },
+      { tone: 'Numbers',
+        preview: '"This week: [X] tasks completed, [X] in progress, [X] hrs logged."',
+        text: "Hi [Name],\n\nThis week:\n- [X] tasks completed\n- [X] tasks in progress\n- [X] hours logged\n\nKey deliverables: [task 1], [task 2]\nWaiting on: [item] from [person]\nNext week focus: [priority]\n\nHave a good weekend,\n[Your name]" },
+      { tone: 'Proactive',
+        preview: '"Before you sign off — here\'s my status and anything that needs your attention."',
+        text: "Hi [Name],\n\nBefore you sign off for the week — here's my status:\n\nCompleted: [tasks]\nIn progress: [tasks]\n\nNeeds your attention next week:\n- [Item 1]\n- [Item 2]\n\nHave a great weekend!\n\n[Your name]" },
+      { tone: 'Acknowledgements',
+        preview: '"Thanks for your help with [X] this week — here\'s a recap of the week."',
+        text: "Hi [Name],\n\nThanks for your help with [item] this week — it made a real difference.\n\nWeek recap:\nCompleted: [task 1], [task 2]\nIn progress: [task] — ETA [date]\nWaiting on: [item]\n\nHave a great weekend,\n[Your name]" },
+      { tone: 'Quiet week',
+        preview: '"Quieter week — here\'s what I focused on and how I used the time."',
+        text: "Hi [Name],\n\nQuieter week — here's what I focused on:\n\n- [Task 1] — [outcome]\n- [Task 2] — [outcome]\n- Used the extra time to [proactive thing, e.g., update trackers, tidy shared folders, review templates]\n\nAvailable next week for anything you'd like to push forward.\n\nHave a good weekend,\n[Your name]" },
+      { tone: 'Busy week',
+        preview: '"Big week — here\'s everything I moved forward."',
+        text: "Hi [Name],\n\nBig week — here's everything I moved forward:\n\n✓ [Task 1]\n✓ [Task 2]\n✓ [Task 3]\n✓ [Task 4]\n\nStill in progress: [task] (on track)\nWaiting on: [item]\n\nHave a great weekend — I need one!\n\n[Your name]" },
+      { tone: 'Team channel',
+        preview: '"Team EOW: here\'s the collective status across [project/area]."',
+        text: "Team EOW — [area/project] status:\n\n✓ Completed this week: [tasks]\n🔄 In progress: [tasks + ETAs]\n⏳ Waiting on: [items from whom]\n🎯 Priority next week: [task]\n\nHave a great weekend everyone!\n\n[Your name]" },
+      { tone: 'Forward-looking',
+        preview: '"Wrapping up — here\'s what I\'m setting up for a strong start next week."',
+        text: "Hi [Name],\n\nWrapping up for the week.\n\nThis week: [task 1] ✓ [task 2] ✓\nIn progress: [task] — resuming Monday\nWaiting on: [item]\n\nReady for next week:\n- [Prepared item 1]\n- [Prepared item 2]\n\nHave a great weekend!\n\n[Your name]" },
+      { tone: 'With questions',
+        preview: '"EOW wrap + two quick questions for when you\'re back on Monday."',
+        text: "Hi [Name],\n\nEOW wrap:\nCompleted: [task 1], [task 2]\nIn progress: [task] — on track\n\nTwo quick questions for Monday:\n1. [Question 1]\n2. [Question 2]\n\nHave a great weekend!\n\n[Your name]" },
+      { tone: 'Simple paragraph',
+        preview: '"Short and sweet — here\'s the week in a paragraph."',
+        text: "Hi [Name],\n\nQuick EOW — completed [task 1] and [task 2] this week. [Task 3] is in progress and on track for [date]. Still waiting on [item] from [person] but nothing blocking for now. Have a great weekend!\n\n[Your name]" },
+      { tone: 'Metrics week',
+        preview: '"Campaign week: [sends], [open rate], [clicks]. Full report attached."',
+        text: "Hi [Name],\n\nEOW — campaign week summary:\n\n- Emails sent: [X]\n- Open rate: [X]%\n- Click rate: [X]%\n- Unsubscribes: [X]\n\nFull report: [link]\n\nNext week: [campaign/task].\n\nHave a great weekend,\n[Your name]" },
     ]
   },
   {
@@ -1001,6 +1316,51 @@ const TEMPLATES = [
       { tone: 'Concise',
         preview: '"[Job name] brief attached. Need [deliverable] in [format] by [date]. Confirm?"',
         text: "[Supplier] — [job name] brief attached. Need [deliverable] in [format] by [date]. Please confirm receipt.\n\n[Your name]" },
+      { tone: 'First time',
+        preview: '"This is our first time working together — here\'s everything you need to know."',
+        text: "Hi [Supplier],\n\nThis is our first time working together — welcome! Brief for [job name] is attached along with our brand guidelines.\n\nKey details:\n- Deliverable: [what]\n- Format/specs: [details]\n- Deadline: [date]\n\nPlease confirm receipt, flag any questions, and let me know if you can meet the deadline.\n\nLooking forward to working with you,\n[Your name]" },
+      { tone: 'Rush job',
+        preview: '"Apologies for the short turnaround — urgent brief attached. Can you deliver by [date]?"',
+        text: "Hi [Supplier],\n\nApologies for the short turnaround — we have an urgent requirement.\n\nBrief attached. Can you deliver [deliverable] by [date]?\n\nPlease confirm ASAP so we can make alternative arrangements if needed.\n\nThanks,\n[Your name]" },
+      { tone: 'With checklist',
+        preview: '"Brief attached. Delivery checklist: format ☐ resolution ☐ deadline ☐ bleed ☐"',
+        text: "Hi [Supplier],\n\nBrief for [job name] attached. Please ensure delivery meets the following:\n\n☐ Format: [format]\n☐ Resolution: [resolution]\n☐ Bleed/margins: [if applicable]\n☐ Deadline: [date]\n☐ File naming: [convention]\n\nPlease confirm you can deliver to spec.\n\nThanks,\n[Your name]" },
+      { tone: 'Multiple deliverables',
+        preview: '"Brief covers [X] deliverables — specs and deadlines differ per item."',
+        text: "Hi [Supplier],\n\nBrief for [project name] attached — this covers [X] deliverables:\n\n1. [Deliverable 1] — [specs] — due [date]\n2. [Deliverable 2] — [specs] — due [date]\n3. [Deliverable 3] — [specs] — due [date]\n\nPlease confirm receipt and whether you can meet all deadlines.\n\nThanks,\n[Your name]" },
+      { tone: 'Revision round',
+        preview: '"Following last week\'s feedback — here\'s the updated brief with the changes noted."',
+        text: "Hi [Supplier],\n\nFollowing our last delivery, I'm sending an updated brief for the next round. Changes from the previous version are highlighted in the document.\n\nDeadline for revised output: [date].\n\nPlease confirm receipt.\n\nThanks,\n[Your name]" },
+      { tone: 'With brand guide',
+        preview: '"Brief + brand guidelines attached — please read both before starting."',
+        text: "Hi [Supplier],\n\nBrief for [job name] attached, along with our brand guidelines.\n\nPlease read both before starting — the guidelines cover logo usage, colour palette, and font specifications that must be followed exactly.\n\nDeadline: [date]. Please confirm receipt.\n\nThanks,\n[Your name]" },
+      { tone: 'On behalf of',
+        preview: '"Sending this on behalf of [Marketing Lead] — please direct any questions to me."',
+        text: "Hi [Supplier],\n\nI'm reaching out on behalf of [Marketing Lead/Company] with the brief for [job name]. [Brief/file attached].\n\nI'll be your point of contact for this project — please direct any questions to me rather than [Marketing Lead] directly.\n\nDeadline: [date]. Please confirm receipt.\n\nThanks,\n[Your name]" },
+      { tone: 'After a call',
+        preview: '"As discussed on our call — brief is now attached with the agreed specs."',
+        text: "Hi [Supplier],\n\nAs discussed on our call today — brief for [job name] is now attached with the agreed specs.\n\nJust to confirm what we covered:\n- [Point 1]\n- [Point 2]\n\nDeadline: [date]. Please confirm receipt.\n\nThanks,\n[Your name]" },
+      { tone: 'With approval reference',
+        preview: '"This brief has been internally approved — please proceed as outlined."',
+        text: "Hi [Supplier],\n\nBrief for [job name] attached — this has been internally approved and you can proceed as outlined.\n\nKey specs: [details]\nDeadline: [date]\n\nPlease confirm receipt and delivery timeframe.\n\nThanks,\n[Your name]" },
+      { tone: 'Closing confirmation',
+        preview: '"Please reply confirming: receipt, ability to deliver, and your key contact for this job."',
+        text: "Hi [Supplier],\n\nBrief for [job name] attached.\n\nPlease reply confirming:\n1. Receipt of this brief\n2. Ability to deliver by [date]\n3. Your key contact for this job\n\nOnce confirmed, we'll consider this project underway.\n\nThanks,\n[Your name]" },
+      { tone: 'Ongoing supplier',
+        preview: '"Monthly [job type] brief attached — same process as always."',
+        text: "Hi [Supplier],\n\n[Month] [job type] brief attached — same process as always.\n\nThis month's changes: [brief note on what's different]\n\nDeadline: [date]. Please confirm receipt.\n\nThanks,\n[Your name]" },
+      { tone: 'Print job',
+        preview: '"Print brief attached — please note bleed, colour mode, and file spec requirements."',
+        text: "Hi [Supplier],\n\nPrint brief for [job name] attached.\n\nKey print specs:\n- Dimensions: [W x H mm]\n- Bleed: 3mm all sides\n- Colour mode: CMYK\n- Resolution: 300 DPI minimum\n- File format: PDF/X-1a\n\nDeadline for print-ready file: [date]. Delivery date: [date].\n\nPlease confirm receipt and feasibility.\n\nThanks,\n[Your name]" },
+      { tone: 'Digital job',
+        preview: '"Digital brief attached — please confirm output specs before starting."',
+        text: "Hi [Supplier],\n\nDigital brief for [job name] attached.\n\nKey digital specs:\n- Dimensions: [px]\n- Format: [JPG/PNG/GIF/MP4]\n- Max file size: [size]\n- Colour mode: RGB\n\nDeadline: [date].\n\nPlease confirm you can deliver to these specs.\n\nThanks,\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"[Job name] — brief attached. Deadline [date]. Any issues, call me."',
+        text: "[Supplier] — [job name] brief attached. Deadline [date]. Any issues, contact me directly at [phone/email].\n\n[Your name]" },
+      { tone: 'Post-quote',
+        preview: '"Your quote has been approved — we\'re ready to proceed. Brief attached."',
+        text: "Hi [Supplier],\n\nGood news — your quote for [job name] has been approved internally. We're ready to proceed.\n\nFull brief attached. Please review and confirm your start date.\n\nDeadline for delivery: [date].\n\nThanks,\n[Your name]" },
     ]
   },
   {
@@ -1024,32 +1384,122 @@ const TEMPLATES = [
       { tone: 'Collaborative',
         preview: '"Thanks for getting this over — just a couple of tweaks and we\'re good to go."',
         text: "Hi [Supplier],\n\nThanks for getting [deliverable] over. A couple of things to tweak before we're good to go:\n\n- [Issue 1]\n- [Issue 2]\n\nNot major — just need those fixed. Can you turn it around by [date]?\n\nThanks,\n[Your name]" },
+      { tone: 'Annotated file',
+        preview: '"I\'ve added annotations to the file — please open and address each comment."',
+        text: "Hi [Supplier],\n\nThank you for [deliverable]. I've reviewed it and added annotations to the file with specific feedback: [link].\n\nPlease open and address each comment, then resend by [date].\n\nLet me know if anything is unclear.\n\nThanks,\n[Your name]" },
+      { tone: 'Wrong version',
+        preview: '"It looks like you sent [old/wrong version] — please resend using [correct file]."',
+        text: "Hi [Supplier],\n\nIt looks like [deliverable] was created from [wrong/outdated file] rather than the current approved template. Could you please redo this using [correct file/template — link]?\n\nRevised deadline: [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Brand issue',
+        preview: '"There are brand compliance issues that must be fixed before we can approve this."',
+        text: "Hi [Supplier],\n\nThank you for [deliverable]. Before we can approve, there are brand compliance issues that need to be addressed:\n\n- [Issue 1 — e.g., wrong logo version]\n- [Issue 2 — e.g., incorrect colour]\n- [Issue 3 — e.g., missing disclaimer]\n\nPlease refer to the brand guidelines [link] and resend by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Minor tweaks',
+        preview: '"Almost there — just two small changes and we\'re done."',
+        text: "Hi [Supplier],\n\nAlmost there — just two small changes and we're done:\n\n1. [Change 1 — be specific]\n2. [Change 2 — be specific]\n\nPlease resend when done. No major revision needed — just those two fixes.\n\nThanks,\n[Your name]" },
+      { tone: 'Copy error',
+        preview: '"There\'s a copy error on [page/section] — the text should read: [correct copy]."',
+        text: "Hi [Supplier],\n\nThere's a copy error in [deliverable].\n\nCurrent text: \"[incorrect text]\"\nCorrect text: \"[correct text as per approved brief]\"\n\nPlease correct and resend by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Missed spec',
+        preview: '"The file doesn\'t meet the [format/size/colour] spec outlined in the brief."',
+        text: "Hi [Supplier],\n\nThe [deliverable] doesn't meet the spec outlined in the brief:\n\nRequired: [spec]\nReceived: [what was delivered]\n\nPlease resubmit to the correct spec by [date]. Brief is attached for reference.\n\nThanks,\n[Your name]" },
+      { tone: 'Positive then issue',
+        preview: '"The overall design is great — just a few compliance points before we can sign off."',
+        text: "Hi [Supplier],\n\nThe overall design for [deliverable] is looking great. Before we can sign off, there are a few compliance points to address:\n\n- [Issue 1]\n- [Issue 2]\n\nThese are mandatory — can't be waived. Please update and resend by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Second round',
+        preview: '"Thanks for the revision — still a few outstanding issues from my previous feedback."',
+        text: "Hi [Supplier],\n\nThank you for the revised [deliverable]. Still a few outstanding issues from my previous feedback:\n\n- [Issue still present]\n- [Issue still present]\n\nCould you please address these and resend by [date]?\n\nThanks,\n[Your name]" },
+      { tone: 'With examples',
+        preview: '"Please see the reference image I\'ve attached showing exactly what I\'m looking for."',
+        text: "Hi [Supplier],\n\nThank you for [deliverable]. I've attached a reference image showing the specific look we're going for on [element].\n\nChanges needed:\n- [Issue] — see attached reference for guidance\n\nPlease revise and resend by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Urgent revision',
+        preview: '"We need this corrected today — the error is visible to [clients/public]."',
+        text: "Hi [Supplier],\n\nUrgent — [deliverable] has an error that needs to be corrected today:\n\n- [Error — be specific]\n\nThis is [visible to clients / going to print / due to go live] and needs to be fixed before [time].\n\nPlease prioritise and resend ASAP.\n\n[Your name]" },
+      { tone: 'One item only',
+        preview: '"One change — [specific item]. Everything else is approved."',
+        text: "Hi [Supplier],\n\nOne change needed on [deliverable]:\n\n- [Specific change]\n\nEverything else is approved. Please resend with just this fix by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'Numbered list',
+        preview: '"Feedback numbered for easy reference — please address each point in order."',
+        text: "Hi [Supplier],\n\nFeedback on [deliverable] — numbered for easy reference:\n\n1. [Issue — page/section, what's wrong, what's needed]\n2. [Issue — page/section, what's wrong, what's needed]\n3. [Issue — page/section, what's wrong, what's needed]\n\nPlease address all points and confirm once done. Revised version needed by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'With table',
+        preview: '"Feedback in table format — column: issue, location, required fix."',
+        text: "Hi [Supplier],\n\nFeedback on [deliverable] in table format:\n\nIssue | Location | Required fix\n[Issue 1] | [p.1 / section] | [specific fix]\n[Issue 2] | [p.2 / section] | [specific fix]\n[Issue 3] | [p.3 / section] | [specific fix]\n\nPlease address all items and resend by [date].\n\nThanks,\n[Your name]" },
+      { tone: 'No more rounds',
+        preview: '"Please address all feedback thoroughly — we don\'t have budget for more rounds."',
+        text: "Hi [Supplier],\n\nFeedback on [deliverable]:\n\n- [Issue 1]\n- [Issue 2]\n- [Issue 3]\n\nPlease address all feedback thoroughly in this round — we don't have capacity for additional revision rounds beyond this.\n\nRevised version needed by [date]. Please review carefully before sending.\n\nThanks,\n[Your name]" },
+      { tone: 'Minimal',
+        preview: '"[Issue]. Please fix and resend by [date]. Thanks."',
+        text: "[Supplier] — [specific issue with deliverable]. Please fix and resend by [date].\n\n[Your name]" },
     ]
   },
 ];
 
-// ── TEMPLATE RENDERING ──────────────────────────────────────────
+// ── TEMPLATE RENDERING — SHUFFLE ────────────────────────────────
+const CARD_DISPLAY = {};
+
+function getRandomIndices(total, count) {
+  const indices = Array.from({ length: total }, (_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices.slice(0, count);
+}
+
+function renderVariants(tplId, indices) {
+  const tpl = TEMPLATES.find(t => t.id === tplId);
+  if (!tpl) return '';
+  return indices.map(i => {
+    const v = tpl.variants[i];
+    return `<div class="tpl-variant">
+      <div class="tpl-variant-left">
+        <span class="tpl-variant-tone">${v.tone}</span>
+        <div class="tpl-variant-preview">${v.preview}</div>
+      </div>
+      <button class="tpl-variant-btn" onclick="copyVariant(this,'${tplId}',${i})">Copy</button>
+    </div>`;
+  }).join('');
+}
+
+function shuffleCard(tplId) {
+  const tpl = TEMPLATES.find(t => t.id === tplId);
+  if (!tpl) return;
+  const display = 5;
+  let newIdx;
+  const current = CARD_DISPLAY[tplId] || [];
+  let attempts = 0;
+  do {
+    newIdx = getRandomIndices(tpl.variants.length, display);
+    attempts++;
+  } while (attempts < 8 && JSON.stringify(newIdx.sort((a,b)=>a-b)) === JSON.stringify([...current].sort((a,b)=>a-b)));
+  CARD_DISPLAY[tplId] = newIdx;
+  const container = document.getElementById('tpl-variants-' + tplId);
+  if (container) container.innerHTML = renderVariants(tplId, newIdx);
+}
+
 function renderTemplates() {
   const grid = document.getElementById('tpl-grid');
   if (!grid) return;
-  grid.innerHTML = TEMPLATES.map(tpl => `
-    <div class="tpl-card">
+  grid.innerHTML = TEMPLATES.map(tpl => {
+    if (!CARD_DISPLAY[tpl.id]) {
+      CARD_DISPLAY[tpl.id] = getRandomIndices(tpl.variants.length, Math.min(5, tpl.variants.length));
+    }
+    const idx = CARD_DISPLAY[tpl.id];
+    return `<div class="tpl-card">
       <div class="tpl-card-header">
         <span class="tpl-cat-badge" style="${tpl.badgeStyle}">${tpl.badge}</span>
         <div class="tpl-card-title">${tpl.title}</div>
         <div class="tpl-card-sub">${tpl.sub}</div>
       </div>
-      <div class="tpl-variants">
-        ${tpl.variants.map((v, i) => `
-          <div class="tpl-variant">
-            <div class="tpl-variant-left">
-              <span class="tpl-variant-tone">${v.tone}</span>
-              <div class="tpl-variant-preview">${v.preview}</div>
-            </div>
-            <button class="tpl-variant-btn" onclick="copyVariant(this,'${tpl.id}',${i})">Copy</button>
-          </div>`).join('')}
+      <div class="tpl-variants" id="tpl-variants-${tpl.id}">${renderVariants(tpl.id, idx)}</div>
+      <div class="tpl-card-footer">
+        <span class="tpl-count-label">Showing 5 of ${tpl.variants.length}</span>
+        <button class="tpl-shuffle-btn" onclick="shuffleCard('${tpl.id}')">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><path d="M2 5h8l-2-2m0 4l2-2"/><path d="M12 9H4l2 2m0-4l-2 2"/></svg>
+          Shuffle
+        </button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function copyVariant(btn, tplId, variantIdx) {
@@ -1196,6 +1646,7 @@ function generateTaskPlan(formData) {
     guideSteps: map.guideSteps,
     templateIds: map.templateIds,
     checkState: {},
+    addedToTimesheet: false,
   };
 
   const tasks = loadTasks();
@@ -1258,6 +1709,42 @@ function updateTaskProgress(taskId) {
   if (saved) {
     const map = TASK_TYPE_MAP[task.type];
     saved.textContent = (map?.label || task.type) + ' · Due ' + formatDeadline(task.deadline) + ' · ' + done + '/' + total + ' done';
+  }
+}
+
+function addToTimesheet(taskId) {
+  const tasks = loadTasks();
+  const task  = tasks[taskId];
+  if (!task || task.addedToTimesheet) return;
+
+  // Create a timesheet entry on today's date
+  const now = new Date();
+  const key = tsDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  const ts  = loadTimesheet();
+  if (!ts[key]) ts[key] = [];
+  const map = TASK_TYPE_MAP[task.type];
+  ts[key].push({
+    title:    task.name,
+    category: (['event_setup','post_event'].includes(task.type) ? 'events' :
+               ['email_campaign','website_content'].includes(task.type) ? 'campaign' :
+               ['indesign_collateral'].includes(task.type) ? 'design' :
+               ['supplier_brief'].includes(task.type) ? 'admin' : 'admin'),
+    minutes:  0,
+    notes:    (map?.label || task.type) + (task.deadline ? ' · Due ' + task.deadline : ''),
+  });
+  saveTimesheet(ts);
+
+  // Mark task as added
+  task.addedToTimesheet = true;
+  tasks[taskId] = task;
+  saveTasks(tasks);
+
+  // Update button in DOM
+  const btn = document.getElementById('ts-add-btn-' + taskId);
+  if (btn) {
+    btn.textContent = '✓ Added to Timesheet';
+    btn.classList.add('added');
+    btn.disabled = true;
   }
 }
 
@@ -1386,7 +1873,14 @@ function renderTaskDetail(taskId) {
         <div class="task-gen-title-row">
           <span class="priority-badge ${task.priority}">${task.priority}</span>
           <div class="task-gen-name">${task.name}</div>
-          <button class="btn-reset" onclick="closeTaskDetail()" style="margin-left:auto;margin-top:0">← Back</button>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+            <button id="ts-add-btn-${task.id}" class="btn-add-timesheet${task.addedToTimesheet ? ' added' : ''}"
+              onclick="addToTimesheet('${task.id}')" ${task.addedToTimesheet ? 'disabled' : ''}>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="8" y1="11" x2="8" y2="14" /><line x1="6.5" y1="12.5" x2="9.5" y2="12.5"/></svg>
+              ${task.addedToTimesheet ? '✓ Added to Timesheet' : 'Add to Timesheet'}
+            </button>
+            <button class="btn-reset" onclick="closeTaskDetail()" style="margin-top:0">← Back</button>
+          </div>
         </div>
         <div class="task-gen-meta">${map?.label || task.type} · Due ${formatDeadline(task.deadline)}</div>
         ${task.details ? `<div class="task-gen-details">${task.details}</div>` : ''}

@@ -325,31 +325,33 @@
           <div class="progress-bar"><div class="progress-fill" id="bar-daily" style="width:0%"></div></div>
         </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 1a7 7 0 100 14A7 7 0 008 1z"/><polyline points="8,4 8,8 11,10"/></svg></div>
-            <span class="sh-title">Morning routine — first 30 min</span>
-            <span class="sh-count" id="count-morning">0/5</span>
+        <div class="section-grid">
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 1a7 7 0 100 14A7 7 0 008 1z"/><polyline points="8,4 8,8 11,10"/></svg></div>
+              <span class="sh-title">Morning routine — first 30 min</span>
+              <span class="sh-count" id="count-morning">0/5</span>
+            </div>
+            <div id="list-morning"></div>
           </div>
-          <div id="list-morning"></div>
-        </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg></div>
-            <span class="sh-title">Core daily tasks</span>
-            <span class="sh-count" id="count-core">0/5</span>
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg></div>
+              <span class="sh-title">Core daily tasks</span>
+              <span class="sh-count" id="count-core">0/5</span>
+            </div>
+            <div id="list-core"></div>
           </div>
-          <div id="list-core"></div>
-        </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 14s-6-3-6-8a6 6 0 0112 0c0 5-6 8-6 8z"/></svg></div>
-            <span class="sh-title">End-of-day wrap</span>
-            <span class="sh-count" id="count-eod">0/4</span>
+          <div class="section-block section-grid-span2">
+            <div class="section-block-header">
+              <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 14s-6-3-6-8a6 6 0 0112 0c0 5-6 8-6 8z"/></svg></div>
+              <span class="sh-title">End-of-day wrap</span>
+              <span class="sh-count" id="count-eod">0/4</span>
+            </div>
+            <div id="list-eod"></div>
           </div>
-          <div id="list-eod"></div>
         </div>
 
         <button class="btn-reset" onclick="resetDaily()">
@@ -365,28 +367,30 @@
           <p>You execute, not decide. Every campaign action requires prior written approval from the Marketing Lead. Flawless execution and proactive status communication is your job.</p>
         </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div>
-            <span class="sh-title">Email campaign — 6-phase execution flow</span>
+        <div class="section-grid">
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div>
+              <span class="sh-title">Email campaign — 6-phase execution flow</span>
+            </div>
+            <div class="phase-list">
+              <div class="phase-row"><div class="phase-num">1</div><div><div class="phase-title">Receive approved brief + content</div><div class="phase-desc">Never start without written approval. Confirm: subject line, sender name, send time, list segment.</div></div></div>
+              <div class="phase-row"><div class="phase-num">2</div><div><div class="phase-title">Build list in CRM / email platform</div><div class="phase-desc">Upload contacts, apply segmentation. Check compliance — consent, opt-outs, financial services rules.</div></div></div>
+              <div class="phase-row"><div class="phase-num">3</div><div><div class="phase-title">Set up email using approved template</div><div class="phase-desc">Apply correct logo, disclaimer, formatting. No off-template design decisions.</div></div></div>
+              <div class="phase-row"><div class="phase-num">4</div><div><div class="phase-title">Send test + QC checklist <span class="ci-badge critical">always</span></div><div class="phase-desc">Broken links? Correct sender? Disclaimer visible? Rendering on mobile?</div></div></div>
+              <div class="phase-row"><div class="phase-num">5</div><div><div class="phase-title">Get final sign-off before scheduling</div><div class="phase-desc">Document approval (email or shared doc). Only then schedule.</div></div></div>
+              <div class="phase-row"><div class="phase-num">6</div><div><div class="phase-title">Post-send: pull performance report</div><div class="phase-desc">Open rate, clicks, bounces, unsubscribes. Add to tracker. Brief Marketing Lead on results.</div></div></div>
+            </div>
           </div>
-          <div class="phase-list">
-            <div class="phase-row"><div class="phase-num">1</div><div><div class="phase-title">Receive approved brief + content</div><div class="phase-desc">Never start without written approval. Confirm: subject line, sender name, send time, list segment.</div></div></div>
-            <div class="phase-row"><div class="phase-num">2</div><div><div class="phase-title">Build list in CRM / email platform</div><div class="phase-desc">Upload contacts, apply segmentation. Check compliance — consent, opt-outs, financial services rules.</div></div></div>
-            <div class="phase-row"><div class="phase-num">3</div><div><div class="phase-title">Set up email using approved template</div><div class="phase-desc">Apply correct logo, disclaimer, formatting. No off-template design decisions.</div></div></div>
-            <div class="phase-row"><div class="phase-num">4</div><div><div class="phase-title">Send test + QC checklist <span class="ci-badge critical">always</span></div><div class="phase-desc">Broken links? Correct sender? Disclaimer visible? Rendering on mobile?</div></div></div>
-            <div class="phase-row"><div class="phase-num">5</div><div><div class="phase-title">Get final sign-off before scheduling</div><div class="phase-desc">Document approval (email or shared doc). Only then schedule.</div></div></div>
-            <div class="phase-row"><div class="phase-num">6</div><div><div class="phase-title">Post-send: pull performance report</div><div class="phase-desc">Open rate, clicks, bounces, unsubscribes. Add to tracker. Brief Marketing Lead on results.</div></div></div>
-          </div>
-        </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h8l2 3-6 9-6-9z"/><line x1="8" y1="5" x2="8" y2="14"/><line x1="4" y1="5" x2="12" y2="5"/></svg></div>
-            <span class="sh-title">Collateral production checklist</span>
-            <span class="sh-count" id="count-collateral">0/6</span>
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h8l2 3-6 9-6-9z"/><line x1="8" y1="5" x2="8" y2="14"/><line x1="4" y1="5" x2="12" y2="5"/></svg></div>
+              <span class="sh-title">Collateral production checklist</span>
+              <span class="sh-count" id="count-collateral">0/6</span>
+            </div>
+            <div id="list-collateral"></div>
           </div>
-          <div id="list-collateral"></div>
         </div>
       </div>
 
@@ -397,31 +401,33 @@
           <p>Wrong name on a badge, missed RSVP, wrong room — small errors reflect directly on the brand in front of clients. Over-communicate and over-prepare.</p>
         </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg></div>
-            <span class="sh-title">Event setup</span>
-            <span class="sh-count" id="count-evsetup">0/6</span>
+        <div class="section-grid">
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg></div>
+              <span class="sh-title">Event setup</span>
+              <span class="sh-count" id="count-evsetup">0/6</span>
+            </div>
+            <div id="list-ev-setup"></div>
           </div>
-          <div id="list-ev-setup"></div>
-        </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="2" width="10" height="13" rx="1"/><line x1="6" y1="6" x2="10" y2="6"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="8" y2="12"/></svg></div>
-            <span class="sh-title">Pre-event materials</span>
-            <span class="sh-count" id="count-evmat">0/4</span>
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="2" width="10" height="13" rx="1"/><line x1="6" y1="6" x2="10" y2="6"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="8" y2="12"/></svg></div>
+              <span class="sh-title">Pre-event materials</span>
+              <span class="sh-count" id="count-evmat">0/4</span>
+            </div>
+            <div id="list-ev-mat"></div>
           </div>
-          <div id="list-ev-mat"></div>
-        </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="2" x2="8" y2="10"/><polyline points="4,6 8,10 12,6"/><line x1="3" y1="13" x2="13" y2="13"/></svg></div>
-            <span class="sh-title">Post-event</span>
-            <span class="sh-count" id="count-evpost">0/5</span>
+          <div class="section-block section-grid-span2">
+            <div class="section-block-header">
+              <div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="2" x2="8" y2="10"/><polyline points="4,6 8,10 12,6"/><line x1="3" y1="13" x2="13" y2="13"/></svg></div>
+              <span class="sh-title">Post-event</span>
+              <span class="sh-count" id="count-evpost">0/5</span>
+            </div>
+            <div id="list-ev-post"></div>
           </div>
-          <div id="list-ev-post"></div>
         </div>
       </div>
 
@@ -432,16 +438,17 @@
           <p>Wrong disclaimers, unapproved claims, or missing logos can have legal consequences. When in doubt, flag it — don't fix it yourself.</p>
         </div>
 
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
-            <span class="sh-title">Brand & compliance QC — every material</span>
-            <span class="sh-count" id="count-compliance">0/8</span>
+        <div class="section-grid">
+          <div class="section-block">
+            <div class="section-block-header">
+              <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
+              <span class="sh-title">Brand & compliance QC — every material</span>
+              <span class="sh-count" id="count-compliance">0/8</span>
+            </div>
+            <div id="list-compliance"></div>
           </div>
-          <div id="list-compliance"></div>
-        </div>
 
-        <div class="section-block" style="margin-top:28px">
+          <div class="section-block">
           <div class="section-block-header" style="background:var(--ink);border-bottom-color:rgba(255,255,255,0.1)">
             <div class="sh-icon" style="background:rgba(255,255,255,0.1)">
               <svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg>
@@ -479,8 +486,9 @@
             <div id="list-qc-preflight"></div>
           </div>
         </div>
+        </div><!-- /section-grid -->
 
-        <div class="stat-grid" style="margin-top:20px">
+        <div class="stat-grid" style="margin-top:4px">
           <div class="stat-card"><div class="stat-card-label">QC passed</div><div class="stat-card-value green" id="stat-qc-done">0</div></div>
           <div class="stat-card"><div class="stat-card-label">Total checks</div><div class="stat-card-value" id="stat-qc-total">21</div></div>
           <div class="stat-card"><div class="stat-card-label">Ready to submit</div><div class="stat-card-value" id="stat-qc-ready">Not yet</div></div>

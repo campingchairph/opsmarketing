@@ -941,3 +941,49 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-1
 .saved-task-delete svg { width: 12px; height: 12px; }
 
 @media (max-width: 900px) { .task-templates-grid { grid-template-columns: 1fr; } }
+
+/* ══════════════════════════════════════
+   2-COLUMN SECTION GRID (workflow pages)
+══════════════════════════════════════ */
+.section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
+.section-grid > .section-block { margin-bottom: 0; }
+.section-grid-span2 { grid-column: 1 / -1; }
+@media (max-width: 900px) { .section-grid { grid-template-columns: 1fr; } }
+
+/* ══════════════════════════════════════
+   ADD-TO-TIMESHEET BUTTON
+══════════════════════════════════════ */
+.btn-add-timesheet {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid var(--teal-dim);
+  border-radius: var(--radius);
+  color: var(--teal);
+  font-size: 12px; font-family: var(--font-body);
+  cursor: pointer; transition: all 0.15s;
+  margin-top: 0;
+}
+.btn-add-timesheet:hover { background: var(--teal-dim); }
+.btn-add-timesheet.added { opacity: 0.55; cursor: default; border-color: var(--sage-dim); color: var(--sage); }
+.btn-add-timesheet svg { width: 13px; height: 13px; }
+
+/* ══════════════════════════════════════
+   TEMPLATE CARD — SHUFFLE FOOTER
+══════════════════════════════════════ */
+.tpl-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-3);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.tpl-shuffle-btn {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-3); background: transparent;
+  border: 1px solid var(--border-md); border-radius: 20px;
+  padding: 3px 10px; cursor: pointer; transition: all 0.15s;
+}
+.tpl-shuffle-btn:hover { background: var(--gold-dim); color: var(--gold); border-color: var(--gold-dim); }
+.tpl-count-label { font-family: var(--font-mono); font-size: 9px; color: var(--text-3); letter-spacing: 0.05em; }
