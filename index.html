@@ -259,6 +259,10 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
       Message Templates
     </div>
+    <div class="nav-item" data-page="timesheet">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+      Timesheet
+    </div>
 
     <div class="sidebar-footer">
       <a href="#" onclick="goHome(); return false;">
@@ -709,6 +713,71 @@
 
         <div id="copy-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:10px 20px;border-radius:var(--radius);font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
           ✓ Copied to clipboard
+        </div>
+      </div>
+
+      <!-- ── TIMESHEET ── -->
+      <div id="page-timesheet" class="page">
+        <div class="ts-summary">
+          <div class="stat-card accent-teal"><div class="stat-card-label">This week</div><div class="stat-card-value" id="ts-stat-week">0h</div></div>
+          <div class="stat-card accent-sage"><div class="stat-card-label">Days worked</div><div class="stat-card-value" id="ts-stat-days">0 days</div></div>
+          <div class="stat-card"><div class="stat-card-label">This month</div><div class="stat-card-value" id="ts-stat-month">0h</div></div>
+          <div class="stat-card accent-rust"><div class="stat-card-label">Total entries</div><div class="stat-card-value" id="ts-stat-entries">0</div></div>
+        </div>
+
+        <div class="calendar-wrap">
+          <!-- Calendar -->
+          <div class="cal-card">
+            <div class="cal-header">
+              <div class="cal-month" id="cal-month-label">May 2026</div>
+              <div class="cal-nav">
+                <button class="cal-nav-btn" onclick="calPrev()">&#8249;</button>
+                <button class="cal-nav-btn" onclick="calNext()">&#8250;</button>
+              </div>
+            </div>
+            <div class="cal-grid-header">
+              <div class="cal-day-label">Su</div>
+              <div class="cal-day-label">Mo</div>
+              <div class="cal-day-label">Tu</div>
+              <div class="cal-day-label">We</div>
+              <div class="cal-day-label">Th</div>
+              <div class="cal-day-label">Fr</div>
+              <div class="cal-day-label">Sa</div>
+            </div>
+            <div class="cal-days" id="cal-days-grid"></div>
+          </div>
+
+          <!-- Detail + Form -->
+          <div class="cal-detail">
+            <div class="cal-detail-header">
+              <div class="cal-detail-date" id="cal-detail-date">Select a date</div>
+              <div class="cal-detail-sub" id="cal-detail-sub">Click any date to view or log work</div>
+            </div>
+            <div class="cal-detail-entries" id="cal-entries-list">
+              <div class="cal-empty">Select a date to view entries.</div>
+            </div>
+            <div class="cal-add-form">
+              <div class="form-row">
+                <input class="form-input form-full" id="ts-title" placeholder="Task name (e.g. Updated rate card PDF)" style="grid-column:1/-1"/>
+              </div>
+              <div class="form-row">
+                <select class="form-select" id="ts-cat">
+                  <option value="admin">Admin</option>
+                  <option value="campaign">Campaign</option>
+                  <option value="design">Design</option>
+                  <option value="events">Events</option>
+                  <option value="crm">CRM</option>
+                  <option value="other">Other</option>
+                </select>
+                <div style="display:flex;gap:6px">
+                  <input class="form-input" id="ts-hrs"  type="number" min="0" max="12" placeholder="hrs" style="width:50%"/>
+                  <input class="form-input" id="ts-mins" type="number" min="0" max="59" step="15" placeholder="min" style="width:50%"/>
+                </div>
+              </div>
+              <textarea class="form-textarea form-full" id="ts-notes" placeholder="Notes (optional — what did you deliver? any blockers?)"></textarea>
+              <button class="btn-add" onclick="addEntry()">+ Log Work</button>
+            </div>
+          </div>
         </div>
       </div>
 
