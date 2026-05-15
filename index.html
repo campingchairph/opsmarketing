@@ -177,33 +177,27 @@
       </div>
     </div>
 
-    <!-- CRM -->
-    <div class="tile tile-crm" onclick="openDashboard('crm')">
+    <!-- First Week -->
+    <div class="tile tile-crm" onclick="openDashboard('firstweek')">
       <div class="tile-illustration">
         <svg width="180" height="180" viewBox="0 0 180 180" stroke-width="1.2">
-          <!-- database / nodes motif -->
-          <ellipse cx="90" cy="55" rx="45" ry="18"/>
-          <ellipse cx="90" cy="90" rx="45" ry="18"/>
-          <ellipse cx="90" cy="125" rx="45" ry="18"/>
-          <line x1="45" y1="55" x2="45" y2="125"/>
-          <line x1="135" y1="55" x2="135" y2="125"/>
-          <!-- nodes -->
-          <circle cx="90" cy="55"  r="5" fill="none"/>
-          <circle cx="90" cy="90"  r="5" fill="none"/>
-          <circle cx="90" cy="125" r="5" fill="none"/>
-          <!-- connect lines top -->
-          <line x1="60" y1="42" x2="60" y2="50"/>
-          <line x1="90" y1="38" x2="90" y2="46"/>
-          <line x1="120" y1="42" x2="120" y2="50"/>
+          <polygon points="90,28 96,50 120,50 101,63 108,86 90,74 72,86 79,63 60,50 84,50"/>
+          <circle cx="90" cy="90" r="55" fill="none"/>
+          <line x1="90" y1="35" x2="90" y2="145"/>
+          <line x1="35" y1="90" x2="145" y2="90"/>
+          <circle cx="90" cy="55" r="4" fill="none"/>
+          <circle cx="125" cy="90" r="4" fill="none"/>
+          <circle cx="90" cy="125" r="4" fill="none"/>
+          <circle cx="55" cy="90" r="4" fill="none"/>
         </svg>
       </div>
       <div class="tile-arrow">
         <svg viewBox="0 0 16 16" fill="none" stroke="#D0D8EB" stroke-width="2"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
       </div>
       <div class="tile-content">
-        <div class="tile-tag">06 — CRM</div>
-        <div class="tile-title">CRM</div>
-        <div class="tile-desc">Salesforce & contact management</div>
+        <div class="tile-tag">07 — Onboarding</div>
+        <div class="tile-title">First Week<br>Guide</div>
+        <div class="tile-desc">Day-by-day remote survival guide</div>
       </div>
     </div>
 
@@ -246,10 +240,24 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/></svg>
       Tools & Skills
     </div>
-    <div class="nav-item" data-page="crm">
+    <div class="nav-item" data-page="monday">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="8" cy="5" rx="5" ry="2"/><path d="M3 5v3c0 1.1 2.2 2 5 2s5-.9 5-2V5"/><path d="M3 8v3c0 1.1 2.2 2 5 2s5-.9 5-2V8"/></svg>
-      CRM
-      <span class="nav-badge coming">soon</span>
+      Monday.com
+    </div>
+
+    <div class="sidebar-section-label">Survival Kit</div>
+    <div class="nav-item" data-page="firstweek">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l1.5 3 3.5.5-2.5 2.5.5 3.5L8 9l-3 1.5.5-3.5L3 4.5l3.5-.5z"/></svg>
+      First Week Guide
+    </div>
+    <div class="nav-item" data-page="panic">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+      Panic Button
+      <span class="nav-badge" style="background:#C4522A">SOS</span>
+    </div>
+    <div class="nav-item" data-page="templates">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
+      Message Templates
     </div>
 
     <div class="sidebar-footer">
@@ -502,43 +510,205 @@
         </div>
       </div>
 
-      <!-- ── CRM ── -->
-      <div id="page-crm" class="page">
+      <!-- ── MONDAY.COM ── -->
+      <div id="page-monday" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Monday.com — your task hub</div>
+          <p>Monday.com is where your work lives. Think of it as a shared whiteboard your whole team can see. Your job: keep it accurate and up to date at all times.</p>
+        </div>
         <div class="section-block">
-          <div class="placeholder-state">
-            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2">
-              <ellipse cx="32" cy="18" rx="18" ry="7"/>
-              <ellipse cx="32" cy="32" rx="18" ry="7"/>
-              <ellipse cx="32" cy="46" rx="18" ry="7"/>
-              <line x1="14" y1="18" x2="14" y2="46"/>
-              <line x1="50" y1="18" x2="50" y2="46"/>
-            </svg>
-            <h3>CRM — coming soon</h3>
-            <p>You're still learning Salesforce. Once you know the actual workflow, fill in these sections with your real process.</p>
-            <div class="placeholder-fields">
-              <div class="placeholder-field">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
-                How to upload and clean contact records
-              </div>
-              <div class="placeholder-field">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
-                How to build email lists + apply segments
-              </div>
-              <div class="placeholder-field">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px"><path d="M8 2l4 8H4z"/></svg>
-                Compliance rules — consent, opt-outs, data accuracy
-              </div>
-              <div class="placeholder-field">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg>
-                How to pull campaign performance reports
-              </div>
-              <div class="placeholder-field">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
-                Data hygiene checklist — your team's naming conventions
-              </div>
-            </div>
-            <p style="font-size:11px;color:var(--ink-faint)">Ask me to fill this in once you've been trained on Salesforce.</p>
+          <div class="section-block-header">
+            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg></div>
+            <span class="sh-title">What each view means</span>
           </div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num" style="background:var(--rust-pale);color:var(--rust)">B</div><div><div class="phase-title">Board view</div><div class="phase-desc">The main view. Rows = tasks, columns = status, owner, deadline, priority. This is where you'll spend most of your time updating task statuses.</div></div></div>
+            <div class="phase-row"><div class="phase-num" style="background:var(--gold-pale);color:var(--gold)">K</div><div><div class="phase-title">Kanban view</div><div class="phase-desc">Same tasks shown as cards in columns (To Do → In Progress → Done). Useful for seeing what's blocked at a glance.</div></div></div>
+            <div class="phase-row"><div class="phase-num" style="background:var(--teal-pale);color:var(--teal)">G</div><div><div class="phase-title">Gantt / Timeline view</div><div class="phase-desc">Tasks shown across a calendar. Use this to spot deadline clashes and flag them early to your Marketing Lead.</div></div></div>
+            <div class="phase-row"><div class="phase-num" style="background:var(--sage-pale);color:var(--sage)">M</div><div><div class="phase-title">My Work view</div><div class="phase-desc">Shows only tasks assigned to you across all boards. Check this first every morning — it's your personal task list.</div></div></div>
+          </div>
+        </div>
+        <div class="section-block">
+          <div class="section-block-header">
+            <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
+            <span class="sh-title">Your Monday.com daily habits</span>
+          </div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">1</div><div><div class="phase-title">Start of day — check "My Work"</div><div class="phase-desc">See everything assigned to you. Sort by deadline. This is your task list for the day.</div></div></div>
+            <div class="phase-row"><div class="phase-num">2</div><div><div class="phase-title">When you start a task — update status to "In Progress"</div><div class="phase-desc">Never leave a task on "To Do" while you're working on it. Your lead needs to see real-time status.</div></div></div>
+            <div class="phase-row"><div class="phase-num">3</div><div><div class="phase-title">When something is blocked — add an update comment</div><div class="phase-desc">Don't just leave it. Click the task → Updates tab → write what's blocking you and tag your lead. This creates a paper trail.</div></div></div>
+            <div class="phase-row"><div class="phase-num">4</div><div><div class="phase-title">When done — mark complete + attach the output file</div><div class="phase-desc">Change status to Done. Attach the PDF, doc, or link directly in the task card. Never just say "done" in chat — attach proof.</div></div></div>
+            <div class="phase-row"><div class="phase-num">5</div><div><div class="phase-title">End of day — check for overdue or at-risk tasks</div><div class="phase-desc">Anything turning red (overdue)? Flag it to your lead before you log off. Never let a deadline pass silently.</div></div></div>
+          </div>
+        </div>
+        <div class="alert-box warn">
+          <div class="alert-title">The golden rule of Monday.com</div>
+          <p>If it's not updated in Monday, it doesn't exist. Your lead manages the team based on what they see in the board. An outdated status = they think you haven't started. Update it constantly, even when work feels obvious.</p>
+        </div>
+      </div>
+
+      <!-- ── FIRST WEEK ── -->
+      <div id="page-firstweek" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Remote first week — the real playbook</div>
+          <p>You won't be able to read the room, pick up office culture, or overhear how things work. You have to be more deliberate. This guide tells you exactly what to do each day.</p>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg></div><span class="sh-title">Before Day 1 — do this at home</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Test your camera, mic, and internet</div><div class="phase-desc">Do a test Zoom/Teams call with anyone. Bad audio on your first day is a bad first impression. Fix it before.</div></div></div>
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Set up a clean, well-lit background</div><div class="phase-desc">Natural light in front of you, not behind. Remove clutter. You're in financial services — professional matters.</div></div></div>
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Install everything they tell you to install</div><div class="phase-desc">Monday.com, Slack, Teams, VPN — get it all working before Day 1. Don't troubleshoot during onboarding calls.</div></div></div>
+            <div class="phase-row"><div class="phase-num">✓</div><div><div class="phase-title">Prepare a notepad (physical or digital)</div><div class="phase-desc">You will be overwhelmed with names, tools, processes, and acronyms. Write everything down. You'll need it in Week 2.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><polyline points="8,8 11,10"/></svg></div><span class="sh-title">Day 1 — show up, absorb, ask one good question</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Log on 5 minutes early</div><div class="phase-desc">Remote first day: be in the waiting room before they are. It signals reliability immediately.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Your only job today: listen and take notes</div><div class="phase-desc">Don't try to impress. Don't volunteer opinions. Ask clarifying questions about your tasks, not strategic suggestions.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Ask: "What does a good first week look like to you?"</div><div class="phase-desc">Ask your Marketing Lead this on Day 1. It tells you exactly what they value and how they measure success. Most new starters never ask this.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Ask: "How do you prefer I communicate with you day to day?"</div><div class="phase-desc">Slack? Email? Monday comments? How urgent is urgent? Remote teams run on communication norms — learn theirs immediately.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Write down every acronym or tool name you don't recognise</div><div class="phase-desc">Look them up after the call. Never nod along and hope it becomes clear — it usually doesn't.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/></svg></div><span class="sh-title">Days 2–3 — start building habits</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Locate the brand asset folder — don't wait to be shown</div><div class="phase-desc">Ask where logos, templates, and approved copy live. Get access. You can't do your job without this.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Find the approvals process — how does a task get signed off?</div><div class="phase-desc">Who approves what? Where is it documented? If it's not documented, write it down as they explain it verbally.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Observe your lead's communication style and mirror it</div><div class="phase-desc">Short and direct? Detailed updates? Emoji-friendly or formal? Match their energy in Slack/email until you know the culture.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Batch your questions — don't ask one at a time all day</div><div class="phase-desc">Write down 3–5 questions, then send them in one Slack message. "Hey, I have a few quick questions when you have a moment" is gold.</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header"><div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12l4-4 3 3 5-6"/></svg></div><span class="sh-title">Days 4–5 — prove you're reliable</span></div>
+          <div class="phase-list">
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Complete at least one task fully and without chasing</div><div class="phase-desc">Pick the clearest task on your list. Finish it, QC it, update Monday, notify your lead. This one moment builds more trust than anything else.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Send a Friday EOW message to your lead</div><div class="phase-desc">"Here's what I completed this week, here's what's in progress, here's what I need clarity on." 5 sentences. Use the template in the Templates tab.</div></div></div>
+            <div class="phase-row"><div class="phase-num">→</div><div><div class="phase-title">Write down 3 things you're still unclear on</div><div class="phase-desc">Not to ask immediately — to ask in your Week 2 check-in. Shows self-awareness and forward thinking.</div></div></div>
+          </div>
+        </div>
+
+        <div class="alert-box warn">
+          <div class="alert-title">The #1 remote new-starter mistake</div>
+          <p>Going quiet. In-office, your presence is visible. Remote, if you don't communicate, you're invisible. Over-communicate in Week 1 — update Monday constantly, send EOD summaries, respond quickly. You can dial it back once trust is built. You can't recover a "where are they?" reputation easily.</p>
+        </div>
+      </div>
+
+      <!-- ── PANIC BUTTON ── -->
+      <div id="page-panic" class="page">
+        <div style="background:#C4522A;border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px">
+          <div style="font-size:32px">🆘</div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;margin-bottom:4px">Panic Button</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.8)">Pick your situation. Get the exact steps. Breathe.</div>
+          </div>
+        </div>
+
+        <div id="panic-menu">
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">What's going wrong right now?</span></div>
+            <div style="padding:8px 0">
+              <div class="panic-item" onclick="showPanic('urgent')">🔥 I have multiple urgent tasks and don't know which to do first</div>
+              <div class="panic-item" onclick="showPanic('mistake')">😱 I made a mistake — something wrong already went out or got sent</div>
+              <div class="panic-item" onclick="showPanic('silent')">🔇 Slack is silent and I don't know if I'm doing things right</div>
+              <div class="panic-item" onclick="showPanic('deadline')">⏰ A deadline is today and my lead is unavailable</div>
+              <div class="panic-item" onclick="showPanic('approval')">⏳ I'm waiting on approval and it's been too long</div>
+              <div class="panic-item" onclick="showPanic('supplier')">📦 A supplier sent the wrong thing / missed a deadline</div>
+              <div class="panic-item" onclick="showPanic('unclear')">❓ I was given a task but the brief is unclear and I don't want to bother anyone</div>
+              <div class="panic-item" onclick="showPanic('feedback')">💬 I got negative feedback on my work</div>
+              <div class="panic-item" onclick="showPanic('overwhelmed')">🌀 I'm completely overwhelmed and don't know where to start</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panic-detail" style="display:none">
+          <button class="btn-reset" onclick="hidePanic()" style="margin-bottom:16px">← Back to situations</button>
+          <div id="panic-content"></div>
+        </div>
+      </div>
+
+      <!-- ── TEMPLATES ── -->
+      <div id="page-templates" class="page">
+        <div class="alert-box info">
+          <div class="alert-title">Remote communication is your visibility</div>
+          <p>When you're WFH, every message is a signal. These templates are calibrated for remote professional tone — clear, direct, not over-apologetic, not overly casual.</p>
+        </div>
+
+        <div id="template-list">
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div><span class="sh-title">Asking for approval</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nI\'ve completed [task/material name] and it\'s ready for your review.\n\n[Attach file or link here]\n\nPlease let me know if any changes are needed or if I\'m good to proceed.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Standard approval request</div>
+              <div class="tpl-sub">Use for: collateral, emails, event materials, website updates</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nQuick one — I need your sign-off on [task] before I can move forward. Deadline is [date/time].\n\n[Attach file or link]\n\nHappy to jump on a call if it\'s easier to review together.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Urgent approval (deadline today)</div>
+              <div class="tpl-sub">Use when: you need a response same-day</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">Flagging a delay or problem</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nHeads up — [task/campaign] is at risk of missing the [date] deadline. The hold-up is [brief reason: waiting on X / issue with Y].\n\nI\'m currently [what you\'re doing to resolve it]. Estimated resolution: [time/date].\n\nLet me know if you\'d like me to escalate or take a different approach.\n\n[Your name]')">
+              <div class="tpl-label">Flagging a delay proactively</div>
+              <div class="tpl-sub">Always send this before the deadline, not after</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nI want to flag an issue with [task]. [Briefly describe what happened — one sentence, factual, no over-explaining].\n\nI\'ve [what you\'ve done so far to address it]. My suggested next step is [your recommendation].\n\nPlease let me know how you\'d like to proceed.\n\n[Your name]')">
+              <div class="tpl-label">Flagging a mistake or error</div>
+              <div class="tpl-sub">Lead with facts, follow with your proposed fix</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v12M4 6h8M4 10h6"/></svg></div><span class="sh-title">Following up</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nFollowing up on my message from [date] re: [topic]. Just checking if you\'ve had a chance to review.\n\nNo rush if you\'re busy — just want to make sure it didn\'t get buried.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Following up on an unanswered message</div>
+              <div class="tpl-sub">Wait 24–48 hrs before sending this</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nJust checking in on [task/approval/file] — still waiting on this before I can move [next step] forward.\n\nCurrent status on my end: [what\'s ready, what\'s blocked]. Happy to provide any additional info needed.\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Chasing a dependency (waiting on someone else)</div>
+              <div class="tpl-sub">Professional, not pushy</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg></div><span class="sh-title">End-of-week check-in</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Name],\n\nHere\'s my end-of-week wrap:\n\n✅ Completed this week:\n– [task 1]\n– [task 2]\n– [task 3]\n\n🔄 In progress:\n– [task] — on track for [date]\n\n⏳ Waiting on:\n– [what you need and from whom]\n\n❓ Still unclear on:\n– [question — save this for your check-in, not urgent]\n\nHave a good weekend,\n[Your name]')">
+              <div class="tpl-label">Friday EOW summary to your Marketing Lead</div>
+              <div class="tpl-sub">Send every Friday. This one message builds more trust than almost anything else.</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-block-header"><div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h8l2 4-6 8-6-8z"/></svg></div><span class="sh-title">Supplier communication</span></div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Supplier name],\n\nI\'m reaching out regarding [job/project name]. Please find the brief attached.\n\nKey details:\n– Deliverable: [what you need]\n– Specs: [size, format, quantity if applicable]\n– Deadline: [date]\n\nPlease confirm receipt and your ability to deliver by [date].\n\nThanks,\n[Your name]\n[Company]')">
+              <div class="tpl-label">Sending a supplier brief</div>
+              <div class="tpl-sub">Always use pre-approved briefs. Attach the file, don't paste into the email.</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+            <div class="template-item" onclick="copyTemplate(this,'Hi [Supplier name],\n\nThank you for sending through [deliverable]. After review, we\'ve identified the following that needs to be addressed:\n\n– [Issue 1 — be specific: wrong colour, incorrect logo version, etc.]\n– [Issue 2 if applicable]\n\nPlease revise and resend by [date/time].\n\nThanks,\n[Your name]')">
+              <div class="tpl-label">Requesting supplier revision</div>
+              <div class="tpl-sub">Be specific about what's wrong — vague feedback = more rounds</div>
+              <div class="tpl-copy-btn">Copy</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="copy-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:10px 20px;border-radius:var(--radius);font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
+          ✓ Copied to clipboard
         </div>
       </div>
 
