@@ -999,17 +999,28 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-1
 .bi-check:has(input:checked) { background: var(--sage-dim); border-color: var(--sage-dim); color: var(--text-1); }
 .bi-warning { background: var(--rust-dim); color: var(--rust); border: 1px solid var(--rust-dim); border-radius: var(--radius); padding: 10px 14px; font-size: 12.5px; margin-top: 4px; }
 
-.intake-task-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: border-color 0.15s; cursor: pointer; }
-.intake-task-card:hover { border-color: var(--border-md); }
-.intake-task-card.completed { opacity: 0.5; }
-.itc-info { flex: 1; min-width: 0; }
-.itc-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-1); }
-.itc-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-top: 2px; }
-.itc-delete { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-3); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
-.itc-delete:hover { background: var(--rust-dim); color: var(--rust); border-color: var(--rust-dim); }
-.itc-delete svg { width: 12px; height: 12px; }
-.itc-timer-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--teal-dim); background: transparent; color: var(--teal); font-size: 11px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+/* Intake plan cards (merged Brief Intake + Task Builder) */
+.intake-plan-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; transition: border-color 0.15s; }
+.intake-plan-card.completed { opacity: 0.55; }
+.ipc-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.ipc-header:hover { background: var(--bg-3); }
+.ipc-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ipc-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-top: 2px; }
+.ipc-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.ipc-toggle { font-size: 11px; color: var(--text-3); transition: transform 0.2s; margin-left: 2px; flex-shrink: 0; }
+.intake-plan-card.open .ipc-toggle { transform: rotate(180deg); }
+.ipc-body { display: none; }
+.intake-plan-card.open .ipc-body { display: block; }
+.ipc-ts-btn { padding: 5px 11px; border-radius: 20px; border: 1px solid var(--sage-dim); background: transparent; color: var(--sage); font-size: 11px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.ipc-ts-btn:hover { background: var(--sage-dim); }
+.ipc-ts-btn.added { opacity: 0.5; cursor: default; }
+.ipc-delete { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-3); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.ipc-delete:hover { background: var(--rust-dim); color: var(--rust); border-color: var(--rust-dim); }
+.ipc-delete svg { width: 12px; height: 12px; }
+.itc-timer-btn { padding: 5px 11px; border-radius: 20px; border: 1px solid var(--teal-dim); background: transparent; color: var(--teal); font-size: 11px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .itc-timer-btn:hover { background: var(--teal-dim); }
+.ipc-tpl-chip { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border-md); background: transparent; color: var(--text-2); font-size: 11px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s; }
+.ipc-tpl-chip:hover { background: var(--bg-4); color: var(--text-1); }
 
 /* ══════════════════════════════════════
    TASK TIMER
@@ -1042,12 +1053,11 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-1
 .ring-fill { fill: none; stroke: var(--teal); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 528; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
 .ring-fill.break-mode { stroke: var(--sage); }
 .ring-fill.done-ring { stroke: var(--gold); }
-.timer-face { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
-.timer-display { font-family: var(--font-mono); font-size: 36px; font-weight: 500; color: var(--text-1); letter-spacing: 0.04em; margin-top: 4px; }
+.timer-display { position: absolute; font-family: var(--font-mono); font-size: 38px; font-weight: 500; color: var(--text-1); letter-spacing: 0.04em; }
 
-@keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-@keyframes pulseRing { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-.timer-ring-wrap.running .timer-face { animation: breathe 4s ease-in-out infinite; }
+@keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes pulseRing { 0%,100% { opacity: 1; } 50% { opacity: 0.65; } }
+.timer-ring-wrap.running .timer-display { animation: breathe 4s ease-in-out infinite; }
 .timer-ring-wrap.running .ring-fill { animation: pulseRing 4s ease-in-out infinite; }
 
 .timer-btn-row { display: flex; gap: 10px; }
@@ -1057,6 +1067,20 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-1
 .timer-finish-btn { padding: 12px 20px; background: transparent; color: var(--sage); border: 1px solid var(--sage-dim); border-radius: 10px; font-size: 14px; font-weight: 600; font-family: var(--font-display); cursor: pointer; transition: all 0.15s; }
 .timer-finish-btn:hover { background: var(--sage-dim); }
 .timer-session-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+.timer-notes-section { width: 100%; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 16px; }
+.timer-notes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.tns-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+.tns-count { font-family: var(--font-mono); font-size: 10px; color: var(--teal); }
+.timer-note-input-row { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; }
+.timer-note-input-row .form-input { flex: 1; }
+.tns-log-btn { padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--teal-dim); background: transparent; color: var(--teal); font-family: var(--font-mono); font-size: 11px; cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
+.tns-log-btn:hover { background: var(--teal-dim); }
+.timer-notes-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.timer-note-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; background: var(--bg-3); border-radius: var(--radius); border-left: 2px solid var(--teal); }
+.tni-time { font-family: var(--font-mono); font-size: 10px; color: var(--teal); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.tni-text { font-size: 12.5px; color: var(--text-2); line-height: 1.45; word-break: break-word; }
+.tni-empty { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); text-align: center; padding: 10px 0; }
 
 /* ══════════════════════════════════════
    FINANCE GLOSSARY

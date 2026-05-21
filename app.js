@@ -264,7 +264,7 @@ function navigate(pageId) {
 
   // Init calendar if needed
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
-  if (pageId === 'taskbuilder') { renderTaskBuilderPage(); }
+  if (pageId === 'taskbuilder') { navigate('intake'); return; }
   if (pageId === 'intake')      { renderIntakeSaved(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
@@ -1936,7 +1936,7 @@ function loadBriefs() { try { return JSON.parse(localStorage.getItem(BRIEFS_KEY)
 function saveBriefs(d) { localStorage.setItem(BRIEFS_KEY, JSON.stringify(d)); }
 
 function saveBrief() {
-  const name  = document.getElementById('bi-name')?.value?.trim();
+  const name = document.getElementById('bi-name')?.value?.trim();
   if (!name) { document.getElementById('bi-name')?.focus(); return; }
 
   const checks = ['bic1','bic2','bic3','bic4','bic5','bic6'].map(id => document.getElementById(id)?.checked);
@@ -1945,18 +1945,31 @@ function saveBrief() {
   if (!allChecked) { if (warn) warn.style.display = 'block'; return; }
   if (warn) warn.style.display = 'none';
 
+  const taskType   = document.getElementById('bi-category')?.value || 'general_admin';
+  const priority   = document.getElementById('bi-priority')?.value || 'medium';
+  const map        = TASK_TYPE_MAP[taskType];
+  const priorityItems = PRIORITY_ITEMS[priority] || [];
+  const typeItems  = map ? map.checklistKeys.flatMap(key => (CHECKLISTS[key] || []).map(item => ({ ...item }))) : [];
+  const checklist  = [...priorityItems, ...typeItems];
+
   const brief = {
-    id: 'brief_' + Date.now(),
+    id:          'brief_' + Date.now(),
     name,
     requestor:   document.getElementById('bi-requestor')?.value?.trim() || '',
-    category:    document.getElementById('bi-category')?.value || 'admin',
-    priority:    document.getElementById('bi-priority')?.value || 'medium',
+    taskType,
+    priority,
     deadline:    document.getElementById('bi-deadline')?.value || '',
     description: document.getElementById('bi-description')?.value?.trim() || '',
     status:      'active',
     sessions:    [],
     totalMins:   0,
     createdAt:   new Date().toISOString(),
+    checklist,
+    checkState:  {},
+    guideSteps:  map?.guideSteps || [],
+    templateIds: map?.templateIds || [],
+    addedToTimesheet: false,
+    timerNotes:  [],
   };
 
   const briefs = loadBriefs();
@@ -1970,6 +1983,11 @@ function saveBrief() {
   ['bic1','bic2','bic3','bic4','bic5','bic6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
 
   renderIntakeSaved();
+  // Scroll to newly created card
+  setTimeout(() => {
+    const card = document.getElementById('ipc-' + brief.id);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 
 function deleteBrief(id) {
@@ -1986,19 +2004,146 @@ function renderIntakeSaved() {
   const list = Object.values(briefs).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   if (!list.length) { el.innerHTML = ''; return; }
 
-  el.innerHTML = `<div class="tb-saved-header">Saved Tasks (${list.length})</div><div class="saved-tasks-list">` +
-    list.map(b => `
-      <div class="intake-task-card ${b.status === 'completed' ? 'completed' : ''}">
-        <span class="priority-badge ${b.priority}">${b.priority}</span>
-        <div class="itc-info">
-          <div class="itc-name">${b.name}</div>
-          <div class="itc-meta">${b.category} · Due ${b.deadline ? formatDeadline(b.deadline) : 'no deadline'} · ${b.totalMins ? fmtMins(b.totalMins) + ' logged' : 'not started'}</div>
-        </div>
-        <button class="itc-timer-btn" onclick="openTimerFor('${b.id}')">▶ Timer</button>
-        <button class="itc-delete" onclick="deleteBrief('${b.id}')">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
-        </button>
-      </div>`).join('') + '</div>';
+  el.innerHTML = `<div class="tb-saved-header" style="margin-top:24px">Saved Tasks (${list.length})</div>` +
+    list.map((b, idx) => {
+      const typeKey   = b.taskType || b.category || 'general_admin';
+      const map       = TASK_TYPE_MAP[typeKey] || TASK_TYPE_MAP['general_admin'];
+      const checklist = b.checklist || [];
+      const checkState= b.checkState || {};
+      const done      = checklist.filter(i => checkState[i.id]).length;
+      const total     = checklist.length;
+      const isOpen    = idx === 0;
+
+      const checklistHTML = checklist.map(item => {
+        const isDone = !!checkState[item.id];
+        let badge = '';
+        if (item.badge === 'critical')    badge = '<span class="ci-badge critical">critical</span>';
+        else if (item.badge === 'common miss') badge = '<span class="ci-badge warn">common miss</span>';
+        return `<div class="check-item${isDone ? ' done' : ''}" data-brief-id="${b.id}" data-item-id="${item.id}" onclick="toggleBriefItem('${b.id}','${item.id}')">
+          <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
+          <div><div class="ci-label">${item.label}${badge}</div>${item.sub ? `<div class="ci-sub">${item.sub}</div>` : ''}</div>
+        </div>`;
+      }).join('');
+
+      const guideHTML = (b.guideSteps || []).map((step, i) => `
+        <div class="phase-row">
+          <div class="phase-num">${i + 1}</div>
+          <div><div class="phase-title">${step.title}</div><div class="phase-desc">${step.desc}</div></div>
+        </div>`).join('');
+
+      const tplChips = (b.templateIds || []).map(tplId => {
+        const tpl = TEMPLATES.find(t => t.id === tplId);
+        if (!tpl) return '';
+        const txt = (tpl.variants[0]?.text || '').replace(/'/g, "\\'");
+        return `<button class="ipc-tpl-chip" onclick="navigator.clipboard.writeText('${txt}').then(()=>{this.textContent='✓ Copied';setTimeout(()=>{this.textContent='${tpl.title}'},1600)})">${tpl.title}</button>`;
+      }).join('');
+
+      const loggedMeta = b.totalMins ? ` · ${fmtMins(b.totalMins)} logged` : '';
+
+      return `
+        <div class="intake-plan-card${isOpen ? ' open' : ''}${b.status === 'completed' ? ' completed' : ''}" id="ipc-${b.id}">
+          <div class="ipc-header" onclick="toggleIntakeCard('${b.id}')">
+            <span class="priority-badge ${b.priority}">${b.priority}</span>
+            <div style="flex:1;min-width:0">
+              <div class="ipc-name">${b.name}</div>
+              <div class="ipc-meta" id="ipc-meta-${b.id}">${map?.label || 'Task'} · ${b.deadline ? formatDeadline(b.deadline) : 'no deadline'} · ${done}/${total} done${loggedMeta}</div>
+            </div>
+            <div class="ipc-actions">
+              <button class="itc-timer-btn" onclick="event.stopPropagation();openTimerFor('${b.id}')">▶ Timer</button>
+              <button class="ipc-ts-btn${b.addedToTimesheet ? ' added' : ''}" id="ts-brief-btn-${b.id}" onclick="event.stopPropagation();addToTimesheetFromBrief('${b.id}')" ${b.addedToTimesheet ? 'disabled' : ''}>${b.addedToTimesheet ? '✓ Added' : '+ Timesheet'}</button>
+              <button class="ipc-delete" onclick="event.stopPropagation();deleteBrief('${b.id}')" title="Delete">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+              </button>
+            </div>
+            <span class="ipc-toggle">▼</span>
+          </div>
+          <div class="ipc-body">
+            ${b.description ? `<div style="padding:10px 16px 0;font-size:12.5px;color:var(--text-2);line-height:1.55;border-left:3px solid var(--teal);margin:0 0 0 0;background:var(--bg-3);padding-top:12px;padding-bottom:12px;padding-right:16px">${b.description}</div>` : ''}
+            ${total ? `<div class="section-block" style="border:none;border-radius:0;margin:0;border-top:1px solid var(--border)">
+              <div class="section-block-header">
+                <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div>
+                <span class="sh-title">Checklist</span>
+                <span class="sh-count" id="bi-count-${b.id}">${done}/${total}</span>
+              </div>
+              <div id="bi-checklist-${b.id}">${checklistHTML}</div>
+            </div>` : ''}
+            ${guideHTML ? `<div class="section-block" style="border:none;border-radius:0;margin:0;border-top:1px solid var(--border)">
+              <div class="section-block-header">
+                <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="2" x2="8" y2="14"/><line x1="4" y1="6" x2="12" y2="6"/><line x1="4" y1="10" x2="10" y2="10"/></svg></div>
+                <span class="sh-title">Step-by-Step Guide</span>
+              </div>
+              <div class="phase-list">${guideHTML}</div>
+            </div>` : ''}
+            ${tplChips ? `<div style="padding:12px 16px;border-top:1px solid var(--border)">
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Quick copy templates</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">${tplChips}</div>
+            </div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleIntakeCard(briefId) {
+  const card = document.getElementById('ipc-' + briefId);
+  if (card) card.classList.toggle('open');
+}
+
+function toggleBriefItem(briefId, itemId) {
+  const briefs = loadBriefs();
+  const brief  = briefs[briefId];
+  if (!brief) return;
+  if (!brief.checkState) brief.checkState = {};
+  if (brief.checkState[itemId]) delete brief.checkState[itemId];
+  else brief.checkState[itemId] = true;
+  briefs[briefId] = brief;
+  saveBriefs(briefs);
+
+  const el = document.querySelector(`.check-item[data-brief-id="${briefId}"][data-item-id="${itemId}"]`);
+  if (el) el.classList.toggle('done');
+
+  const checklist = brief.checklist || [];
+  const done = checklist.filter(i => brief.checkState[i.id]).length;
+  const cnt  = document.getElementById('bi-count-' + briefId);
+  if (cnt) cnt.textContent = done + '/' + checklist.length;
+  const meta = document.getElementById('ipc-meta-' + briefId);
+  if (meta) {
+    const typeKey = brief.taskType || brief.category || 'general_admin';
+    const map = TASK_TYPE_MAP[typeKey] || TASK_TYPE_MAP['general_admin'];
+    const loggedMeta = brief.totalMins ? ` · ${fmtMins(brief.totalMins)} logged` : '';
+    meta.textContent = `${map?.label || 'Task'} · ${brief.deadline ? formatDeadline(brief.deadline) : 'no deadline'} · ${done}/${checklist.length} done${loggedMeta}`;
+  }
+}
+
+function addToTimesheetFromBrief(briefId) {
+  const briefs = loadBriefs();
+  const brief  = briefs[briefId];
+  if (!brief || brief.addedToTimesheet) return;
+
+  const catMap = {
+    email_campaign:'campaign', website_content:'campaign',
+    event_setup:'events', post_event:'events',
+    indesign_collateral:'design',
+    supplier_brief:'admin', general_admin:'admin',
+  };
+  const now = new Date();
+  const key = tsDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  const ts  = loadTimesheet();
+  if (!ts[key]) ts[key] = [];
+  const map = TASK_TYPE_MAP[brief.taskType || 'general_admin'];
+  ts[key].push({
+    title:    brief.name,
+    category: catMap[brief.taskType] || 'admin',
+    minutes:  brief.totalMins || 0,
+    notes:    (map?.label || brief.taskType || 'Task') + (brief.deadline ? ' · Due ' + brief.deadline : '') + (brief.totalMins ? ' · ' + fmtMins(brief.totalMins) + ' logged' : ''),
+  });
+  saveTimesheet(ts);
+
+  brief.addedToTimesheet = true;
+  briefs[briefId] = brief;
+  saveBriefs(briefs);
+
+  const btn = document.getElementById('ts-brief-btn-' + briefId);
+  if (btn) { btn.textContent = '✓ Added'; btn.classList.add('added'); btn.disabled = true; }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2008,7 +2153,7 @@ let timerState = {
   briefId: null, running: false, paused: false,
   totalSecs: 25 * 60, secsLeft: 25 * 60, modeMins: 25,
   sessionStart: null, sessionMins: 0, pomodoroCount: 0,
-  interval: null,
+  interval: null, notes: [],
 };
 let particleCanvas = null, particleCtx = null, particleAnim = null;
 const particles = [];
@@ -2039,7 +2184,14 @@ function renderTimerTaskList() {
     return;
   }
 
-  const catColors = { campaign:'var(--gold)', design:'var(--teal)', events:'var(--rust)', admin:'var(--lavender)', crm:'var(--sage)', website:'var(--lav)', other:'var(--text-3)' };
+  const catColors = {
+    email_campaign:'var(--gold)', indesign_collateral:'var(--teal)',
+    event_setup:'var(--rust)', post_event:'var(--rust)',
+    supplier_brief:'var(--lavender)', website_content:'var(--lav)',
+    general_admin:'var(--text-3)',
+    campaign:'var(--gold)', design:'var(--teal)', events:'var(--rust)',
+    admin:'var(--lavender)', crm:'var(--sage)', website:'var(--lav)', other:'var(--text-3)',
+  };
   el.innerHTML = `
     <div class="section-block" style="margin-bottom:16px">
       <div class="section-block-header">
@@ -2049,20 +2201,24 @@ function renderTimerTaskList() {
       </div>
       <div style="padding:10px 14px">
         <div class="timer-task-list-header">Click a task to start focusing</div>` +
-    all.map(b => `
+    all.map(b => {
+      const typeKey = b.taskType || b.category || 'general_admin';
+      const typeLabel = TASK_TYPE_MAP[typeKey]?.label || b.category || typeKey;
+      const col = catColors[typeKey] || 'var(--text-3)';
+      return `
       <div class="timer-list-card ${b.status === 'completed' ? 'done-card' : ''}" onclick="openTimerFor('${b.id}')">
-        <div class="tlc-icon" style="background:${catColors[b.category] || 'var(--bg-4)'}22;color:${catColors[b.category] || 'var(--text-3)'}">
+        <div class="tlc-icon" style="background:${col}22;color:${col}">
           ${b.status === 'completed' ? '✓' : '▶'}
         </div>
         <div class="tlc-body">
           <div class="tlc-name">${b.name}</div>
           <div class="tlc-meta">
             <span class="priority-badge ${b.priority}" style="margin-right:4px">${b.priority}</span>
-            ${b.category} · Due ${b.deadline ? formatDeadline(b.deadline) : 'no deadline'} · ${b.totalMins ? fmtMins(b.totalMins) + ' logged' : '0m logged'}
+            ${typeLabel} · Due ${b.deadline ? formatDeadline(b.deadline) : 'no deadline'} · ${b.totalMins ? fmtMins(b.totalMins) + ' logged' : '0m logged'}
           </div>
         </div>
         <div class="tlc-arrow">›</div>
-      </div>`).join('') + `</div></div>`;
+      </div>`; }).join('') + `</div></div>`;
 }
 
 function openTimerFor(briefId) {
@@ -2079,11 +2235,15 @@ function openTimerFor(briefId) {
   timerState.secsLeft = timerState.totalSecs = timerState.modeMins * 60;
   timerState.sessionMins = 0;
 
+  const typeKey = brief.taskType || brief.category || 'general_admin';
+  const typeLabel = TASK_TYPE_MAP[typeKey]?.label || brief.category || typeKey;
   setEl('tf-title', brief.name);
-  setEl('tf-meta', `${brief.category} · Due ${brief.deadline ? formatDeadline(brief.deadline) : 'no deadline'}`);
+  setEl('tf-meta', `${typeLabel} · Due ${brief.deadline ? formatDeadline(brief.deadline) : 'no deadline'}`);
   setEl('tf-desc', brief.description || 'No description provided.');
+  timerState.notes = brief.timerNotes ? [...brief.timerNotes] : [];
   updateTimerDisplay();
   updateSessionLabel();
+  renderTimerNotes();
 
   const startBtn = document.getElementById('timer-start-btn');
   if (startBtn) { startBtn.textContent = 'Start'; startBtn.className = 'timer-start-btn'; }
@@ -2154,7 +2314,6 @@ function timerToggle() {
     if (startBtn) { startBtn.textContent = 'Pause'; startBtn.className = 'timer-start-btn'; }
     document.querySelector('.timer-ring-wrap')?.classList.add('running');
     startParticles();
-    setFaceExpression('focused');
   }
 }
 
@@ -2173,7 +2332,6 @@ function timerTick() {
     timerState.pomodoroCount++;
     const ring = document.getElementById('ring-fill');
     if (ring) ring.classList.add('done-ring');
-    setFaceExpression('happy');
     document.querySelector('.timer-ring-wrap')?.classList.remove('running');
     stopParticles();
     const startBtn = document.getElementById('timer-start-btn');
@@ -2236,7 +2394,6 @@ function timerFinish() {
     saveTimesheet(ts);
   }
 
-  setFaceExpression('happy');
   stopParticles();
   document.querySelector('.timer-ring-wrap')?.classList.remove('running');
   exitFocus();
@@ -2289,6 +2446,46 @@ function startParticles() {
 function stopParticles() {
   if (particleAnim) { cancelAnimationFrame(particleAnim); particleAnim = null; }
   if (particleCtx && particleCanvas) particleCtx.clearRect(0, 0, 220, 220);
+}
+
+function addTimerNote() {
+  const input = document.getElementById('timer-note-input');
+  const text = input?.value?.trim();
+  if (!text) return;
+
+  const note = { time: new Date().toISOString(), text };
+
+  // Persist to brief
+  const briefs = loadBriefs();
+  const brief = briefs[timerState.briefId];
+  if (brief) {
+    if (!brief.timerNotes) brief.timerNotes = [];
+    brief.timerNotes.push(note);
+    briefs[timerState.briefId] = brief;
+    saveBriefs(briefs);
+  }
+
+  timerState.notes.push(note);
+  input.value = '';
+  renderTimerNotes();
+}
+
+function renderTimerNotes() {
+  const el = document.getElementById('timer-notes-list');
+  if (!el) return;
+  const notes = timerState.notes || [];
+  const cntEl = document.getElementById('timer-notes-count');
+  if (cntEl) cntEl.textContent = notes.length ? notes.length + ' note' + (notes.length !== 1 ? 's' : '') : '';
+
+  if (!notes.length) {
+    el.innerHTML = '<div class="tni-empty">No notes yet — log anything worth recording while you work.</div>';
+    return;
+  }
+  el.innerHTML = notes.slice().reverse().map(n => `
+    <div class="timer-note-item">
+      <div class="tni-time">${new Date(n.time).toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'})}</div>
+      <div class="tni-text">${n.text}</div>
+    </div>`).join('');
 }
 
 // ══════════════════════════════════════════════════════════════════

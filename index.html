@@ -234,12 +234,6 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l5 2v6q0 4-5 6Q3 13 3 9V3Z"/></svg>
       Brand & Compliance
     </div>
-    <div class="nav-item" data-page="taskbuilder">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="13" rx="1"/><line x1="6" y1="6" x2="10" y2="6"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="8" y2="12"/><circle cx="11.5" cy="11.5" r="2.5"/><line x1="11.5" y1="10.5" x2="11.5" y2="12.5"/><line x1="10.5" y1="11.5" x2="12.5" y2="11.5"/></svg>
-      Task Builder
-      <span class="nav-badge" style="background:var(--teal)">New</span>
-    </div>
-
     <div class="nav-item" data-page="intake">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
       Brief Intake
@@ -933,22 +927,22 @@
         <div class="section-block">
           <div class="section-block-header">
             <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg></div>
-            <span class="sh-title">Receive a new task — fill this in first</span>
+            <span class="sh-title">New task — fill this in first</span>
           </div>
           <div class="tb-form-body">
             <div class="form-row" style="grid-template-columns:1fr">
-              <input class="form-input" id="bi-name" placeholder="Task name (e.g. June rate card update, Event invitation — June 18)"/>
+              <input class="form-input" id="bi-name" placeholder="Task name (e.g. June rate card, Event invitation — June 18)"/>
             </div>
             <div class="form-row">
               <input class="form-input" id="bi-requestor" placeholder="Requested by (name)"/>
               <select class="form-select" id="bi-category">
-                <option value="campaign">Campaign</option>
-                <option value="design">Design / Collateral</option>
-                <option value="events">Events</option>
-                <option value="admin">Admin</option>
-                <option value="crm">CRM / Data</option>
-                <option value="website">Website / Content</option>
-                <option value="other">Other</option>
+                <option value="email_campaign">Email Campaign</option>
+                <option value="indesign_collateral">InDesign / Collateral</option>
+                <option value="event_setup">Event Setup</option>
+                <option value="post_event">Post-Event</option>
+                <option value="supplier_brief">Supplier Brief</option>
+                <option value="website_content">Website / Content</option>
+                <option value="general_admin">General Admin</option>
               </select>
             </div>
             <div class="form-row">
@@ -963,7 +957,7 @@
               </div>
             </div>
             <textarea class="form-textarea" id="bi-description" style="height:72px;width:100%;margin-bottom:12px" placeholder="What did they tell you about this task? Copy the brief or key instructions here."></textarea>
-            <div class="bi-checks-label">Pre-start checklist — tick everything before you begin:</div>
+            <div class="bi-checks-label">Pre-start checklist — tick everything before saving:</div>
             <div class="bi-checks" id="bi-checks">
               <label class="bi-check"><input type="checkbox" id="bic1"/> I have a confirmed deadline</label>
               <label class="bi-check"><input type="checkbox" id="bic2"/> I have approved copy / content</label>
@@ -973,7 +967,7 @@
               <label class="bi-check"><input type="checkbox" id="bic6"/> I understand the context / purpose of this task</label>
             </div>
             <div id="bi-warning" class="bi-warning" style="display:none">⚠ You have unchecked items — go back and get the missing information before starting.</div>
-            <button class="btn-add" style="margin-top:12px" onclick="saveBrief()">Save Task &amp; Send to Timer →</button>
+            <button class="btn-add" style="margin-top:12px" onclick="saveBrief()">Save &amp; Generate Plan →</button>
           </div>
         </div>
         <div id="intake-saved"></div>
@@ -1000,14 +994,6 @@
                   <circle class="ring-bg" cx="100" cy="100" r="84"/>
                   <circle class="ring-fill" id="ring-fill" cx="100" cy="100" r="84"/>
                 </svg>
-                <div class="timer-face" id="timer-face">
-                  <svg viewBox="0 0 60 60" width="60" height="60" id="timer-face-svg">
-                    <circle cx="30" cy="30" r="28" fill="var(--gold-dim)" stroke="var(--gold)" stroke-width="1.5"/>
-                    <circle class="face-eye" cx="20" cy="25" r="3" fill="var(--gold)"/>
-                    <circle class="face-eye" cx="40" cy="25" r="3" fill="var(--gold)"/>
-                    <path class="face-mouth" id="face-mouth" d="M 20 38 Q 30 44 40 38" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                </div>
                 <div class="timer-display" id="timer-display">25:00</div>
               </div>
               <div class="timer-btn-row">
@@ -1015,6 +1001,17 @@
                 <button class="timer-finish-btn" onclick="timerFinish()">✓ Finish Task</button>
               </div>
               <div class="timer-session-label" id="timer-session-label">Session 1 · 0m logged today</div>
+              <div class="timer-notes-section">
+                <div class="timer-notes-header">
+                  <span class="tns-label">Session log</span>
+                  <span class="tns-count" id="timer-notes-count"></span>
+                </div>
+                <div class="timer-note-input-row">
+                  <input class="form-input" id="timer-note-input" placeholder="Note a blocker, update, or anything worth logging…" onkeydown="if(event.key==='Enter')addTimerNote()"/>
+                  <button class="tns-log-btn" onclick="addTimerNote()">Log</button>
+                </div>
+                <div id="timer-notes-list" class="timer-notes-list"></div>
+              </div>
             </div>
           </div>
         </div>
