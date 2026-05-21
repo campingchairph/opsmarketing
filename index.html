@@ -243,6 +243,7 @@
     <div class="nav-item" data-page="timer">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="9" r="5"/><polyline points="8,6 8,9 10,11"/><line x1="6" y1="1" x2="10" y2="1"/><line x1="14" y1="4" x2="12" y2="6"/></svg>
       Task Timer
+      <span class="nav-timer-dot" id="nav-timer-dot" style="display:none"></span>
     </div>
 
     <div class="sidebar-section-label">Reference</div>
@@ -306,6 +307,11 @@
         <div class="topbar-subtitle" id="topbar-subtitle">Morning, core tasks &amp; end-of-day</div>
       </div>
       <div class="topbar-right">
+        <div id="topbar-timer-chip" class="topbar-timer-chip" style="display:none" onclick="goToActiveTimer()" title="Active timer — click to return to focus">
+          <span class="ttc-dot" id="ttc-dot"></span>
+          <span class="ttc-label">Timer</span>
+          <span class="ttc-time" id="topbar-timer-display">25:00</span>
+        </div>
         <div class="dual-clock">
           <div class="clock-item">
             <span class="clock-city">MNL</span>

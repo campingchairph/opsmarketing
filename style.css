@@ -338,6 +338,24 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-1
 /* ══════════════════════════════════════
    DUAL CLOCK
 ══════════════════════════════════════ */
+/* Topbar active timer chip */
+.topbar-timer-chip { display: flex; align-items: center; gap: 7px; padding: 6px 13px; background: var(--teal-dim); border: 1px solid rgba(58,144,144,0.35); border-radius: 20px; cursor: pointer; transition: all 0.15s; user-select: none; }
+.topbar-timer-chip:hover { background: var(--teal); border-color: var(--teal); }
+.topbar-timer-chip:hover .ttc-label,
+.topbar-timer-chip:hover .ttc-time { color: #fff; }
+.topbar-timer-chip:hover .ttc-dot { background: #fff; animation: none; }
+.topbar-timer-chip.paused { background: var(--gold-dim); border-color: rgba(200,149,46,0.35); }
+.topbar-timer-chip.paused .ttc-label,
+.topbar-timer-chip.paused .ttc-time { color: var(--gold); }
+.topbar-timer-chip.paused .ttc-dot { background: var(--gold); animation: none; opacity: 0.7; }
+.ttc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); flex-shrink: 0; animation: ttc-pulse 1.4s ease-in-out infinite; }
+.ttc-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); }
+.ttc-time { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--teal); letter-spacing: 0.03em; min-width: 44px; text-align: right; }
+@keyframes ttc-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.75); } }
+
+/* Nav timer notification dot */
+.nav-timer-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); display: inline-block; margin-left: auto; flex-shrink: 0; animation: ttc-pulse 1.4s ease-in-out infinite; }
+
 .dual-clock {
   display: flex;
   align-items: center;

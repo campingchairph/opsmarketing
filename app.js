@@ -2159,6 +2159,14 @@ let particleCanvas = null, particleCtx = null, particleAnim = null;
 const particles = [];
 
 function renderTimerTaskList() {
+  // If a timer is already running/paused, jump straight to focus view
+  if ((timerState.running || timerState.paused) && timerState.briefId) {
+    const tl = document.getElementById('timer-task-list');
+    const tf = document.getElementById('timer-focus');
+    if (tl) tl.style.display = 'none';
+    if (tf) tf.style.display = 'block';
+    return;
+  }
   const el = document.getElementById('timer-task-list');
   if (!el) return;
   const briefs = loadBriefs();
@@ -2268,11 +2276,13 @@ function openTimerFor(briefId) {
 
 function exitFocus() {
   if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; timerState.running = false; }
+  timerState.paused = false;
   stopParticles();
   const ringWrap = document.querySelector('.timer-ring-wrap');
   if (ringWrap) ringWrap.classList.remove('running');
   document.getElementById('timer-task-list').style.display = 'block';
   document.getElementById('timer-focus').style.display = 'none';
+  updateTopbarTimer();
   renderTimerTaskList();
 }
 
@@ -2322,6 +2332,7 @@ function timerToggle() {
     if (startBtn) { startBtn.textContent = 'Resume'; startBtn.className = 'timer-start-btn paused'; }
     document.querySelector('.timer-ring-wrap')?.classList.remove('running');
     stopParticles();
+    updateTopbarTimer();
   } else {
     // Start / Resume
     timerState.running = true; timerState.paused = false;
@@ -2330,6 +2341,7 @@ function timerToggle() {
     if (startBtn) { startBtn.textContent = 'Pause'; startBtn.className = 'timer-start-btn'; }
     document.querySelector('.timer-ring-wrap')?.classList.add('running');
     startParticles();
+    updateTopbarTimer();
   }
 }
 
@@ -2338,6 +2350,7 @@ function timerTick() {
   updateTimerDisplay();
   updateRingProgress();
   updateStampHint();
+  updateTopbarTimer();
   if (timerState.secsLeft <= 0) {
     clearInterval(timerState.interval); timerState.interval = null;
     timerState.running = false;
@@ -2373,6 +2386,39 @@ function updateRingProgress() {
   if (!ring) return;
   const pct = timerState.secsLeft / timerState.totalSecs;
   ring.style.strokeDashoffset = String(528 * (1 - pct));
+}
+
+function updateTopbarTimer() {
+  const chip    = document.getElementById('topbar-timer-chip');
+  const display = document.getElementById('topbar-timer-display');
+  const dot     = document.getElementById('nav-timer-dot');
+  const ttcDot  = document.getElementById('ttc-dot');
+
+  const isActive = timerState.running || timerState.paused;
+
+  if (chip) {
+    chip.style.display = isActive ? 'flex' : 'none';
+    chip.classList.toggle('paused', !!timerState.paused && !timerState.running);
+  }
+  if (dot) dot.style.display = isActive ? 'inline-block' : 'none';
+  if (ttcDot) ttcDot.classList.toggle('paused', !!timerState.paused && !timerState.running);
+
+  if (isActive && display) {
+    const m = Math.floor(timerState.secsLeft / 60);
+    const s = timerState.secsLeft % 60;
+    display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+}
+
+function goToActiveTimer() {
+  navigate('timer');
+  // If there's an active brief, jump straight to focus view
+  if (timerState.briefId) {
+    const tl = document.getElementById('timer-task-list');
+    const tf = document.getElementById('timer-focus');
+    if (tl) tl.style.display = 'none';
+    if (tf) tf.style.display = 'block';
+  }
 }
 
 function updateStampHint() {
@@ -2424,6 +2470,7 @@ function timerFinish() {
 
   stopParticles();
   document.querySelector('.timer-ring-wrap')?.classList.remove('running');
+  updateTopbarTimer();
   exitFocus();
 }
 
