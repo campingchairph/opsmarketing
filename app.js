@@ -2498,30 +2498,34 @@ function renderTimerNotes() {
   }
 
   el.innerHTML = notes.slice().reverse().map(n => {
-    const wallDate  = new Date(n.time);
-    const wallHour  = wallDate.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
-    const wallAmpm  = wallHour.includes('am') ? 'AM' : wallHour.includes('pm') ? 'PM' : '';
-    const wallClean = wallHour.replace(/\s*(am|pm)/i, '');
+    // Wall clock
+    const wallDate = new Date(n.time);
+    const wallStr  = wallDate.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
 
-    // Timer position
+    // Timer badge — remaining time is the hero
     const sl = n.secsLeft != null ? n.secsLeft : null;
-    const el2= n.elapsed   != null ? n.elapsed  : null;
-    let timerTag = '';
+    const el2= n.elapsed  != null ? n.elapsed  : null;
+    let badgeTop = '--:--', badgeSub = 'left';
+    let elapsedStr = '';
     if (sl != null) {
       const rm = Math.floor(sl / 60), rs = sl % 60;
-      const em = Math.floor((el2||0) / 60), es = (el2||0) % 60;
-      timerTag = `${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')} left · ${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')} elapsed`;
+      badgeTop = `${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
+      badgeSub = 'left';
+      if (el2 != null) {
+        const em = Math.floor(el2 / 60), es = el2 % 60;
+        elapsedStr = `${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')} in`;
+      }
     }
 
     return `
     <div class="timer-note-item">
-      <div class="tni-clock-badge">
-        <span class="tni-clock-time">${wallClean}</span>
-        ${wallAmpm ? `<span class="tni-clock-ampm">${wallAmpm}</span>` : ''}
+      <div class="tni-timer-badge">
+        <span class="tni-badge-time">${badgeTop}</span>
+        <span class="tni-badge-sub">${badgeSub}</span>
       </div>
       <div class="tni-content">
         <div class="tni-text">${n.text}</div>
-        ${timerTag ? `<div class="tni-timer-tag">⏱ ${timerTag}</div>` : ''}
+        <div class="tni-meta">${wallStr}${elapsedStr ? ' · ' + elapsedStr : ''}</div>
       </div>
     </div>`;
   }).join('');
