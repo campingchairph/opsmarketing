@@ -2394,16 +2394,22 @@ function updateTopbarTimer() {
   const dot     = document.getElementById('nav-timer-dot');
   const ttcDot  = document.getElementById('ttc-dot');
 
-  const isActive = timerState.running || timerState.paused;
+  const isLoaded  = !!timerState.briefId;                       // task is open in focus view
+  const isRunning = timerState.running;
+  const isPaused  = timerState.paused && !timerState.running;
 
+  // Chip shows whenever a task is loaded (ready, running, or paused)
   if (chip) {
-    chip.style.display = isActive ? 'flex' : 'none';
-    chip.classList.toggle('paused', !!timerState.paused && !timerState.running);
+    chip.style.display = isLoaded ? 'flex' : 'none';
+    chip.classList.toggle('paused',  isPaused);
+    chip.classList.toggle('ready',   isLoaded && !isRunning && !isPaused);
   }
-  if (dot) dot.style.display = isActive ? 'inline-block' : 'none';
-  if (ttcDot) ttcDot.classList.toggle('paused', !!timerState.paused && !timerState.running);
+  // Nav dot shows whenever a task is loaded
+  if (dot)    dot.style.display    = isLoaded ? 'inline-block' : 'none';
+  if (ttcDot) ttcDot.classList.toggle('paused', isPaused);
 
-  if (isActive && display) {
+  // Always update the displayed time
+  if (isLoaded && display) {
     const m = Math.floor(timerState.secsLeft / 60);
     const s = timerState.secsLeft % 60;
     display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
