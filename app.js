@@ -2453,11 +2453,22 @@ function addTimerNote() {
   const text = input?.value?.trim();
   if (!text) return;
 
-  const note = { time: new Date().toISOString(), text };
+  // Capture both wall-clock and timer position at moment of submission
+  const now      = new Date();
+  const secsLeft = timerState.secsLeft;
+  const elapsed  = timerState.totalSecs - secsLeft;
+
+  const note = {
+    time:      now.toISOString(),   // wall-clock
+    secsLeft,                       // timer position (seconds remaining)
+    elapsed,                        // seconds elapsed in this session
+    modeMins:  timerState.modeMins, // which mode was active (25/5/15)
+    text,
+  };
 
   // Persist to brief
   const briefs = loadBriefs();
-  const brief = briefs[timerState.briefId];
+  const brief  = briefs[timerState.briefId];
   if (brief) {
     if (!brief.timerNotes) brief.timerNotes = [];
     brief.timerNotes.push(note);
@@ -2475,17 +2486,45 @@ function renderTimerNotes() {
   if (!el) return;
   const notes = timerState.notes || [];
   const cntEl = document.getElementById('timer-notes-count');
-  if (cntEl) cntEl.textContent = notes.length ? notes.length + ' note' + (notes.length !== 1 ? 's' : '') : '';
+  if (cntEl) cntEl.textContent = notes.length ? notes.length + (notes.length === 1 ? ' note' : ' notes') : '';
 
   if (!notes.length) {
-    el.innerHTML = '<div class="tni-empty">No notes yet — log anything worth recording while you work.</div>';
+    el.innerHTML = `<div class="tni-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" style="margin-bottom:6px;opacity:0.3"><path d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2v-5"/><polyline points="16,2 22,2 22,8"/><line x1="22" y1="2" x2="11" y2="13"/></svg>
+      <div>No notes yet</div>
+      <div style="font-size:10px;margin-top:3px;opacity:0.6">Log anything while you work — blockers, decisions, updates</div>
+    </div>`;
     return;
   }
-  el.innerHTML = notes.slice().reverse().map(n => `
+
+  el.innerHTML = notes.slice().reverse().map(n => {
+    const wallDate  = new Date(n.time);
+    const wallHour  = wallDate.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+    const wallAmpm  = wallHour.includes('am') ? 'AM' : wallHour.includes('pm') ? 'PM' : '';
+    const wallClean = wallHour.replace(/\s*(am|pm)/i, '');
+
+    // Timer position
+    const sl = n.secsLeft != null ? n.secsLeft : null;
+    const el2= n.elapsed   != null ? n.elapsed  : null;
+    let timerTag = '';
+    if (sl != null) {
+      const rm = Math.floor(sl / 60), rs = sl % 60;
+      const em = Math.floor((el2||0) / 60), es = (el2||0) % 60;
+      timerTag = `${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')} left · ${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')} elapsed`;
+    }
+
+    return `
     <div class="timer-note-item">
-      <div class="tni-time">${new Date(n.time).toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'})}</div>
-      <div class="tni-text">${n.text}</div>
-    </div>`).join('');
+      <div class="tni-clock-badge">
+        <span class="tni-clock-time">${wallClean}</span>
+        ${wallAmpm ? `<span class="tni-clock-ampm">${wallAmpm}</span>` : ''}
+      </div>
+      <div class="tni-content">
+        <div class="tni-text">${n.text}</div>
+        ${timerTag ? `<div class="tni-timer-tag">⏱ ${timerTag}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════════════════════════
