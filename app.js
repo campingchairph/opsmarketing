@@ -2024,12 +2024,31 @@ function renderTimerTaskList() {
   });
 
   if (!all.length) {
-    el.innerHTML = `<div class="alert-box info"><div class="alert-title">No tasks yet</div><p>Go to Brief Intake and save a task first — it'll appear here ready to time.</p></div>`;
+    el.innerHTML = `
+      <div class="section-block" style="margin-bottom:16px">
+        <div class="section-block-header">
+          <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="9" r="5"/><polyline points="8,6 8,9 10,11"/><line x1="6" y1="1" x2="10" y2="1"/></svg></div>
+          <span class="sh-title">Your tasks</span>
+        </div>
+        <div style="padding:24px 18px;text-align:center">
+          <div style="font-size:32px;margin-bottom:12px">⏱</div>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:6px">No tasks waiting to be timed</div>
+          <p style="font-size:12.5px;color:var(--text-3);margin:0">Go to <strong style="color:var(--teal)">Brief Intake</strong> in the sidebar, fill in the task details, and click <strong style="color:var(--teal)">Save Task &amp; Send to Timer →</strong> — it'll appear here instantly.</p>
+        </div>
+      </div>`;
     return;
   }
 
   const catColors = { campaign:'var(--gold)', design:'var(--teal)', events:'var(--rust)', admin:'var(--lavender)', crm:'var(--sage)', website:'var(--lav)', other:'var(--text-3)' };
-  el.innerHTML = `<div class="timer-task-list-header">Click a task to start focusing</div>` +
+  el.innerHTML = `
+    <div class="section-block" style="margin-bottom:16px">
+      <div class="section-block-header">
+        <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="9" r="5"/><polyline points="8,6 8,9 10,11"/><line x1="6" y1="1" x2="10" y2="1"/></svg></div>
+        <span class="sh-title">Your tasks</span>
+        <span class="sh-count">${all.length}</span>
+      </div>
+      <div style="padding:10px 14px">
+        <div class="timer-task-list-header">Click a task to start focusing</div>` +
     all.map(b => `
       <div class="timer-list-card ${b.status === 'completed' ? 'done-card' : ''}" onclick="openTimerFor('${b.id}')">
         <div class="tlc-icon" style="background:${catColors[b.category] || 'var(--bg-4)'}22;color:${catColors[b.category] || 'var(--text-3)'}">
@@ -2043,7 +2062,7 @@ function renderTimerTaskList() {
           </div>
         </div>
         <div class="tlc-arrow">›</div>
-      </div>`).join('');
+      </div>`).join('') + `</div></div>`;
 }
 
 function openTimerFor(briefId) {
@@ -2400,7 +2419,7 @@ function renderGoodLooks() {
   const el = document.getElementById('goodlooks-content');
   if (!el) return;
   el.innerHTML = GOOD_LOOKS.map(item => `
-    <div class="wgl-card" onclick="this.classList.toggle('open')">
+    <div class="wgl-card open" onclick="this.classList.toggle('open')">
       <div class="wgl-card-header">
         <span style="font-size:18px;flex-shrink:0">${item.icon}</span>
         <span class="wgl-card-title">${item.type}</span>
