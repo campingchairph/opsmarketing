@@ -236,12 +236,18 @@ function navigate(pageId) {
     events:       ['Events',    'Setup, materials & post-event'],
     brand:        ['Brand & Compliance', 'QC checklist + InDesign preflight'],
     taskbuilder:  ['Task Builder', 'Generate a custom plan for any task'],
+    intake:       ['Brief Intake', 'Receive a task — fill this in first'],
+    timer:        ['Task Timer', 'Focus mode — Pomodoro timer'],
     tools:        ['Tools & Skills',  'Your tech stack reference'],
     monday:       ['Monday.com', 'Your task management hub'],
     firstweek:    ['First Week Guide', 'Day-by-day remote survival plan'],
     panic:        ['Panic Button 🆘', 'Step-by-step for when things go wrong'],
     templates:    ['Message Templates', 'Ready-to-copy professional messages'],
     timesheet:    ['Timesheet', 'Log work, track hours, backtrack any day'],
+    glossary:     ['Finance Glossary', 'Financial services terms explained'],
+    goodlooks:    ['What Good Looks Like', 'Pass vs Good vs Impressive'],
+    mistakes:     ['Mistakes Log', 'Learn before you make them'],
+    ninetydays:   ['90-Day Tracker', 'Wins, skills, feedback & goals'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -257,8 +263,14 @@ function navigate(pageId) {
   updateAllStats();
 
   // Init calendar if needed
-  if (pageId === 'timesheet') { setTimeout(initCalendar, 50); }
+  if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
   if (pageId === 'taskbuilder') { renderTaskBuilderPage(); }
+  if (pageId === 'intake')      { renderIntakeSaved(); }
+  if (pageId === 'timer')       { renderTimerTaskList(); }
+  if (pageId === 'glossary')    { renderGlossaryList(); }
+  if (pageId === 'goodlooks')   { renderGoodLooks(); }
+  if (pageId === 'mistakes')    { renderPreloadedMistakes(); renderPersonalMistakes(); }
+  if (pageId === 'ninetydays')  { renderNinetyDays(); }
 
   // Update page-level progress bar
   updatePageProgress(pageId);
@@ -1914,6 +1926,655 @@ function renderTaskDetail(taskId) {
     </div>`;
 
   output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BRIEF INTAKE
+// ══════════════════════════════════════════════════════════════════
+const BRIEFS_KEY = 'msc_briefs_v1';
+function loadBriefs() { try { return JSON.parse(localStorage.getItem(BRIEFS_KEY)) || {}; } catch { return {}; } }
+function saveBriefs(d) { localStorage.setItem(BRIEFS_KEY, JSON.stringify(d)); }
+
+function saveBrief() {
+  const name  = document.getElementById('bi-name')?.value?.trim();
+  if (!name) { document.getElementById('bi-name')?.focus(); return; }
+
+  const checks = ['bic1','bic2','bic3','bic4','bic5','bic6'].map(id => document.getElementById(id)?.checked);
+  const allChecked = checks.every(Boolean);
+  const warn = document.getElementById('bi-warning');
+  if (!allChecked) { if (warn) warn.style.display = 'block'; return; }
+  if (warn) warn.style.display = 'none';
+
+  const brief = {
+    id: 'brief_' + Date.now(),
+    name,
+    requestor:   document.getElementById('bi-requestor')?.value?.trim() || '',
+    category:    document.getElementById('bi-category')?.value || 'admin',
+    priority:    document.getElementById('bi-priority')?.value || 'medium',
+    deadline:    document.getElementById('bi-deadline')?.value || '',
+    description: document.getElementById('bi-description')?.value?.trim() || '',
+    status:      'active',
+    sessions:    [],
+    totalMins:   0,
+    createdAt:   new Date().toISOString(),
+  };
+
+  const briefs = loadBriefs();
+  briefs[brief.id] = brief;
+  saveBriefs(briefs);
+
+  // Reset form
+  ['bi-name','bi-requestor','bi-description'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['bi-category','bi-priority'].forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  const dl = document.getElementById('bi-deadline'); if (dl) dl.value = '';
+  ['bic1','bic2','bic3','bic4','bic5','bic6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+
+  renderIntakeSaved();
+}
+
+function deleteBrief(id) {
+  const briefs = loadBriefs();
+  delete briefs[id];
+  saveBriefs(briefs);
+  renderIntakeSaved();
+}
+
+function renderIntakeSaved() {
+  const el = document.getElementById('intake-saved');
+  if (!el) return;
+  const briefs = loadBriefs();
+  const list = Object.values(briefs).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (!list.length) { el.innerHTML = ''; return; }
+
+  el.innerHTML = `<div class="tb-saved-header">Saved Tasks (${list.length})</div><div class="saved-tasks-list">` +
+    list.map(b => `
+      <div class="intake-task-card ${b.status === 'completed' ? 'completed' : ''}">
+        <span class="priority-badge ${b.priority}">${b.priority}</span>
+        <div class="itc-info">
+          <div class="itc-name">${b.name}</div>
+          <div class="itc-meta">${b.category} · Due ${b.deadline ? formatDeadline(b.deadline) : 'no deadline'} · ${b.totalMins ? fmtMins(b.totalMins) + ' logged' : 'not started'}</div>
+        </div>
+        <button class="itc-timer-btn" onclick="openTimerFor('${b.id}')">▶ Timer</button>
+        <button class="itc-delete" onclick="deleteBrief('${b.id}')">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+        </button>
+      </div>`).join('') + '</div>';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TASK TIMER
+// ══════════════════════════════════════════════════════════════════
+let timerState = {
+  briefId: null, running: false, paused: false,
+  totalSecs: 25 * 60, secsLeft: 25 * 60, modeMins: 25,
+  sessionStart: null, sessionMins: 0, pomodoroCount: 0,
+  interval: null,
+};
+let particleCanvas = null, particleCtx = null, particleAnim = null;
+const particles = [];
+
+function renderTimerTaskList() {
+  const el = document.getElementById('timer-task-list');
+  if (!el) return;
+  const briefs = loadBriefs();
+  const all = Object.values(briefs).sort((a, b) => {
+    if (a.status === 'completed' && b.status !== 'completed') return 1;
+    if (b.status === 'completed' && a.status !== 'completed') return -1;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
+  if (!all.length) {
+    el.innerHTML = `<div class="alert-box info"><div class="alert-title">No tasks yet</div><p>Go to Brief Intake and save a task first — it'll appear here ready to time.</p></div>`;
+    return;
+  }
+
+  const catColors = { campaign:'var(--gold)', design:'var(--teal)', events:'var(--rust)', admin:'var(--lavender)', crm:'var(--sage)', website:'var(--lav)', other:'var(--text-3)' };
+  el.innerHTML = `<div class="timer-task-list-header">Click a task to start focusing</div>` +
+    all.map(b => `
+      <div class="timer-list-card ${b.status === 'completed' ? 'done-card' : ''}" onclick="openTimerFor('${b.id}')">
+        <div class="tlc-icon" style="background:${catColors[b.category] || 'var(--bg-4)'}22;color:${catColors[b.category] || 'var(--text-3)'}">
+          ${b.status === 'completed' ? '✓' : '▶'}
+        </div>
+        <div class="tlc-body">
+          <div class="tlc-name">${b.name}</div>
+          <div class="tlc-meta">
+            <span class="priority-badge ${b.priority}" style="margin-right:4px">${b.priority}</span>
+            ${b.category} · Due ${b.deadline ? formatDeadline(b.deadline) : 'no deadline'} · ${b.totalMins ? fmtMins(b.totalMins) + ' logged' : '0m logged'}
+          </div>
+        </div>
+        <div class="tlc-arrow">›</div>
+      </div>`).join('');
+}
+
+function openTimerFor(briefId) {
+  const briefs = loadBriefs();
+  const brief = briefs[briefId];
+  if (!brief) return;
+
+  // Stop any running timer
+  if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; }
+
+  timerState.briefId = briefId;
+  timerState.running = false;
+  timerState.paused  = false;
+  timerState.secsLeft = timerState.totalSecs = timerState.modeMins * 60;
+  timerState.sessionMins = 0;
+
+  setEl('tf-title', brief.name);
+  setEl('tf-meta', `${brief.category} · Due ${brief.deadline ? formatDeadline(brief.deadline) : 'no deadline'}`);
+  setEl('tf-desc', brief.description || 'No description provided.');
+  updateTimerDisplay();
+  updateSessionLabel();
+
+  const startBtn = document.getElementById('timer-start-btn');
+  if (startBtn) { startBtn.textContent = 'Start'; startBtn.className = 'timer-start-btn'; }
+
+  const ring = document.getElementById('ring-fill');
+  if (ring) { ring.className = 'ring-fill'; ring.style.strokeDashoffset = '0'; }
+
+  // Show focus view, hide list
+  const tl = document.getElementById('timer-task-list');
+  const tf = document.getElementById('timer-focus');
+  if (tl) tl.style.display = 'none';
+  if (tf) tf.style.display = 'block';
+
+  // Navigate to timer page if not already there
+  const activePage = document.querySelector('.nav-item.active')?.dataset?.page;
+  if (activePage !== 'timer') navigate('timer');
+
+  initParticles();
+  document.querySelector('.content')?.scrollTo(0, 0);
+}
+
+function exitFocus() {
+  if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; timerState.running = false; }
+  stopParticles();
+  const ringWrap = document.querySelector('.timer-ring-wrap');
+  if (ringWrap) ringWrap.classList.remove('running');
+  document.getElementById('timer-task-list').style.display = 'block';
+  document.getElementById('timer-focus').style.display = 'none';
+  renderTimerTaskList();
+}
+
+function setTimerMode(btn, mins) {
+  document.querySelectorAll('.timer-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  timerState.modeMins = mins;
+  timerState.totalSecs = mins * 60;
+  timerState.secsLeft = mins * 60;
+  if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; timerState.running = false; timerState.paused = false; }
+  const ring = document.getElementById('ring-fill');
+  if (ring) { ring.className = 'ring-fill' + (mins < 20 ? ' break-mode' : ''); ring.style.strokeDashoffset = '0'; }
+  const startBtn = document.getElementById('timer-start-btn');
+  if (startBtn) { startBtn.textContent = 'Start'; startBtn.className = 'timer-start-btn'; }
+  const ringWrap = document.querySelector('.timer-ring-wrap');
+  if (ringWrap) ringWrap.classList.remove('running');
+  stopParticles();
+  updateTimerDisplay();
+}
+
+function timerToggle() {
+  const startBtn = document.getElementById('timer-start-btn');
+  if (timerState.running) {
+    // Pause
+    clearInterval(timerState.interval); timerState.interval = null;
+    timerState.running = false; timerState.paused = true;
+    if (timerState.sessionStart) {
+      const elapsed = Math.round((Date.now() - timerState.sessionStart) / 60000);
+      timerState.sessionMins += elapsed;
+      timerState.sessionStart = null;
+    }
+    if (startBtn) { startBtn.textContent = 'Resume'; startBtn.className = 'timer-start-btn paused'; }
+    document.querySelector('.timer-ring-wrap')?.classList.remove('running');
+    stopParticles();
+  } else {
+    // Start / Resume
+    timerState.running = true; timerState.paused = false;
+    timerState.sessionStart = Date.now();
+    timerState.interval = setInterval(timerTick, 1000);
+    if (startBtn) { startBtn.textContent = 'Pause'; startBtn.className = 'timer-start-btn'; }
+    document.querySelector('.timer-ring-wrap')?.classList.add('running');
+    startParticles();
+    setFaceExpression('focused');
+  }
+}
+
+function timerTick() {
+  timerState.secsLeft--;
+  updateTimerDisplay();
+  updateRingProgress();
+  if (timerState.secsLeft <= 0) {
+    clearInterval(timerState.interval); timerState.interval = null;
+    timerState.running = false;
+    // Log session
+    if (timerState.sessionStart) {
+      timerState.sessionMins += timerState.modeMins;
+      timerState.sessionStart = null;
+    }
+    timerState.pomodoroCount++;
+    const ring = document.getElementById('ring-fill');
+    if (ring) ring.classList.add('done-ring');
+    setFaceExpression('happy');
+    document.querySelector('.timer-ring-wrap')?.classList.remove('running');
+    stopParticles();
+    const startBtn = document.getElementById('timer-start-btn');
+    if (startBtn) { startBtn.textContent = 'Start Again'; startBtn.className = 'timer-start-btn'; }
+    // Reset for next round
+    timerState.secsLeft = timerState.totalSecs;
+    updateSessionLabel();
+    // Try browser notification
+    if (Notification.permission === 'granted') new Notification('Timer done!', { body: timerState.modeMins + ' minutes complete.' });
+  }
+  updateSessionLabel();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerState.secsLeft / 60);
+  const s = timerState.secsLeft % 60;
+  setEl('timer-display', String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'));
+}
+
+function updateRingProgress() {
+  const ring = document.getElementById('ring-fill');
+  if (!ring) return;
+  const pct = timerState.secsLeft / timerState.totalSecs;
+  ring.style.strokeDashoffset = String(528 * (1 - pct));
+}
+
+function updateSessionLabel() {
+  const briefId = timerState.briefId;
+  const briefs = loadBriefs();
+  const brief = briefs[briefId];
+  const totalToday = (brief?.totalMins || 0) + timerState.sessionMins;
+  setEl('timer-session-label', `Pomodoro ${timerState.pomodoroCount + 1} · ${fmtMins(timerState.sessionMins)} this session · ${fmtMins(totalToday)} total`);
+}
+
+function timerFinish() {
+  if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; }
+  if (timerState.sessionStart) {
+    const elapsed = Math.round((Date.now() - timerState.sessionStart) / 60000);
+    timerState.sessionMins += elapsed;
+    timerState.sessionStart = null;
+  }
+  timerState.running = false;
+
+  const briefId = timerState.briefId;
+  const briefs = loadBriefs();
+  const brief = briefs[briefId];
+  if (brief && timerState.sessionMins > 0) {
+    brief.totalMins = (brief.totalMins || 0) + timerState.sessionMins;
+    brief.sessions.push({ date: new Date().toISOString(), mins: timerState.sessionMins });
+    brief.status = 'completed';
+    briefs[briefId] = brief;
+    saveBriefs(briefs);
+
+    // Push to timesheet
+    const now = new Date();
+    const key = tsDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+    const ts = loadTimesheet();
+    if (!ts[key]) ts[key] = [];
+    ts[key].push({ title: brief.name, category: brief.category || 'admin', minutes: timerState.sessionMins, notes: 'Logged via Task Timer · ' + timerState.pomodoroCount + ' pomodoro(s)' });
+    saveTimesheet(ts);
+  }
+
+  setFaceExpression('happy');
+  stopParticles();
+  document.querySelector('.timer-ring-wrap')?.classList.remove('running');
+  exitFocus();
+}
+
+function setFaceExpression(type) {
+  const mouth = document.getElementById('face-mouth');
+  if (!mouth) return;
+  if (type === 'focused') mouth.setAttribute('d', 'M 22 40 Q 30 38 38 40');
+  else if (type === 'happy') mouth.setAttribute('d', 'M 18 36 Q 30 46 42 36');
+  else mouth.setAttribute('d', 'M 20 38 Q 30 44 40 38');
+}
+
+// Particles
+function initParticles() {
+  particleCanvas = document.getElementById('timer-particles');
+  if (!particleCanvas) return;
+  particleCanvas.width = 220; particleCanvas.height = 220;
+  particleCtx = particleCanvas.getContext('2d');
+  particles.length = 0;
+  for (let i = 0; i < 18; i++) particles.push(newParticle());
+}
+
+function newParticle() {
+  const angle = Math.random() * Math.PI * 2;
+  const r = 60 + Math.random() * 40;
+  return { x: 110 + Math.cos(angle) * r, y: 110 + Math.sin(angle) * r, r: 2 + Math.random() * 2.5, opacity: 0.1 + Math.random() * 0.4, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, life: Math.random() };
+}
+
+function drawParticles() {
+  if (!particleCtx || !particleCanvas) return;
+  particleCtx.clearRect(0, 0, 220, 220);
+  particles.forEach((p, i) => {
+    p.x += p.vx; p.y += p.vy; p.life += 0.005;
+    if (p.life > 1) { particles[i] = newParticle(); return; }
+    const pulse = 0.5 + 0.5 * Math.sin(p.life * Math.PI * 2);
+    particleCtx.beginPath();
+    particleCtx.arc(p.x, p.y, p.r * (0.8 + 0.2 * pulse), 0, Math.PI * 2);
+    particleCtx.fillStyle = `rgba(58,144,144,${p.opacity * pulse})`;
+    particleCtx.fill();
+  });
+}
+
+function startParticles() {
+  if (particleAnim) return;
+  function loop() { drawParticles(); particleAnim = requestAnimationFrame(loop); }
+  loop();
+}
+
+function stopParticles() {
+  if (particleAnim) { cancelAnimationFrame(particleAnim); particleAnim = null; }
+  if (particleCtx && particleCanvas) particleCtx.clearRect(0, 0, 220, 220);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FINANCE GLOSSARY
+// ══════════════════════════════════════════════════════════════════
+const GLOSSARY = [
+  { term:'AFSL', tag:'legal', def:'Australian Financial Services Licence. A licence issued by ASIC that allows a company to provide financial services. Your employer holds one — it means all marketing materials must comply with financial services laws before they go out.' },
+  { term:'ASIC', tag:'legal', def:'Australian Securities and Investments Commission. The federal regulator overseeing financial services. When in doubt about whether something is compliant, assume ASIC is the reason it can\'t be changed.' },
+  { term:'PDS', tag:'legal', def:'Product Disclosure Statement. A mandatory document explaining a financial product (e.g. a managed fund). You\'ll often be asked to link to or reference the PDS in marketing materials. Never change its wording.' },
+  { term:'FSG', tag:'legal', def:'Financial Services Guide. Explains what services a company provides and how they get paid. Must be up to date and distributed in specific circumstances. If someone asks you to include it, follow instructions exactly.' },
+  { term:'TMD', tag:'legal', def:'Target Market Determination. A document that describes who a financial product is suitable for. Required by ASIC since 2021. Relevant when creating campaign materials — the target audience must align with the TMD.' },
+  { term:'General advice', tag:'legal', def:'Financial advice that doesn\'t take a person\'s individual circumstances into account. Most marketing materials contain general advice. Must include the general advice warning: "This is general information only and does not consider your personal objectives, financial situation or needs."' },
+  { term:'Personal advice', tag:'legal', def:'Financial advice tailored to someone\'s specific situation. Marketing materials almost never contain personal advice. If a brief suggests content that looks like it could be personal advice, flag it immediately.' },
+  { term:'Disclaimer', tag:'legal', def:'Mandatory legal text that must appear on marketing materials in financial services. Varies by product and channel. Never remove, shorten, or reword a disclaimer without explicit Legal/Compliance approval.' },
+  { term:'Compliance sign-off', tag:'legal', def:'Written approval from the compliance or legal team before a material is published or sent. In financial services, this is often required in addition to Marketing Lead approval. Do not proceed without it if instructed.' },
+  { term:'RG168', tag:'legal', def:'ASIC Regulatory Guide 168 — covers disclosure obligations for financial products marketed to consumers. You won\'t need to read it, but it\'s the reason certain disclosures are non-negotiable on your materials.' },
+  { term:'Managed fund', tag:'finance', def:'An investment vehicle where money from multiple investors is pooled and managed by a professional fund manager. Your employer likely manages or distributes managed funds. Rate cards and product brochures usually describe these.' },
+  { term:'Rate card', tag:'finance', def:'A document showing current investment returns, fees, or pricing for financial products. Often updated quarterly. One of the most common InDesign tasks for a marketing coordinator — high accuracy required as it contains live financial data.' },
+  { term:'ETF', tag:'finance', def:'Exchange-Traded Fund. An investment fund traded on a stock exchange, like shares. If your employer offers ETFs, you may produce marketing materials for them. Lower regulatory overhead than managed funds in some cases.' },
+  { term:'LIC', tag:'finance', def:'Listed Investment Company. A company listed on the ASX that holds a portfolio of investments. Similar to an ETF but structured as a company. May appear in your briefs and collateral.' },
+  { term:'Benchmark', tag:'finance', def:'A standard index used to measure investment performance (e.g. the ASX 200). Marketing materials often compare a fund\'s performance against its benchmark. Never change these figures — they come from fund managers.' },
+  { term:'Portfolio', tag:'finance', def:'A collection of investments held by a fund or individual investor. In your work, you\'ll reference portfolio holdings in marketing materials. Accuracy is critical — these are regulated disclosures.' },
+  { term:'Redemption', tag:'finance', def:'The process of an investor withdrawing money from a fund. Relevant when producing materials about fund features or during fund closure communications.' },
+  { term:'Prospectus', tag:'finance', def:'A formal legal document issued when a company raises capital from the public. Strictly regulated. If you are ever asked to work on prospectus materials, seek guidance — these have very specific compliance requirements.' },
+  { term:'CRM', tag:'data', def:'Customer Relationship Management system. The database where contact records, interactions, and marketing lists live. You\'ll use it to upload contacts, apply segmentation, manage opt-outs, and pull campaign lists. Salesforce is common.' },
+  { term:'Segmentation', tag:'data', def:'Dividing a contact list into subgroups based on shared characteristics (e.g. adviser vs retail, state, product interest). You must use the segmentation criteria specified in the brief — wrong segments = wrong audience.' },
+  { term:'Opt-out / unsubscribe', tag:'data', def:'When a contact requests not to receive further emails. Legally mandatory under the Spam Act. All email campaigns must include an unsubscribe link and opt-outs must be processed within 5 business days.' },
+  { term:'Spam Act', tag:'legal', def:'Australian legislation governing commercial electronic messages. Key rules: you must have consent to send, every email must include an unsubscribe option, and unsubscribes must be honoured promptly. Your email platform handles most of this mechanically.' },
+  { term:'Pardot', tag:'data', def:'Salesforce\'s B2B marketing automation platform. Used to build email campaigns, manage lists, track open/click rates, and run automated nurture sequences. Often used alongside Salesforce CRM.' },
+  { term:'Open rate', tag:'marketing', def:'The percentage of recipients who opened an email. A key metric in your post-send report. Industry average for financial services is ~20–25%. Report it accurately — don\'t interpret, just provide the number.' },
+  { term:'Click-through rate', tag:'marketing', def:'The percentage of email recipients who clicked a link. Shows engagement beyond just opening. Often abbreviated CTR. Pull from your email platform and include in campaign performance reports.' },
+  { term:'Bounce', tag:'marketing', def:'An email that couldn\'t be delivered. Hard bounce = permanent delivery failure (bad address). Soft bounce = temporary issue. High bounce rates indicate list quality problems. Flag to your lead if you see a spike.' },
+  { term:'Brief', tag:'marketing', def:'A document or instruction from your lead describing a task — what needs to be created, for whom, by when, and in what format. Always read the brief fully before starting. If anything is unclear, ask before you begin.' },
+  { term:'Bleed', tag:'design', def:'The area beyond the trim edge of a printed document where background colours and images must extend. Standard bleed is 3mm on all sides. Forgetting bleed on a print file is a common early mistake — check every print export.' },
+  { term:'Preflight', tag:'design', def:'A check run before exporting a print file (InDesign: Window → Output → Preflight). Catches errors like overset text, missing links, wrong colour mode, or missing fonts. Zero errors = ready to export. Do not skip.' },
+  { term:'Slug', tag:'design', def:'An area outside the bleed used for print instructions, job numbers, or colour bars. Not part of the final printed piece. Set up in InDesign document settings.' },
+  { term:'CMYK', tag:'design', def:'Cyan, Magenta, Yellow, Key (Black). The colour mode used for print. All print files must be in CMYK — sending RGB to a printer causes colour shifts. Check your InDesign swatches panel before exporting.' },
+  { term:'PDF/X-1a', tag:'design', def:'A PDF standard commonly required by print suppliers. It flattens transparency, embeds fonts, and converts to CMYK. Use the PDF/X-1a export preset in InDesign for press-ready print jobs unless the supplier specifies otherwise.' },
+  { term:'Go-live', tag:'marketing', def:'The moment a campaign, webpage, or material is published or sent to its audience. Nothing goes live without written sign-off. Confirm go-live date and time in the brief before scheduling.' },
+  { term:'Stakeholder', tag:'marketing', def:'Anyone with an interest in or influence over a project — typically your Marketing Lead, compliance team, fund managers, or external clients. Understanding who the stakeholders are on a task helps you know whose approval you need.' },
+  { term:'KPI', tag:'marketing', def:'Key Performance Indicator. A measurable target for a campaign or task (e.g. open rate > 22%, event attendance > 50). You\'ll report against KPIs — pull the data accurately, don\'t interpret unless asked.' },
+];
+
+function filterGlossary() {
+  const q = (document.getElementById('glossary-search')?.value || '').toLowerCase();
+  renderGlossaryList(q);
+}
+
+function renderGlossaryList(q = '') {
+  const el = document.getElementById('glossary-list');
+  if (!el) return;
+  const filtered = q ? GLOSSARY.filter(g => g.term.toLowerCase().includes(q) || g.def.toLowerCase().includes(q)) : GLOSSARY;
+  if (!filtered.length) { el.innerHTML = `<div class="section-block"><div class="glossary-empty">No terms match "${q}"</div></div>`; return; }
+
+  // Group by first letter
+  const groups = {};
+  filtered.forEach(g => {
+    const letter = g.term[0].toUpperCase();
+    if (!groups[letter]) groups[letter] = [];
+    groups[letter].push(g);
+  });
+
+  el.innerHTML = Object.keys(groups).sort().map(letter => `
+    <div class="section-block" style="margin-bottom:12px">
+      <div class="section-block-header">
+        <span class="sh-title" style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.15em">${letter}</span>
+      </div>
+      ${groups[letter].map(g => `
+        <div class="glossary-item">
+          <div class="glossary-term">${g.term}</div>
+          <div class="glossary-body">
+            <div><span class="glossary-tag ${g.tag}">${g.tag}</span></div>
+            <div class="glossary-def">${g.def}</div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WHAT GOOD LOOKS LIKE
+// ══════════════════════════════════════════════════════════════════
+const GOOD_LOOKS = [
+  {
+    type: 'Email Campaign',
+    icon: '📧',
+    pass: ['Sent on time', 'No broken links', 'Unsubscribe link present', 'Correct list segment used', 'Approval email exists'],
+    good: ['Test email reviewed on mobile AND desktop', 'Open rate pulled within 24 hours of send', 'Bounces and unsubscribes logged same day', 'Approval documented in shared folder, not just a chat message', 'Subject line and sender name double-checked against brief'],
+    impressive: ['Performance report sent to Marketing Lead with brief commentary (not just numbers)', 'Notes any anomalies proactively (high bounce = possible list issue)', 'Comparison to previous campaign included in report', 'Sends a pre-flight checklist screenshot with approval request', 'Archives the campaign version with send date in file name'],
+  },
+  {
+    type: 'InDesign Collateral',
+    icon: '🖨',
+    pass: ['Correct template used', 'Logo present', 'Disclaimer included', 'No spelling errors', 'PDF exported and sent'],
+    good: ['Preflight run with zero errors before export', 'Correct colour mode for channel (CMYK print / RGB digital)', 'Links panel checked — no missing or modified links', 'File named correctly with version number', 'Source file saved and packaged alongside the PDF'],
+    impressive: ['Prints a physical proof or zooms to 100% and reads every word', 'Includes a QC checklist screenshot with approval request', 'Notes any brand deviations they spotted and flagged before submitting', 'Packages the file with fonts and links, named to convention, uploaded to correct folder', 'Mentions the bleed spec used if print job'],
+  },
+  {
+    type: 'Event Coordination',
+    icon: '📅',
+    pass: ['Invitations sent on time', 'RSVP list maintained', 'Venue and logistics confirmed', 'Name badges prepared'],
+    good: ['RSVP tracker updated same day as each response', 'Reminder emails sent at 1 week and 1 day out', 'Supplier confirmations documented (email trail)', 'Attendance list cross-checked against name badges before event', 'Post-event materials archived same week'],
+    impressive: ['Proactively flags RSVP count vs capacity before it becomes a problem', 'Prepares a run sheet for the day — timeline, contacts, venue, backup contacts', 'Reconciles attendance vs RSVP within 24 hours post-event', 'Sends CRM update and follow-up list to Marketing Lead before being asked', 'Submits supplier invoices within 2 business days of event'],
+  },
+  {
+    type: 'CRM & Data',
+    icon: '📊',
+    pass: ['List uploaded correctly', 'Segment applied', 'Opt-outs checked before send', 'No obvious data errors'],
+    good: ['Cross-references the upload against the source file before confirming', 'Flags any contacts missing consent flags before proceeding', 'Checks for duplicate records before upload', 'Confirms list count with Marketing Lead before campaign is scheduled', 'Documents where the list came from and when it was last cleaned'],
+    impressive: ['Proactively checks that the list aligns with the TMD for the product being promoted', 'Reports unsubscribe count post-campaign alongside bounce rate', 'Flags any unusual patterns (e.g. spike in hard bounces = outdated list)', 'Keeps a simple log of list sizes over time to spot data decay', 'Asks whether contacts require re-consent if list is older than 12 months'],
+  },
+  {
+    type: 'Performance Report',
+    icon: '📈',
+    pass: ['Numbers pulled from the platform', 'Sent to Marketing Lead', 'Covers open rate and clicks'],
+    good: ['Compares to previous campaign or industry benchmark', 'Delivered within 24 hours of campaign close', 'Includes context (was send time different? Was subject line tested?)', 'Notes any deliverability issues (bounces, suppressions)', 'Attached as a formatted document, not a screenshot'],
+    impressive: ['Provides one-paragraph narrative: what worked, what didn\'t, what to consider next time', 'Includes a trend chart if multiple campaigns run', 'Flags any compliance issues discovered post-send', 'Suggests one testable change for the next campaign', 'Keeps a running campaign log so patterns emerge over time'],
+  },
+  {
+    type: 'Supplier Management',
+    icon: '📦',
+    pass: ['Brief sent', 'Receipt confirmed', 'File delivered on time', 'Basic QC done'],
+    good: ['Brief includes all specs — format, dimensions, bleed, colour mode, deadline', 'Confirmation email explicitly requests an ETA acknowledgement', 'Reviews the deliverable against the brief point by point (not just a glance)', 'Raises issues specifically — not "this doesn\'t look right" but "logo version is incorrect, should be white on dark"', 'Follows up 48 hours before deadline if no confirmation received'],
+    impressive: ['Maintains a simple supplier log: name, contact, past jobs, turnaround reliability', 'Flags lead time issues proactively — "if we need this by Friday, we need to brief by Tuesday"', 'Checks supplier output against brand guide, not just the brief', 'Escalates supplier issues to Marketing Lead with a proposed resolution, not just a problem', 'Notes any spec corrections on the file itself before archiving, for future reference'],
+  },
+];
+
+function renderGoodLooks() {
+  const el = document.getElementById('goodlooks-content');
+  if (!el) return;
+  el.innerHTML = GOOD_LOOKS.map(item => `
+    <div class="wgl-card" onclick="this.classList.toggle('open')">
+      <div class="wgl-card-header">
+        <span style="font-size:18px;flex-shrink:0">${item.icon}</span>
+        <span class="wgl-card-title">${item.type}</span>
+        <span class="wgl-toggle">▼</span>
+      </div>
+      <div class="wgl-levels">
+        <div class="wgl-level pass">
+          <div class="wgl-level-label"><span class="wgl-level-dot"></span>Pass</div>
+          ${item.pass.map(t => `<div class="wgl-item">${t}</div>`).join('')}
+        </div>
+        <div class="wgl-level good">
+          <div class="wgl-level-label"><span class="wgl-level-dot"></span>Good</div>
+          ${item.good.map(t => `<div class="wgl-item">${t}</div>`).join('')}
+        </div>
+        <div class="wgl-level impressive">
+          <div class="wgl-level-label"><span class="wgl-level-dot"></span>Impressive</div>
+          ${item.impressive.map(t => `<div class="wgl-item">${t}</div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MISTAKES LOG
+// ══════════════════════════════════════════════════════════════════
+const PRELOADED_MISTAKES = [
+  { task:'Email campaign', what:'Used an old template that had the previous disclaimer', fix:'Always open templates from the approved shared folder, not a recent personal copy' },
+  { task:'Email campaign', what:'Sent to the wrong list segment', fix:'Print or screenshot the segment criteria and compare to brief before scheduling' },
+  { task:'Email campaign', what:'Didn\'t test the email on mobile — layout broke', fix:'Always send a test to yourself and check on your phone before approval request' },
+  { task:'Email campaign', what:'Scheduled before final approval was received', fix:'Written approval = email or shared doc. Never schedule on a verbal or Slack "yeah looks fine"' },
+  { task:'InDesign collateral', what:'Exported in RGB instead of CMYK for a print job', fix:'Check the Swatches panel and export preset before every print export' },
+  { task:'InDesign collateral', what:'Submitted with overset text — copy was cut off on page 3', fix:'Run Preflight (Window → Output → Preflight) and resolve all errors before exporting' },
+  { task:'InDesign collateral', what:'Used the wrong logo version (reversed when it should have been full colour)', fix:'The brand guide specifies which version goes on which background — check it every time' },
+  { task:'InDesign collateral', what:'Sent to print without bleed — white edges appeared on the final product', fix:'3mm bleed on all sides, every print job. Check Document Setup before exporting' },
+  { task:'Event coordination', what:'Name badges printed with a misspelled attendee name', fix:'Cross-reference name badges against the confirmed RSVP list, not the invitation list' },
+  { task:'Event coordination', what:'Didn\'t send a reminder — attendance was lower than expected', fix:'Schedule 1-week and 1-day reminders at the same time you send the invitation' },
+  { task:'Event coordination', what:'Supplier confirmed verbally but there was no written confirmation', fix:'Always ask for written confirmation — "Can you reply confirming you\'ll deliver by [date]?"' },
+  { task:'CRM / data', what:'Uploaded a list without checking for opt-outs first', fix:'Check opt-out and suppression lists before every upload, not after' },
+  { task:'CRM / data', what:'Sent a campaign to a list that included contacts in a different state', fix:'Segment criteria must be verified against the brief before the list is locked' },
+  { task:'Website update', what:'Published to the live site instead of staging for review', fix:'Always preview on staging and screenshot before going live. Approval = sign-off on the staging version' },
+  { task:'Website update', what:'Updated live copy without a current backup', fix:'Check that the CMS has a version history or take a screenshot before making changes' },
+  { task:'General', what:'Went silent when stuck — 2 hours passed and the deadline moved', fix:'Flag blockers within the hour, not at EOD. A one-liner is enough: "I\'m stuck on X — guidance needed"' },
+  { task:'General', what:'Sent a deliverable without QC\'ing it — the logo was missing', fix:'QC against the brief as a checklist, not a glance. Every item on the brief = one check' },
+  { task:'General', what:'Didn\'t update Monday.com — lead thought the task hadn\'t been started', fix:'Change status to "In Progress" when you start. Don\'t wait until it\'s done' },
+  { task:'General', what:'Sent the wrong file version to the supplier', fix:'File naming convention + version numbers. Open the file before attaching to confirm it\'s the right one' },
+  { task:'General', what:'Missed a deadline without flagging it early', fix:'If a deadline is at risk, say so at least 3–4 hours before it hits — not after it passes' },
+];
+
+const MISTAKES_KEY = 'msc_mistakes_v1';
+function loadPersonalMistakes() { try { return JSON.parse(localStorage.getItem(MISTAKES_KEY)) || []; } catch { return []; } }
+function savePersonalMistakes(d) { localStorage.setItem(MISTAKES_KEY, JSON.stringify(d)); }
+
+function renderPreloadedMistakes() {
+  const el = document.getElementById('mistakes-preloaded');
+  if (!el) return;
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);padding:10px 14px;background:var(--bg-3);border-bottom:1px solid var(--border)">
+    <div class="mi-col-label">Task type</div><div class="mi-col-label">What went wrong</div><div class="mi-col-label">What would have caught it</div>
+  </div>` + PRELOADED_MISTAKES.map((m, i) => `
+    <div class="mistake-item">
+      <div><div class="mi-col-val" style="color:var(--text-3);font-size:11px">#${i+1} · ${m.task}</div></div>
+      <div><div class="mi-col-val" style="color:var(--rust)">${m.what}</div></div>
+      <div><div class="mi-col-val" style="color:var(--sage)">${m.fix}</div></div>
+    </div>`).join('');
+}
+
+function renderPersonalMistakes() {
+  const el = document.getElementById('mistakes-personal');
+  if (!el) return;
+  const list = loadPersonalMistakes();
+  if (!list.length) { el.innerHTML = '<div style="padding:16px 18px;font-size:12px;color:var(--text-3);font-family:var(--font-mono)">No personal entries yet — they\'ll appear here as you add them.</div>'; return; }
+  el.innerHTML = list.map((m, i) => `
+    <div class="personal-mistake-row">
+      <div class="pm-body">
+        <div class="pm-task">${m.task}</div>
+        <div class="pm-mistake">✗ ${m.mistake}</div>
+        <div class="pm-fix">→ ${m.fix}</div>
+      </div>
+      <button class="pm-delete" onclick="deletePersonalMistake(${i})">
+        <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function addMistake() {
+  const task    = document.getElementById('ml-what')?.value?.trim();
+  const mistake = document.getElementById('ml-mistake')?.value?.trim();
+  const fix     = document.getElementById('ml-fix')?.value?.trim();
+  if (!task || !mistake || !fix) return;
+  const list = loadPersonalMistakes();
+  list.unshift({ task, mistake, fix, date: new Date().toISOString() });
+  savePersonalMistakes(list);
+  ['ml-what','ml-mistake','ml-fix'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderPersonalMistakes();
+}
+
+function deletePersonalMistake(idx) {
+  const list = loadPersonalMistakes();
+  list.splice(idx, 1);
+  savePersonalMistakes(list);
+  renderPersonalMistakes();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 90-DAY TRACKER
+// ══════════════════════════════════════════════════════════════════
+const ND_KEY = 'msc_ninetydays_v1';
+function loadND() { try { return JSON.parse(localStorage.getItem(ND_KEY)) || { startDate: '', wins: [], skills: [], feedback: [], unclear: [] }; } catch { return { startDate: '', wins: [], skills: [], feedback: [], unclear: [] }; } }
+function saveND(d) { localStorage.setItem(ND_KEY, JSON.stringify(d)); }
+
+function saveNdStartDate() {
+  const val = document.getElementById('nd-start-date')?.value;
+  const nd = loadND();
+  nd.startDate = val;
+  saveND(nd);
+  renderNdStats();
+}
+
+function renderNdStats() {
+  const nd = loadND();
+  if (nd.startDate) {
+    const start = new Date(nd.startDate);
+    const days  = Math.max(0, Math.floor((Date.now() - start.getTime()) / 86400000));
+    setEl('nd-days', days);
+    const el = document.getElementById('nd-start-date'); if (el) el.value = nd.startDate;
+  }
+  setEl('nd-wins-count',     nd.wins.length);
+  setEl('nd-skills-count',   nd.skills.length);
+  setEl('nd-feedback-count', nd.feedback.length);
+}
+
+function renderNdList(type) {
+  const nd = loadND();
+  const ids = { wins: 'nd-wins-list', skills: 'nd-skills-list', feedback: 'nd-feedback-list', unclear: 'nd-unclear-list' };
+  const el = document.getElementById(ids[type]);
+  if (!el) return;
+  const list = nd[type] || [];
+  if (!list.length) { el.innerHTML = '<div class="nd-empty">Nothing here yet.</div>'; return; }
+  el.innerHTML = list.map((item, i) => `
+    <div class="nd-entry">
+      <div style="flex:1">
+        <div class="nd-entry-text">${item.text}</div>
+        <div class="nd-entry-date">${new Date(item.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
+      </div>
+      <button class="nd-delete" onclick="deleteNdEntry('${type}',${i})">
+        <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function addNdEntry(type) {
+  const inputIds = { wins: 'nd-win-input', skills: 'nd-skill-input', feedback: 'nd-feedback-input', unclear: 'nd-unclear-input' };
+  const el = document.getElementById(inputIds[type]);
+  const text = el?.value?.trim();
+  if (!text) return;
+  const nd = loadND();
+  if (!nd[type]) nd[type] = [];
+  nd[type].unshift({ text, date: new Date().toISOString() });
+  saveND(nd);
+  el.value = '';
+  renderNdList(type);
+  renderNdStats();
+}
+
+function deleteNdEntry(type, idx) {
+  const nd = loadND();
+  nd[type].splice(idx, 1);
+  saveND(nd);
+  renderNdList(type);
+  renderNdStats();
+}
+
+function renderNinetyDays() {
+  renderNdStats();
+  ['wins','skills','feedback','unclear'].forEach(renderNdList);
 }
 
 // ── INIT ────────────────────────────────────────────────────────
