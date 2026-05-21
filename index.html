@@ -983,10 +983,19 @@
             <div class="timer-task-meta" id="tf-meta"></div>
             <div class="timer-task-desc" id="tf-desc"></div>
             <div class="timer-controls">
-              <div class="timer-mode-row">
-                <button class="timer-mode-btn active" data-mins="25" onclick="setTimerMode(this,25)">25m</button>
-                <button class="timer-mode-btn" data-mins="5" onclick="setTimerMode(this,5)">5m break</button>
-                <button class="timer-mode-btn" data-mins="15" onclick="setTimerMode(this,15)">15m break</button>
+              <div class="timer-duration-wrap">
+                <div class="timer-duration-field">
+                  <input type="number" class="timer-duration-input" id="timer-duration" value="25" min="1" max="300" oninput="applyCustomDuration(this.value)"/>
+                  <span class="timer-duration-unit">min</span>
+                </div>
+                <div class="timer-preset-chips">
+                  <button class="timer-preset-chip active" data-mins="25" onclick="setPresetMins(this,25)">25m</button>
+                  <button class="timer-preset-chip" data-mins="45" onclick="setPresetMins(this,45)">45m</button>
+                  <button class="timer-preset-chip" data-mins="60" onclick="setPresetMins(this,60)">60m</button>
+                  <button class="timer-preset-chip" data-mins="90" onclick="setPresetMins(this,90)">90m</button>
+                  <button class="timer-preset-chip break" data-mins="5" onclick="setPresetMins(this,5)">5m break</button>
+                  <button class="timer-preset-chip break" data-mins="15" onclick="setPresetMins(this,15)">15m break</button>
+                </div>
               </div>
               <div class="timer-ring-wrap">
                 <canvas id="timer-particles" class="timer-particles"></canvas>
@@ -1010,6 +1019,7 @@
                   <input class="form-input" id="timer-note-input" placeholder="Note a blocker, update, or anything worth logging…" onkeydown="if(event.key==='Enter')addTimerNote()"/>
                   <button class="tns-log-btn" onclick="addTimerNote()">Log</button>
                 </div>
+                <div class="tns-stamp-hint" id="tns-stamp-hint"></div>
                 <div id="timer-notes-list" class="timer-notes-list"></div>
               </div>
             </div>

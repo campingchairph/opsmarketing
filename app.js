@@ -2243,6 +2243,7 @@ function openTimerFor(briefId) {
   timerState.notes = brief.timerNotes ? [...brief.timerNotes] : [];
   updateTimerDisplay();
   updateSessionLabel();
+  updateStampHint();
   renderTimerNotes();
 
   const startBtn = document.getElementById('timer-start-btn');
@@ -2276,8 +2277,13 @@ function exitFocus() {
 }
 
 function setTimerMode(btn, mins) {
-  document.querySelectorAll('.timer-mode-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  mins = parseInt(mins) || 25;
+  // Sync preset chips
+  document.querySelectorAll('.timer-preset-chip').forEach(b => b.classList.toggle('active', parseInt(b.dataset.mins) === mins));
+  // Sync duration input
+  const durInput = document.getElementById('timer-duration');
+  if (durInput) durInput.value = mins;
+
   timerState.modeMins = mins;
   timerState.totalSecs = mins * 60;
   timerState.secsLeft = mins * 60;
@@ -2290,6 +2296,16 @@ function setTimerMode(btn, mins) {
   if (ringWrap) ringWrap.classList.remove('running');
   stopParticles();
   updateTimerDisplay();
+}
+
+function setPresetMins(btn, mins) {
+  setTimerMode(btn, mins);
+}
+
+function applyCustomDuration(val) {
+  const mins = parseInt(val);
+  if (!mins || mins < 1 || mins > 300) return;
+  setTimerMode(null, mins);
 }
 
 function timerToggle() {
@@ -2321,6 +2337,7 @@ function timerTick() {
   timerState.secsLeft--;
   updateTimerDisplay();
   updateRingProgress();
+  updateStampHint();
   if (timerState.secsLeft <= 0) {
     clearInterval(timerState.interval); timerState.interval = null;
     timerState.running = false;
@@ -2356,6 +2373,17 @@ function updateRingProgress() {
   if (!ring) return;
   const pct = timerState.secsLeft / timerState.totalSecs;
   ring.style.strokeDashoffset = String(528 * (1 - pct));
+}
+
+function updateStampHint() {
+  const el = document.getElementById('tns-stamp-hint');
+  if (!el) return;
+  const now = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+  const elp = timerState.totalSecs - timerState.secsLeft;
+  const sl  = timerState.secsLeft;
+  const em  = Math.floor(elp / 60), es = elp % 60;
+  const rm  = Math.floor(sl  / 60), rs = sl  % 60;
+  el.textContent = `Will stamp: ${now} · ${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')} in · ${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')} left`;
 }
 
 function updateSessionLabel() {
@@ -2498,23 +2526,22 @@ function renderTimerNotes() {
   }
 
   el.innerHTML = notes.slice().reverse().map(n => {
-    // Wall clock
     const wallDate = new Date(n.time);
     const wallStr  = wallDate.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
 
-    // Timer badge — remaining time is the hero
-    const sl = n.secsLeft != null ? n.secsLeft : null;
-    const el2= n.elapsed  != null ? n.elapsed  : null;
-    let badgeTop = '--:--', badgeSub = 'left';
-    let elapsedStr = '';
+    const sl  = n.secsLeft != null ? n.secsLeft : null;
+    const elp = n.elapsed  != null ? n.elapsed  : null;
+
+    // Badge = elapsed time (how far IN to the session)
+    let badgeTop = '--:--', badgeSub = 'in';
+    let metaRight = '';
+    if (elp != null) {
+      const em = Math.floor(elp / 60), es = elp % 60;
+      badgeTop = `${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')}`;
+    }
     if (sl != null) {
       const rm = Math.floor(sl / 60), rs = sl % 60;
-      badgeTop = `${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
-      badgeSub = 'left';
-      if (el2 != null) {
-        const em = Math.floor(el2 / 60), es = el2 % 60;
-        elapsedStr = `${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')} in`;
-      }
+      metaRight = `${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')} left`;
     }
 
     return `
@@ -2525,7 +2552,7 @@ function renderTimerNotes() {
       </div>
       <div class="tni-content">
         <div class="tni-text">${n.text}</div>
-        <div class="tni-meta">${wallStr}${elapsedStr ? ' · ' + elapsedStr : ''}</div>
+        <div class="tni-meta">${wallStr}${metaRight ? ' · ' + metaRight : ''}</div>
       </div>
     </div>`;
   }).join('');
