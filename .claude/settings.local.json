@@ -4,7 +4,10 @@
       "WebFetch(domain:claude.ai)",
       "Bash(git push *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(findstr /c:\"Outfit\\\\|JetBrains\\\\|Inter\" style.css)",
+      "Bash(n\\\\\"\")",
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css' | Select-Object -First 3\\) -join \\\\\"`n\\\\\"\")"
     ]
   }
 }
