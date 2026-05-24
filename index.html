@@ -291,7 +291,22 @@
       90-Day Tracker
     </div>
 
+    <!-- AI Key Panel -->
+    <div id="ai-key-panel" style="display:none;padding:12px 16px;background:var(--bg-3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:4px">
+      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">Anthropic API Key</div>
+      <input id="ai-key-input" type="password" class="form-input" placeholder="sk-ant-…" style="margin-bottom:8px;font-size:11px"/>
+      <div style="display:flex;gap:6px">
+        <button id="ai-key-save" class="btn-add" style="flex:1;padding:7px;font-size:11px" onclick="saveAiKey()">Save key</button>
+        <button style="padding:7px 10px;border:1px solid var(--border-md);border-radius:8px;background:transparent;color:var(--text-3);font-size:11px;cursor:pointer" onclick="clearAiKey()">Clear</button>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-3);line-height:1.5">Key stored in <span style="color:var(--accent)">localStorage</span> only — never sent anywhere except directly to <span style="color:var(--text-2)">api.anthropic.com</span>.</div>
+    </div>
+
     <div class="sidebar-footer">
+      <a href="#" onclick="toggleAiKeyPanel(); return false;" id="ai-key-toggle-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.42 1.42M11.36 11.36l1.42 1.42M3.22 12.78l1.42-1.42M11.36 4.64l1.42-1.42"/></svg>
+        <span id="ai-key-toggle-label">AI Settings</span>
+      </a>
       <a href="#" onclick="goHome(); return false;">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 6L8 1l6 5v8H10V9H6v4H2Z"/></svg>
         Home
@@ -385,6 +400,50 @@
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
           Reset daily checklists
         </button>
+
+        <!-- ── AI: EOD / EOW Summary Writer ── -->
+        <div class="ai-feature-block" id="eod-writer" style="margin-top:20px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="3" r="1.5" fill="var(--accent)"/></svg>
+            </div>
+            <span class="sh-title">EOD / EOW Summary Writer</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Describe what you did today or this week — Claude writes your manager update as 5 polished sentences.</p>
+            <div class="ai-controls">
+              <div class="ai-field-row">
+                <label class="ai-label">Summary type</label>
+                <select id="eod-type" class="form-select">
+                  <option value="end-of-day">End of day (EOD)</option>
+                  <option value="end-of-week">End of week (EOW)</option>
+                </select>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">What you completed</label>
+                <textarea id="eod-completed" class="form-textarea" rows="3" style="height:72px" placeholder="e.g. Drafted Q2 broker email, sent test to manager, updated 3 tasks in Monday, attended brand briefing call"></textarea>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">What's still in progress</label>
+                <textarea id="eod-inprogress" class="form-textarea" rows="2" style="height:56px" placeholder="e.g. Waiting on legal sign-off for disclaimer copy, InDesign rate card still in review"></textarea>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">Blockers or things you need</label>
+                <textarea id="eod-blockers" class="form-textarea" rows="2" style="height:48px" placeholder="e.g. Need approved logo file from brand team before I can finalise the flyer"></textarea>
+              </div>
+              <button id="eod-btn" class="btn-add" onclick="generateEODSummary()">Write summary →</button>
+            </div>
+            <div class="ai-output" id="eod-output" hidden>
+              <div class="ai-output-label">Manager update</div>
+              <textarea id="eod-result" class="ai-result-text" rows="8" readonly></textarea>
+              <button class="ai-copy-btn" onclick="copyAiOutput('eod-result')">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                Copy to clipboard
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ── CAMPAIGNS ── -->
@@ -419,6 +478,124 @@
             <div id="list-collateral"></div>
           </div>
         </div>
+
+        <!-- ── AI: Email Drafter ── -->
+        <div class="ai-feature-block" id="email-drafter" style="margin-top:16px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="var(--accent)"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
+            </div>
+            <span class="sh-title">AI Email Drafter</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste your bullet points — Claude writes a full broker email with subject line, ready to copy into your email platform.</p>
+            <div class="ai-controls">
+              <div class="ai-two-col">
+                <div class="ai-field-row">
+                  <label class="ai-label">Tone</label>
+                  <select id="email-tone" class="form-select">
+                    <option value="formal">Formal</option>
+                    <option value="warm and professional" selected>Warm &amp; professional</option>
+                    <option value="direct and concise">Direct &amp; concise</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">Your bullet points</label>
+                <textarea id="email-bullets" class="form-textarea" rows="5" style="height:110px" placeholder="- Q2 fund performance update&#10;- New product launch in August&#10;- Invite to webinar on 15 July&#10;- Contact details for queries"></textarea>
+              </div>
+              <button id="email-draft-btn" class="btn-add" onclick="draftBrokerEmail()">Draft email →</button>
+            </div>
+            <div class="ai-output" id="email-output" hidden>
+              <div class="ai-output-label">Draft email</div>
+              <textarea id="email-result" class="ai-result-text" rows="14" readonly></textarea>
+              <button class="ai-copy-btn" onclick="copyAiOutput('email-result')">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                Copy to clipboard
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── AI: Pre-Send QC + Cover Note side by side ── -->
+        <div class="section-grid" style="margin-top:16px">
+
+          <!-- Pre-Send Test Email QC -->
+          <div class="ai-feature-block" id="test-email-qc">
+            <div class="section-block-header ai-feature-header">
+              <div class="sh-icon" style="background:var(--accent-dim)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/><circle cx="8" cy="8" r="7"/></svg>
+              </div>
+              <span class="sh-title">Pre-Send Test Email QC</span>
+              <span id="test-qc-count" class="sh-count">0 / 10</span>
+            </div>
+            <div class="ai-feature-body" style="padding-bottom:0">
+              <p class="ai-feature-desc" style="margin-bottom:12px">All 10 must be ticked before you can mark the test as QC passed.</p>
+              <ul class="qc-list" id="test-qc-list">
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Test email sent to yourself first and reviewed in full</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Renders correctly on mobile (check Gmail app)</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Renders correctly on desktop (Outlook + Chrome)</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> All links are live and go to correct pages</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> No broken images or missing assets</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Sender name and email address are correct</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Subject line matches approved brief exactly</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Legal disclaimer / disclosure is present and correct</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Personalisation tokens resolved — none left unfilled</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Unsubscribe link is working</label></li>
+              </ul>
+              <div class="qc-footer">
+                <span id="test-qc-status" class="qc-status-text">0 / 10 checked</span>
+                <button id="test-qc-pass-btn" class="btn-add" style="width:auto;padding:9px 18px" disabled onclick="markTestQCPassed()">Mark as QC Passed ✓</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manager Cover Note Generator -->
+          <div class="ai-feature-block" id="cover-note-gen">
+            <div class="section-block-header ai-feature-header">
+              <div class="sh-icon" style="background:var(--accent-dim)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="var(--accent)"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
+              </div>
+              <span class="sh-title">Manager Cover Note Generator</span>
+              <span class="ai-badge">AI</span>
+            </div>
+            <div class="ai-feature-body">
+              <p class="ai-feature-desc">Fill in the details — Claude writes the short context note to attach when forwarding the test email for sign-off.</p>
+              <div class="ai-controls">
+                <div class="ai-field-row">
+                  <label class="ai-label">Campaign / email name</label>
+                  <input type="text" id="cn-campaign" class="form-input" placeholder="e.g. Q2 Broker Update — July 2026"/>
+                </div>
+                <div class="ai-two-col">
+                  <div class="ai-field-row">
+                    <label class="ai-label">Planned send date</label>
+                    <input type="date" id="cn-senddate" class="form-input"/>
+                  </div>
+                  <div class="ai-field-row">
+                    <label class="ai-label">Audience / list segment</label>
+                    <input type="text" id="cn-audience" class="form-input" placeholder="e.g. All active brokers — AU &amp; NZ"/>
+                  </div>
+                </div>
+                <div class="ai-field-row">
+                  <label class="ai-label">Anything the manager needs to know</label>
+                  <textarea id="cn-notes" class="form-textarea" rows="3" style="height:64px" placeholder="e.g. New disclaimer wording applied, two links updated from last version, waiting on sign-off by COB Thursday"></textarea>
+                </div>
+                <button id="cover-note-btn" class="btn-add" onclick="generateCoverNote()">Generate cover note →</button>
+              </div>
+              <div class="ai-output" id="cover-note-output" hidden>
+                <div class="ai-output-label">Cover note</div>
+                <textarea id="cover-note-result" class="ai-result-text" rows="7" readonly></textarea>
+                <button class="ai-copy-btn" onclick="copyAiOutput('cover-note-result')">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                  Copy to clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /section-grid AI row -->
       </div>
 
       <!-- ── EVENTS ── -->

@@ -2916,6 +2916,194 @@ function renderNinetyDays() {
   ['wins','skills','feedback','unclear'].forEach(renderNdList);
 }
 
+// ══════════════════════════════════════════════════════════════════
+// AI / CLAUDE API
+// ══════════════════════════════════════════════════════════════════
+
+const AI_KEY_STORAGE = 'msc_claude_key';
+
+function getAiKey() {
+  return localStorage.getItem(AI_KEY_STORAGE) || '';
+}
+
+function saveAiKey() {
+  const inp = document.getElementById('ai-key-input');
+  const val = inp?.value?.trim();
+  // Don't save if user is looking at the masked dots (i.e. hasn't typed a new key)
+  if (!val || /^•+$/.test(val)) return;
+  localStorage.setItem(AI_KEY_STORAGE, val);
+  if (inp) inp.value = '';
+  const btn = document.getElementById('ai-key-save');
+  if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save key'; }, 2200); }
+  const link = document.getElementById('ai-key-toggle-label');
+  if (link) link.textContent = 'AI Settings ✓';
+}
+
+function clearAiKey() {
+  localStorage.removeItem(AI_KEY_STORAGE);
+  const inp = document.getElementById('ai-key-input');
+  if (inp) inp.value = '';
+  const link = document.getElementById('ai-key-toggle-label');
+  if (link) link.textContent = 'AI Settings';
+}
+
+function toggleAiKeyPanel() {
+  const panel = document.getElementById('ai-key-panel');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Show placeholder dots if key already saved
+    const inp = document.getElementById('ai-key-input');
+    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'sk-ant-…';
+    inp.value = '';
+  }
+}
+
+// ── Core API helper ──────────────────────────────────────────────
+async function callClaude(systemPrompt, userMessage) {
+  const key = getAiKey();
+  if (!key) throw new Error('NO_KEY');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text ?? 'No response received from Claude.';
+}
+
+// ── Shared UI helpers ────────────────────────────────────────────
+function copyAiOutput(textareaId) {
+  const el = document.getElementById(textareaId);
+  if (!el || !el.value) return;
+  navigator.clipboard.writeText(el.value).then(() => showAiToast('✓ Copied to clipboard'));
+}
+
+function showAiToast(msg) {
+  const t = document.getElementById('copy-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2200);
+}
+
+function aiSetBtn(btnId, loading, defaultLabel, loadingLabel) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.textContent = loading ? loadingLabel : defaultLabel;
+  btn.disabled = loading;
+}
+
+function aiNoKey(featureName) {
+  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Anthropic API key, and click Save.\n\nYou can get a key at console.anthropic.com.`);
+}
+
+// ── Feature 1: AI Email Drafter ──────────────────────────────────
+async function draftBrokerEmail() {
+  const bullets = document.getElementById('email-bullets')?.value?.trim();
+  const tone    = document.getElementById('email-tone')?.value;
+  if (!bullets) { alert('Please enter your bullet points first.'); return; }
+  if (!getAiKey()) { aiNoKey(); return; }
+  aiSetBtn('email-draft-btn', true, 'Draft email →', 'Drafting…');
+  try {
+    const system = `You are a professional financial services marketing coordinator. Write broker update emails that are clear, compliant, and well-structured. Always include a subject line at the top formatted as:\nSubject: [subject line here]\n\nThen write the full email body. Never include legal advice. Use Australian English spelling.`;
+    const prompt = `Write a ${tone} broker update email based on these bullet points:\n${bullets}`;
+    const result = await callClaude(system, prompt);
+    const out = document.getElementById('email-output');
+    document.getElementById('email-result').value = result;
+    if (out) out.hidden = false;
+    out?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (e) {
+    alert('Claude API error: ' + e.message);
+  }
+  aiSetBtn('email-draft-btn', false, 'Draft email →', 'Drafting…');
+}
+
+// ── Feature 2: Pre-Send Test Email QC ────────────────────────────
+function updateTestQC() {
+  const all     = document.querySelectorAll('[data-qc="test"]');
+  const checked = document.querySelectorAll('[data-qc="test"]:checked');
+  const n = checked.length, total = all.length;
+  const status = document.getElementById('test-qc-status');
+  const count  = document.getElementById('test-qc-count');
+  const btn    = document.getElementById('test-qc-pass-btn');
+  if (status) status.textContent = `${n} / ${total} checked`;
+  if (count)  count.textContent  = `${n} / ${total}`;
+  if (btn) {
+    btn.disabled = n < total;
+    if (n === total) btn.classList.add('qc-ready');
+    else btn.classList.remove('qc-ready');
+  }
+}
+
+function markTestQCPassed() {
+  const btn = document.getElementById('test-qc-pass-btn');
+  if (btn) { btn.textContent = '✓ QC Passed — ready for sign-off'; btn.disabled = true; btn.classList.add('qc-done'); }
+  showAiToast('✓ Test email QC passed — forward to manager for sign-off');
+}
+
+// ── Feature 3: Manager Cover Note Generator ───────────────────────
+async function generateCoverNote() {
+  const campaign = document.getElementById('cn-campaign')?.value?.trim();
+  const senddate = document.getElementById('cn-senddate')?.value;
+  const audience = document.getElementById('cn-audience')?.value?.trim();
+  const notes    = document.getElementById('cn-notes')?.value?.trim();
+  if (!campaign) { alert('Please enter the campaign name.'); return; }
+  if (!getAiKey()) { aiNoKey(); return; }
+  aiSetBtn('cover-note-btn', true, 'Generate cover note →', 'Generating…');
+  try {
+    const system = `You are a marketing coordinator writing a brief, professional internal note to a manager. The note accompanies a test email forwarded for approval. Keep it to 4–6 sentences. Use Australian English. Tone: professional and clear. Do not write "Dear" — start directly with context.`;
+    const prompt = `Write a manager cover note for the following test email submission:\nCampaign: ${campaign}\nPlanned send date: ${senddate || 'TBC'}\nAudience: ${audience || 'TBC'}\nAdditional notes: ${notes || 'None'}`;
+    const result = await callClaude(system, prompt);
+    const out = document.getElementById('cover-note-output');
+    document.getElementById('cover-note-result').value = result;
+    if (out) out.hidden = false;
+    out?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (e) {
+    alert('Claude API error: ' + e.message);
+  }
+  aiSetBtn('cover-note-btn', false, 'Generate cover note →', 'Generating…');
+}
+
+// ── Feature 4: EOD / EOW Summary Writer ──────────────────────────
+async function generateEODSummary() {
+  const type       = document.getElementById('eod-type')?.value;
+  const completed  = document.getElementById('eod-completed')?.value?.trim();
+  const inprogress = document.getElementById('eod-inprogress')?.value?.trim();
+  const blockers   = document.getElementById('eod-blockers')?.value?.trim();
+  if (!completed) { alert('Please enter what you completed today.'); return; }
+  if (!getAiKey()) { aiNoKey(); return; }
+  aiSetBtn('eod-btn', true, 'Write summary →', 'Writing…');
+  try {
+    const system = `You are a marketing coordinator writing a concise ${type} update to your manager. Write exactly 5 sentences. Structure: 1–2 sentences on what was completed, 1 sentence on what is in progress, 1 sentence on any blockers or needs, 1 closing sentence. Professional, clear, Australian English. Do not use bullet points — write in flowing prose.`;
+    const prompt = `Write my ${type} manager update:\nCompleted: ${completed}\nIn progress: ${inprogress || 'Nothing new to add.'}\nBlockers / needs: ${blockers || 'None at this stage.'}`;
+    const result = await callClaude(system, prompt);
+    const out = document.getElementById('eod-output');
+    document.getElementById('eod-result').value = result;
+    if (out) out.hidden = false;
+    out?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (e) {
+    alert('Claude API error: ' + e.message);
+  }
+  aiSetBtn('eod-btn', false, 'Write summary →', 'Writing…');
+}
+
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -2927,6 +3115,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => navigate(item.dataset.page));
   });
+
+  // Reflect saved API key state in sidebar label
+  if (getAiKey()) {
+    const link = document.getElementById('ai-key-toggle-label');
+    if (link) link.textContent = 'AI Settings ✓';
+  }
 
   navigate('daily');
 });
