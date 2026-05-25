@@ -3166,6 +3166,147 @@ async function generateEODSummary() {
   aiSetBtn('eod-btn', false, 'Write summary →', 'Writing…');
 }
 
+// ══════════════════════════════════════════════════════════════════
+// QUICK NOTES DRAWER
+// ══════════════════════════════════════════════════════════════════
+
+const NOTES_KEYS = {
+  daily: 'msc_notes_daily_v1',
+  clips: 'msc_notes_clips_v1',
+  week:  'msc_notes_week_v1'
+};
+const NOTES_HINTS = {
+  daily: 'Clears automatically each day at midnight.',
+  clips: 'Saved until you delete them — great for reusable phrases.',
+  week:  'Clears automatically each Monday.'
+};
+
+let notesActiveTab = 'daily';
+
+function loadNotes(tab) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(NOTES_KEYS[tab])) || [];
+    if (tab === 'daily') {
+      const today = getTodayStr();
+      return raw.filter(n => n.date === today);
+    }
+    if (tab === 'week') {
+      const weekStart = getWeekStartStr();
+      return raw.filter(n => n.week === weekStart);
+    }
+    return raw; // clips persist
+  } catch { return []; }
+}
+
+function saveNotes(tab, list) {
+  localStorage.setItem(NOTES_KEYS[tab], JSON.stringify(list));
+}
+
+function getWeekStartStr() {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Mon
+  const mon = new Date(d.setDate(diff));
+  return mon.toISOString().slice(0, 10);
+}
+
+function toggleNotesDrawer() {
+  const drawer = document.getElementById('notes-drawer');
+  const btn    = document.getElementById('notes-toggle-btn');
+  if (!drawer) return;
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  if (btn) btn.classList.toggle('active', !isOpen);
+  if (!isOpen) renderNotesList();
+}
+
+function switchNotesTab(tab) {
+  notesActiveTab = tab;
+  document.querySelectorAll('.notes-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  const hint = document.getElementById('notes-tab-hint');
+  if (hint) hint.textContent = NOTES_HINTS[tab];
+  const inp = document.getElementById('notes-input');
+  if (inp) {
+    inp.placeholder = tab === 'clips'
+      ? 'Save a reusable phrase, campaign name, or audience description…'
+      : 'Type a note and press Add… (Ctrl+Enter)';
+    inp.value = '';
+    inp.focus();
+  }
+  renderNotesList();
+}
+
+function addNote() {
+  const inp  = document.getElementById('notes-input');
+  const text = inp?.value?.trim();
+  if (!text) return;
+  const list = loadNotes(notesActiveTab);
+  const note = {
+    id:   Date.now(),
+    text,
+    date: getTodayStr(),
+    week: getWeekStartStr(),
+    time: new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+  };
+  list.unshift(note);
+  saveNotes(notesActiveTab, list);
+  inp.value = '';
+  inp.focus();
+  renderNotesList();
+}
+
+function deleteNote(tab, id) {
+  const list = loadNotes(tab).filter(n => n.id !== id);
+  // For daily/week we need to reload ALL (not just today's filtered)
+  const raw = (() => { try { return JSON.parse(localStorage.getItem(NOTES_KEYS[tab])) || []; } catch { return []; } })();
+  saveNotes(tab, raw.filter(n => n.id !== id));
+  renderNotesList();
+}
+
+function copyNote(text) {
+  navigator.clipboard.writeText(text).then(() => showAiToast('✓ Copied — paste into any field'));
+}
+
+function renderNotesList() {
+  const el   = document.getElementById('notes-list');
+  const hint = document.getElementById('notes-tab-hint');
+  if (!el) return;
+  if (hint) hint.textContent = NOTES_HINTS[notesActiveTab];
+
+  const list = loadNotes(notesActiveTab);
+  if (!list.length) {
+    el.innerHTML = `<div class="notes-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;height:28px;opacity:0.2;margin-bottom:8px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      <div>No notes yet</div>
+      <div style="font-size:11px;margin-top:3px">${NOTES_HINTS[notesActiveTab]}</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(n => `
+    <div class="note-card">
+      <div class="note-text">${escapeHtml(n.text)}</div>
+      <div class="note-footer">
+        <span class="note-time">${n.time || ''}</span>
+        <div class="note-actions">
+          <button class="note-copy-btn" onclick="copyNote(${JSON.stringify(n.text)})" title="Copy to clipboard">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <button class="note-delete-btn" onclick="deleteNote('${notesActiveTab}', ${n.id})" title="Delete">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();

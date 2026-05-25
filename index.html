@@ -1312,6 +1312,50 @@
 
     </div><!-- /content -->
   </div><!-- /main -->
+
+  <!-- ══════════════════════════════════════
+       NOTES DRAWER
+  ══════════════════════════════════════ -->
+  <div id="notes-drawer" class="notes-drawer">
+
+    <!-- Drawer header -->
+    <div class="notes-drawer-header">
+      <div class="notes-drawer-title">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
+        Quick Notes
+      </div>
+      <button class="notes-close-btn" onclick="toggleNotesDrawer()" title="Close">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="notes-tabs">
+      <button class="notes-tab active" data-tab="daily"   onclick="switchNotesTab('daily')">📝 Daily</button>
+      <button class="notes-tab"        data-tab="clips"   onclick="switchNotesTab('clips')">📌 Clips</button>
+      <button class="notes-tab"        data-tab="week"    onclick="switchNotesTab('week')">📅 Week</button>
+    </div>
+
+    <!-- Tab hint -->
+    <div class="notes-tab-hint" id="notes-tab-hint"></div>
+
+    <!-- Add new note -->
+    <div class="notes-add-row">
+      <textarea id="notes-input" class="notes-input" placeholder="Type a note and press Add…" rows="2" onkeydown="if(event.ctrlKey&&event.key==='Enter')addNote()"></textarea>
+      <button class="notes-add-btn" onclick="addNote()">Add</button>
+    </div>
+
+    <!-- Notes list -->
+    <div id="notes-list" class="notes-list"></div>
+
+  </div>
+
+  <!-- Floating toggle tab -->
+  <button id="notes-toggle-btn" class="notes-toggle-btn" onclick="toggleNotesDrawer()" title="Quick Notes">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>
+    <span>Notes</span>
+  </button>
+
 </div><!-- /dashboard -->
 
 <script src="app.js"></script>
