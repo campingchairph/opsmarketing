@@ -238,12 +238,10 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
       Brief Intake
     </div>
-
-    <div class="sidebar-section-label">Focus</div>
-    <div class="nav-item" data-page="timer">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="9" r="5"/><polyline points="8,6 8,9 10,11"/><line x1="6" y1="1" x2="10" y2="1"/><line x1="14" y1="4" x2="12" y2="6"/></svg>
-      Task Timer
-      <span class="nav-timer-dot" id="nav-timer-dot" style="display:none"></span>
+    <div class="nav-item" data-page="aiwriter">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="currentColor"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
+      AI Write &amp; QC
+      <span class="nav-badge ai-badge-nav">AI</span>
     </div>
 
     <div class="sidebar-section-label">Reference</div>
@@ -269,11 +267,6 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l1.5 3 3.5.5-2.5 2.5.5 3.5L8 9l-3 1.5.5-3.5L3 4.5l3.5-.5z"/></svg>
       First Week Guide
     </div>
-    <div class="nav-item" data-page="panic">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
-      Panic Button
-      <span class="nav-badge sos">SOS</span>
-    </div>
     <div class="nav-item" data-page="templates">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
       Message Templates
@@ -281,14 +274,6 @@
     <div class="nav-item" data-page="timesheet">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
       Timesheet
-    </div>
-    <div class="nav-item" data-page="mistakes">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
-      Mistakes Log
-    </div>
-    <div class="nav-item" data-page="ninetydays">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,12 5,7 8,9 11,5 14,3"/><line x1="2" y1="14" x2="14" y2="14"/></svg>
-      90-Day Tracker
     </div>
 
     <!-- AI Key Panel -->
@@ -323,6 +308,16 @@
         <div class="topbar-subtitle" id="topbar-subtitle">Morning, core tasks &amp; end-of-day</div>
       </div>
       <div class="topbar-right">
+        <!-- SOS Panic Button -->
+        <button class="topbar-sos-btn" onclick="navigate('panic')" title="Panic Button — step-by-step for when things go wrong">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+          <span>SOS</span>
+        </button>
+        <!-- Timer Icon -->
+        <button class="topbar-timer-btn" onclick="navigate('timer')" title="Task Timer — focus mode">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="9" r="5"/><polyline points="8,6 8,9 10,11"/><line x1="6" y1="1" x2="10" y2="1"/><line x1="14" y1="4" x2="12" y2="6"/></svg>
+          <span id="nav-timer-dot" class="topbar-timer-live" style="display:none"></span>
+        </button>
         <div id="topbar-timer-chip" class="topbar-timer-chip" style="display:none" onclick="goToActiveTimer()" title="Active timer — click to return to focus">
           <span class="ttc-dot" id="ttc-dot"></span>
           <span class="ttc-label">Timer</span>
@@ -401,49 +396,9 @@
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
           Reset daily checklists
         </button>
-
-        <!-- ── AI: EOD / EOW Summary Writer ── -->
-        <div class="ai-feature-block" id="eod-writer" style="margin-top:20px">
-          <div class="section-block-header ai-feature-header">
-            <div class="sh-icon" style="background:var(--accent-dim)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="3" r="1.5" fill="var(--accent)"/></svg>
-            </div>
-            <span class="sh-title">EOD / EOW Summary Writer</span>
-            <span class="ai-badge">AI</span>
-          </div>
-          <div class="ai-feature-body">
-            <p class="ai-feature-desc">Describe what you did today or this week — Claude writes your manager update as 5 polished sentences.</p>
-            <div class="ai-controls">
-              <div class="ai-field-row">
-                <label class="ai-label">Summary type</label>
-                <select id="eod-type" class="form-select">
-                  <option value="end-of-day">End of day (EOD)</option>
-                  <option value="end-of-week">End of week (EOW)</option>
-                </select>
-              </div>
-              <div class="ai-field-row">
-                <label class="ai-label">What you completed</label>
-                <textarea id="eod-completed" class="form-textarea" rows="3" style="height:72px" placeholder="e.g. Drafted Q2 broker email, sent test to manager, updated 3 tasks in Monday, attended brand briefing call"></textarea>
-              </div>
-              <div class="ai-field-row">
-                <label class="ai-label">What's still in progress</label>
-                <textarea id="eod-inprogress" class="form-textarea" rows="2" style="height:56px" placeholder="e.g. Waiting on legal sign-off for disclaimer copy, InDesign rate card still in review"></textarea>
-              </div>
-              <div class="ai-field-row">
-                <label class="ai-label">Blockers or things you need</label>
-                <textarea id="eod-blockers" class="form-textarea" rows="2" style="height:48px" placeholder="e.g. Need approved logo file from brand team before I can finalise the flyer"></textarea>
-              </div>
-              <button id="eod-btn" class="btn-add" onclick="generateEODSummary()">Write summary →</button>
-            </div>
-            <div class="ai-output" id="eod-output" hidden>
-              <div class="ai-output-label">Manager update</div>
-              <textarea id="eod-result" class="ai-result-text" rows="8" readonly></textarea>
-              <button class="ai-copy-btn" onclick="copyAiOutput('eod-result')">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
-                Copy to clipboard
-              </button>
-            </div>
-          </div>
+        <div class="ai-page-nudge">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+          Need to write your EOD summary? Head to <a href="#" onclick="navigate('aiwriter');return false;"><strong>AI Write &amp; QC</strong></a> in the sidebar.
         </div>
       </div>
 
@@ -480,123 +435,10 @@
           </div>
         </div>
 
-        <!-- ── AI: Email Drafter ── -->
-        <div class="ai-feature-block" id="email-drafter" style="margin-top:16px">
-          <div class="section-block-header ai-feature-header">
-            <div class="sh-icon" style="background:var(--accent-dim)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="var(--accent)"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
-            </div>
-            <span class="sh-title">AI Email Drafter</span>
-            <span class="ai-badge">AI</span>
-          </div>
-          <div class="ai-feature-body">
-            <p class="ai-feature-desc">Paste your bullet points — Claude writes a full broker email with subject line, ready to copy into your email platform.</p>
-            <div class="ai-controls">
-              <div class="ai-two-col">
-                <div class="ai-field-row">
-                  <label class="ai-label">Tone</label>
-                  <select id="email-tone" class="form-select">
-                    <option value="formal">Formal</option>
-                    <option value="warm and professional" selected>Warm &amp; professional</option>
-                    <option value="direct and concise">Direct &amp; concise</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-              </div>
-              <div class="ai-field-row">
-                <label class="ai-label">Your bullet points</label>
-                <textarea id="email-bullets" class="form-textarea" rows="5" style="height:110px" placeholder="- Q2 fund performance update&#10;- New product launch in August&#10;- Invite to webinar on 15 July&#10;- Contact details for queries"></textarea>
-              </div>
-              <button id="email-draft-btn" class="btn-add" onclick="draftBrokerEmail()">Draft email →</button>
-            </div>
-            <div class="ai-output" id="email-output" hidden>
-              <div class="ai-output-label">Draft email</div>
-              <textarea id="email-result" class="ai-result-text" rows="14" readonly></textarea>
-              <button class="ai-copy-btn" onclick="copyAiOutput('email-result')">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
-                Copy to clipboard
-              </button>
-            </div>
-          </div>
+        <div class="ai-page-nudge">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+          Draft a broker email or run the pre-send QC? Head to <a href="#" onclick="navigate('aiwriter');return false;"><strong>AI Write &amp; QC</strong></a> in the sidebar.
         </div>
-
-        <!-- ── AI: Pre-Send QC + Cover Note side by side ── -->
-        <div class="section-grid" style="margin-top:16px">
-
-          <!-- Pre-Send Test Email QC -->
-          <div class="ai-feature-block" id="test-email-qc">
-            <div class="section-block-header ai-feature-header">
-              <div class="sh-icon" style="background:var(--accent-dim)">
-                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/><circle cx="8" cy="8" r="7"/></svg>
-              </div>
-              <span class="sh-title">Pre-Send Test Email QC</span>
-              <span id="test-qc-count" class="sh-count">0 / 10</span>
-            </div>
-            <div class="ai-feature-body" style="padding-bottom:0">
-              <p class="ai-feature-desc" style="margin-bottom:12px">All 10 must be ticked before you can mark the test as QC passed.</p>
-              <ul class="qc-list" id="test-qc-list">
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Test email sent to yourself first and reviewed in full</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Renders correctly on mobile (check Gmail app)</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Renders correctly on desktop (Outlook + Chrome)</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> All links are live and go to correct pages</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> No broken images or missing assets</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Sender name and email address are correct</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Subject line matches approved brief exactly</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Legal disclaimer / disclosure is present and correct</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Personalisation tokens resolved — none left unfilled</label></li>
-                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Unsubscribe link is working</label></li>
-              </ul>
-              <div class="qc-footer">
-                <span id="test-qc-status" class="qc-status-text">0 / 10 checked</span>
-                <button id="test-qc-pass-btn" class="btn-add" style="width:auto;padding:9px 18px" disabled onclick="markTestQCPassed()">Mark as QC Passed ✓</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Manager Cover Note Generator -->
-          <div class="ai-feature-block" id="cover-note-gen">
-            <div class="section-block-header ai-feature-header">
-              <div class="sh-icon" style="background:var(--accent-dim)">
-                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="var(--accent)"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
-              </div>
-              <span class="sh-title">Manager Cover Note Generator</span>
-              <span class="ai-badge">AI</span>
-            </div>
-            <div class="ai-feature-body">
-              <p class="ai-feature-desc">Fill in the details — Claude writes the short context note to attach when forwarding the test email for sign-off.</p>
-              <div class="ai-controls">
-                <div class="ai-field-row">
-                  <label class="ai-label">Campaign / email name</label>
-                  <input type="text" id="cn-campaign" class="form-input" placeholder="e.g. Q2 Broker Update — July 2026"/>
-                </div>
-                <div class="ai-two-col">
-                  <div class="ai-field-row">
-                    <label class="ai-label">Planned send date</label>
-                    <input type="date" id="cn-senddate" class="form-input"/>
-                  </div>
-                  <div class="ai-field-row">
-                    <label class="ai-label">Audience / list segment</label>
-                    <input type="text" id="cn-audience" class="form-input" placeholder="e.g. All active brokers — AU &amp; NZ"/>
-                  </div>
-                </div>
-                <div class="ai-field-row">
-                  <label class="ai-label">Anything the manager needs to know</label>
-                  <textarea id="cn-notes" class="form-textarea" rows="3" style="height:64px" placeholder="e.g. New disclaimer wording applied, two links updated from last version, waiting on sign-off by COB Thursday"></textarea>
-                </div>
-                <button id="cover-note-btn" class="btn-add" onclick="generateCoverNote()">Generate cover note →</button>
-              </div>
-              <div class="ai-output" id="cover-note-output" hidden>
-                <div class="ai-output-label">Cover note</div>
-                <textarea id="cover-note-result" class="ai-result-text" rows="7" readonly></textarea>
-                <button class="ai-copy-btn" onclick="copyAiOutput('cover-note-result')">
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
-                  Copy to clipboard
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /section-grid AI row -->
       </div>
 
       <!-- ── EVENTS ── -->
@@ -1158,6 +1000,180 @@
       </div>
 
       <!-- ── TASK TIMER ── -->
+      <!-- ── AI WRITE & QC ── -->
+      <div id="page-aiwriter" class="page">
+        <div class="alert-box info" style="margin-bottom:20px">
+          <div class="alert-title">AI Write &amp; QC — powered by Groq (free)</div>
+          <p>Four tools that turn your notes into polished drafts. Set your Groq API key in <strong>AI Settings</strong> (sidebar footer) first — it's free at <strong>console.groq.com</strong>.</p>
+        </div>
+
+        <!-- ── Row 1: EOD Writer (full width) ── -->
+        <div class="ai-feature-block" id="eod-writer" style="margin-bottom:16px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="3" r="1.5" fill="var(--accent)"/></svg>
+            </div>
+            <span class="sh-title">EOD / EOW Summary Writer</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Describe what you did today or this week — the AI writes your manager update as 5 polished sentences.</p>
+            <div class="ai-controls">
+              <div class="ai-two-col">
+                <div class="ai-field-row">
+                  <label class="ai-label">Summary type</label>
+                  <select id="eod-type" class="form-select">
+                    <option value="end-of-day">End of day (EOD)</option>
+                    <option value="end-of-week">End of week (EOW)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">What you completed</label>
+                <textarea id="eod-completed" class="form-textarea" rows="3" style="height:72px" placeholder="e.g. Drafted Q2 broker email, sent test to manager, updated 3 tasks in Monday, attended brand briefing call"></textarea>
+              </div>
+              <div class="ai-two-col">
+                <div class="ai-field-row">
+                  <label class="ai-label">What's still in progress</label>
+                  <textarea id="eod-inprogress" class="form-textarea" rows="2" style="height:56px" placeholder="e.g. Waiting on legal sign-off for disclaimer copy"></textarea>
+                </div>
+                <div class="ai-field-row">
+                  <label class="ai-label">Blockers or things you need</label>
+                  <textarea id="eod-blockers" class="form-textarea" rows="2" style="height:56px" placeholder="e.g. Need approved logo file from brand team"></textarea>
+                </div>
+              </div>
+              <button id="eod-btn" class="btn-add" onclick="generateEODSummary()">Write summary →</button>
+            </div>
+            <div class="ai-output" id="eod-output" hidden>
+              <div class="ai-output-label">Manager update</div>
+              <textarea id="eod-result" class="ai-result-text" rows="8" readonly></textarea>
+              <button class="ai-copy-btn" onclick="copyAiOutput('eod-result')">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                Copy to clipboard
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Row 2: Email Drafter (full width) ── -->
+        <div class="ai-feature-block" id="email-drafter" style="margin-bottom:16px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="var(--accent)"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
+            </div>
+            <span class="sh-title">AI Email Drafter</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste your bullet points — the AI writes a full broker email with subject line, ready to copy into your email platform.</p>
+            <div class="ai-controls">
+              <div class="ai-two-col">
+                <div class="ai-field-row">
+                  <label class="ai-label">Tone</label>
+                  <select id="email-tone" class="form-select">
+                    <option value="formal">Formal</option>
+                    <option value="warm and professional" selected>Warm &amp; professional</option>
+                    <option value="direct and concise">Direct &amp; concise</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">Your bullet points</label>
+                <textarea id="email-bullets" class="form-textarea" rows="5" style="height:110px" placeholder="- Q2 fund performance update&#10;- New product launch in August&#10;- Invite to webinar on 15 July&#10;- Contact details for queries"></textarea>
+              </div>
+              <button id="email-draft-btn" class="btn-add" onclick="draftBrokerEmail()">Draft email →</button>
+            </div>
+            <div class="ai-output" id="email-output" hidden>
+              <div class="ai-output-label">Draft email</div>
+              <textarea id="email-result" class="ai-result-text" rows="14" readonly></textarea>
+              <button class="ai-copy-btn" onclick="copyAiOutput('email-result')">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                Copy to clipboard
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Row 3: Pre-Send QC + Cover Note side by side ── -->
+        <div class="section-grid">
+
+          <!-- Pre-Send Test Email QC -->
+          <div class="ai-feature-block" id="test-email-qc">
+            <div class="section-block-header ai-feature-header">
+              <div class="sh-icon" style="background:var(--accent-dim)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/><circle cx="8" cy="8" r="7"/></svg>
+              </div>
+              <span class="sh-title">Pre-Send Test Email QC</span>
+              <span id="test-qc-count" class="sh-count">0 / 10</span>
+            </div>
+            <div class="ai-feature-body" style="padding-bottom:0">
+              <p class="ai-feature-desc" style="margin-bottom:12px">All 10 must be ticked before you can mark the test as QC passed.</p>
+              <ul class="qc-list" id="test-qc-list">
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Test email sent to yourself first and reviewed in full</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Renders correctly on mobile (check Gmail app)</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Renders correctly on desktop (Outlook + Chrome)</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> All links are live and go to correct pages</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> No broken images or missing assets</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Sender name and email address are correct</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Subject line matches approved brief exactly</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Legal disclaimer / disclosure is present and correct</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Personalisation tokens resolved — none left unfilled</label></li>
+                <li class="qc-item"><label class="qc-label"><input type="checkbox" data-qc="test" onchange="updateTestQC()"> Unsubscribe link is working</label></li>
+              </ul>
+              <div class="qc-footer">
+                <span id="test-qc-status" class="qc-status-text">0 / 10 checked</span>
+                <button id="test-qc-pass-btn" class="btn-add" style="width:auto;padding:9px 18px" disabled onclick="markTestQCPassed()">Mark as QC Passed ✓</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manager Cover Note Generator -->
+          <div class="ai-feature-block" id="cover-note-gen">
+            <div class="section-block-header ai-feature-header">
+              <div class="sh-icon" style="background:var(--accent-dim)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><circle cx="12" cy="12" r="3" fill="var(--bg-2)" stroke="var(--accent)"/><line x1="12" y1="10.5" x2="12" y2="13.5"/><line x1="10.5" y1="12" x2="13.5" y2="12"/></svg>
+              </div>
+              <span class="sh-title">Manager Cover Note</span>
+              <span class="ai-badge">AI</span>
+            </div>
+            <div class="ai-feature-body">
+              <p class="ai-feature-desc">Fill in the details — the AI writes the short note to attach when forwarding a test email for sign-off.</p>
+              <div class="ai-controls">
+                <div class="ai-field-row">
+                  <label class="ai-label">Campaign / email name</label>
+                  <input type="text" id="cn-campaign" class="form-input" placeholder="e.g. Q2 Broker Update — July 2026"/>
+                </div>
+                <div class="ai-two-col">
+                  <div class="ai-field-row">
+                    <label class="ai-label">Planned send date</label>
+                    <input type="date" id="cn-senddate" class="form-input"/>
+                  </div>
+                  <div class="ai-field-row">
+                    <label class="ai-label">Audience / list segment</label>
+                    <input type="text" id="cn-audience" class="form-input" placeholder="e.g. All active brokers — AU &amp; NZ"/>
+                  </div>
+                </div>
+                <div class="ai-field-row">
+                  <label class="ai-label">Anything the manager needs to know</label>
+                  <textarea id="cn-notes" class="form-textarea" rows="3" style="height:64px" placeholder="e.g. New disclaimer wording applied, two links updated from last version"></textarea>
+                </div>
+                <button id="cover-note-btn" class="btn-add" onclick="generateCoverNote()">Generate cover note →</button>
+              </div>
+              <div class="ai-output" id="cover-note-output" hidden>
+                <div class="ai-output-label">Cover note</div>
+                <textarea id="cover-note-result" class="ai-result-text" rows="7" readonly></textarea>
+                <button class="ai-copy-btn" onclick="copyAiOutput('cover-note-result')">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                  Copy to clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /section-grid AI row -->
+      </div>
+
       <div id="page-timer" class="page">
         <div id="timer-task-list"></div>
         <div id="timer-focus" style="display:none">
@@ -1234,91 +1250,88 @@
         <div id="goodlooks-content"></div>
       </div>
 
-      <!-- ── MISTAKES LOG ── -->
-      <div id="page-mistakes" class="page">
-        <div class="alert-box warn">
-          <div class="alert-title">Learn from others before you make their mistakes</div>
-          <p>These are the 20 most common mistakes made by marketing coordinators in their first 90 days — collected, not invented. Add your own as they happen. No judgment, just pattern recognition.</p>
-        </div>
-        <div class="section-block">
-          <div class="section-block-header">
-            <div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg></div>
-            <span class="sh-title">Common first-90-day mistakes</span>
-          </div>
-          <div id="mistakes-preloaded"></div>
-        </div>
-        <div class="section-block" style="margin-top:16px">
-          <div class="section-block-header">
-            <div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg></div>
-            <span class="sh-title">My personal log</span>
-          </div>
-          <div style="padding:14px 18px">
-            <div class="form-row" style="grid-template-columns:1fr">
-              <input class="form-input" id="ml-what" placeholder="What task was it?"/>
-            </div>
-            <div class="form-row" style="grid-template-columns:1fr">
-              <input class="form-input" id="ml-mistake" placeholder="What went wrong?"/>
-            </div>
-            <div class="form-row" style="grid-template-columns:1fr;margin-bottom:8px">
-              <input class="form-input" id="ml-fix" placeholder="What check would have caught it?"/>
-            </div>
-            <button class="btn-add" onclick="addMistake()">+ Add to My Log</button>
-          </div>
-          <div id="mistakes-personal"></div>
-        </div>
-      </div>
-
-      <!-- ── 90-DAY TRACKER ── -->
-      <div id="page-ninetydays" class="page">
-        <div class="stat-grid" id="nd-stat-grid" style="margin-bottom:16px">
-          <div class="stat-card accent-teal"><div class="stat-card-label">Days in role</div><div class="stat-card-value" id="nd-days">—</div></div>
-          <div class="stat-card accent-sage"><div class="stat-card-label">Wins logged</div><div class="stat-card-value green" id="nd-wins-count">0</div></div>
-          <div class="stat-card"><div class="stat-card-label">Skills learned</div><div class="stat-card-value" id="nd-skills-count">0</div></div>
-          <div class="stat-card"><div class="stat-card-label">Feedback received</div><div class="stat-card-value" id="nd-feedback-count">0</div></div>
-        </div>
-        <div class="section-block" style="margin-bottom:16px">
-          <div class="section-block-header">
-            <div class="sh-icon teal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="12" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/></svg></div>
-            <span class="sh-title">Start date</span>
-          </div>
-          <div style="padding:14px 18px;display:flex;align-items:center;gap:12px">
-            <input type="date" class="form-input" id="nd-start-date" onchange="saveNdStartDate()" style="max-width:200px"/>
-            <span style="font-size:12px;color:var(--text-3);font-family:var(--font-mono)">Set your first day so the tracker knows where you are in the 90 days</span>
-          </div>
-        </div>
-        <div class="section-grid">
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,8 6,11 13,4"/></svg></div><span class="sh-title">Wins</span><span class="sh-count" id="nd-wins-label"></span></div>
-            <div id="nd-wins-list"></div>
-            <div class="nd-add-row"><input class="form-input" id="nd-win-input" placeholder="Add a win…"/><button class="btn-add" style="width:auto;padding:8px 14px" onclick="addNdEntry('wins')">+</button></div>
-          </div>
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><line x1="8" y1="11" x2="8" y2="12"/></svg></div><span class="sh-title">Skills learned</span></div>
-            <div id="nd-skills-list"></div>
-            <div class="nd-add-row"><input class="form-input" id="nd-skill-input" placeholder="Add a skill…"/><button class="btn-add" style="width:auto;padding:8px 14px" onclick="addNdEntry('skills')">+</button></div>
-          </div>
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2h12v9H2z"/><polyline points="2,11 5,9 8,11 11,9 14,11"/></svg></div><span class="sh-title">Feedback received</span></div>
-            <div id="nd-feedback-list"></div>
-            <div class="nd-add-row"><input class="form-input" id="nd-feedback-input" placeholder="Add feedback…"/><button class="btn-add" style="width:auto;padding:8px 14px" onclick="addNdEntry('feedback')">+</button></div>
-          </div>
-          <div class="section-block">
-            <div class="section-block-header"><div class="sh-icon rust"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg></div><span class="sh-title">Still unclear / need to ask</span></div>
-            <div id="nd-unclear-list"></div>
-            <div class="nd-add-row"><input class="form-input" id="nd-unclear-input" placeholder="Something you still need to understand…"/><button class="btn-add" style="width:auto;padding:8px 14px" onclick="addNdEntry('unclear')">+</button></div>
-          </div>
-        </div>
-      </div>
+      <!-- page-mistakes and page-ninetydays moved to right-side drawers -->
+      <div id="page-mistakes" class="page" style="display:none!important"></div>
+      <div id="page-ninetydays" class="page" style="display:none!important"></div>
 
     </div><!-- /content -->
   </div><!-- /main -->
 
   <!-- ══════════════════════════════════════
+       90-DAY TRACKER DRAWER
+  ══════════════════════════════════════ -->
+  <div id="nd-drawer" class="side-drawer nd-drawer">
+    <div class="side-drawer-header">
+      <div class="side-drawer-title">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><polyline points="2,12 5,7 8,9 11,5 14,3"/><line x1="2" y1="14" x2="14" y2="14"/></svg>
+        90-Day Tracker
+      </div>
+      <button class="side-drawer-close" onclick="toggleNdDrawer()" title="Close">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="nd-drawer-body">
+      <!-- Stats row -->
+      <div class="nd-drawer-stats">
+        <div class="nd-stat"><div class="nd-stat-val" id="nd-days">—</div><div class="nd-stat-lbl">Days in role</div></div>
+        <div class="nd-stat"><div class="nd-stat-val green" id="nd-wins-count">0</div><div class="nd-stat-lbl">Wins</div></div>
+        <div class="nd-stat"><div class="nd-stat-val" id="nd-skills-count">0</div><div class="nd-stat-lbl">Skills</div></div>
+        <div class="nd-stat"><div class="nd-stat-val" id="nd-feedback-count">0</div><div class="nd-stat-lbl">Feedback</div></div>
+      </div>
+      <!-- Start date -->
+      <div class="nd-drawer-startrow">
+        <label class="nd-start-label">Start date</label>
+        <input type="date" class="form-input nd-start-input" id="nd-start-date" onchange="saveNdStartDate()"/>
+      </div>
+      <!-- Tabs for category -->
+      <div class="nd-tabs">
+        <button class="nd-tab active" data-ndtab="wins"     onclick="switchNdTab('wins')">Wins</button>
+        <button class="nd-tab"        data-ndtab="skills"   onclick="switchNdTab('skills')">Skills</button>
+        <button class="nd-tab"        data-ndtab="feedback" onclick="switchNdTab('feedback')">Feedback</button>
+        <button class="nd-tab"        data-ndtab="unclear"  onclick="switchNdTab('unclear')">Unclear</button>
+      </div>
+      <!-- Active list -->
+      <div id="nd-active-list" class="nd-active-list"></div>
+      <!-- Add row -->
+      <div class="nd-drawer-add">
+        <input class="form-input" id="nd-drawer-input" placeholder="Add entry…" onkeydown="if(event.key==='Enter')addNdDrawerEntry()"/>
+        <button class="btn-add nd-add-btn" onclick="addNdDrawerEntry()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       MISTAKES LOG DRAWER
+  ══════════════════════════════════════ -->
+  <div id="ml-drawer" class="side-drawer ml-drawer">
+    <div class="side-drawer-header">
+      <div class="side-drawer-title">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+        Mistakes Log
+      </div>
+      <button class="side-drawer-close" onclick="toggleMlDrawer()" title="Close">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+    <!-- Tabs: Personal Log / Common List -->
+    <div class="nd-tabs" style="flex-shrink:0">
+      <button class="nd-tab active" data-mltab="personal" onclick="switchMlTab('personal')">My Log</button>
+      <button class="nd-tab"        data-mltab="common"   onclick="switchMlTab('common')">Common Mistakes</button>
+    </div>
+    <!-- Personal log add form -->
+    <div id="ml-personal-form" class="ml-personal-form">
+      <input class="form-input" id="ml-what" placeholder="What task was it?" style="margin-bottom:6px"/>
+      <input class="form-input" id="ml-mistake" placeholder="What went wrong?" style="margin-bottom:6px"/>
+      <input class="form-input" id="ml-fix" placeholder="What check would have caught it?" style="margin-bottom:8px"/>
+      <button class="btn-add" style="width:100%" onclick="addMistake()">+ Add to My Log</button>
+    </div>
+    <div class="ml-drawer-list" id="ml-drawer-list"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
        NOTES DRAWER
   ══════════════════════════════════════ -->
-  <div id="notes-drawer" class="notes-drawer">
-
-    <!-- Drawer header -->
+  <div id="notes-drawer" class="notes-drawer side-drawer-notes">
     <div class="notes-drawer-header">
       <div class="notes-drawer-title">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
@@ -1328,33 +1341,34 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
       </button>
     </div>
-
-    <!-- Tabs -->
     <div class="notes-tabs">
       <button class="notes-tab active" data-tab="daily"   onclick="switchNotesTab('daily')">📝 Daily</button>
       <button class="notes-tab"        data-tab="clips"   onclick="switchNotesTab('clips')">📌 Clips</button>
       <button class="notes-tab"        data-tab="week"    onclick="switchNotesTab('week')">📅 Week</button>
     </div>
-
-    <!-- Tab hint -->
     <div class="notes-tab-hint" id="notes-tab-hint"></div>
-
-    <!-- Add new note -->
     <div class="notes-add-row">
       <textarea id="notes-input" class="notes-input" placeholder="Type a note and press Add…" rows="2" onkeydown="if(event.ctrlKey&&event.key==='Enter')addNote()"></textarea>
       <button class="notes-add-btn" onclick="addNote()">Add</button>
     </div>
-
-    <!-- Notes list -->
     <div id="notes-list" class="notes-list"></div>
-
   </div>
 
-  <!-- Floating toggle tab -->
-  <button id="notes-toggle-btn" class="notes-toggle-btn" onclick="toggleNotesDrawer()" title="Quick Notes">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>
-    <span>Notes</span>
-  </button>
+  <!-- ══════════════════════════════════════
+       RIGHT TABS STACK
+  ══════════════════════════════════════ -->
+  <div class="right-tabs-stack">
+    <button id="nd-drawer-tab" class="right-tab nd-tab-btn" onclick="toggleNdDrawer()" title="90-Day Tracker">
+      <span>90 Days</span>
+    </button>
+    <button id="notes-toggle-btn" class="right-tab notes-tab-btn" onclick="toggleNotesDrawer()" title="Quick Notes">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>
+      <span>Notes</span>
+    </button>
+    <button id="ml-drawer-tab" class="right-tab ml-tab-btn" onclick="toggleMlDrawer()" title="Mistakes Log">
+      <span>Mistakes</span>
+    </button>
+  </div>
 
 </div><!-- /dashboard -->
 

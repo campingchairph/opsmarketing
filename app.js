@@ -230,11 +230,16 @@ function navigate(pageId) {
   if (nav) nav.classList.add('active');
 
   // Update topbar title
+  // Mistakes and 90-Day now live in right-side drawers
+  if (pageId === 'mistakes')    { openMlDrawer();  return; }
+  if (pageId === 'ninetydays')  { openNdDrawer();  return; }
+
   const titles = {
     daily:        ['Daily Ops', 'Morning, core tasks & end-of-day'],
     campaigns:    ['Campaigns', 'Email execution & collateral'],
     events:       ['Events',    'Setup, materials & post-event'],
     brand:        ['Brand & Compliance', 'QC checklist + InDesign preflight'],
+    aiwriter:     ['AI Write & QC', 'Draft emails, QC checklists & manager notes'],
     taskbuilder:  ['Task Builder', 'Generate a custom plan for any task'],
     intake:       ['Brief Intake', 'Receive a task — fill this in first'],
     timer:        ['Task Timer', 'Focus mode — Pomodoro timer'],
@@ -246,8 +251,6 @@ function navigate(pageId) {
     timesheet:    ['Timesheet', 'Log work, track hours, backtrack any day'],
     glossary:     ['Finance Glossary', 'Financial services terms explained'],
     goodlooks:    ['What Good Looks Like', 'Pass vs Good vs Impressive'],
-    mistakes:     ['Mistakes Log', 'Learn before you make them'],
-    ninetydays:   ['90-Day Tracker', 'Wins, skills, feedback & goals'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -264,7 +267,6 @@ function navigate(pageId) {
 
   // Init calendar if needed
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
-  if (pageId === 'taskbuilder') { navigate('intake'); return; }
   if (pageId === 'intake')      { renderIntakeSaved(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
@@ -2823,18 +2825,6 @@ function renderPersonalMistakes() {
     </div>`).join('');
 }
 
-function addMistake() {
-  const task    = document.getElementById('ml-what')?.value?.trim();
-  const mistake = document.getElementById('ml-mistake')?.value?.trim();
-  const fix     = document.getElementById('ml-fix')?.value?.trim();
-  if (!task || !mistake || !fix) return;
-  const list = loadPersonalMistakes();
-  list.unshift({ task, mistake, fix, date: new Date().toISOString() });
-  savePersonalMistakes(list);
-  ['ml-what','ml-mistake','ml-fix'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  renderPersonalMistakes();
-}
-
 function deletePersonalMistake(idx) {
   const list = loadPersonalMistakes();
   list.splice(idx, 1);
@@ -3210,16 +3200,6 @@ function getWeekStartStr() {
   return mon.toISOString().slice(0, 10);
 }
 
-function toggleNotesDrawer() {
-  const drawer = document.getElementById('notes-drawer');
-  const btn    = document.getElementById('notes-toggle-btn');
-  if (!drawer) return;
-  const isOpen = drawer.classList.contains('open');
-  drawer.classList.toggle('open', !isOpen);
-  if (btn) btn.classList.toggle('active', !isOpen);
-  if (!isOpen) renderNotesList();
-}
-
 function switchNotesTab(tab) {
   notesActiveTab = tab;
   document.querySelectorAll('.notes-tab').forEach(t => {
@@ -3305,6 +3285,202 @@ function renderNotesList() {
 
 function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RIGHT-SIDE DRAWERS — 90-Day Tracker + Mistakes Log
+// ══════════════════════════════════════════════════════════════════
+
+// ── Helpers ─────────────────────────────────────────────────────
+function closeAllDrawers() {
+  ['nd-drawer','ml-drawer','notes-drawer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  });
+  ['nd-drawer-tab','ml-drawer-tab','notes-toggle-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+}
+
+// ── 90-Day Tracker Drawer ────────────────────────────────────────
+let ndActiveTab = 'wins';
+
+function openNdDrawer() {
+  closeAllDrawers();
+  const drawer = document.getElementById('nd-drawer');
+  const btn    = document.getElementById('nd-drawer-tab');
+  if (!drawer) return;
+  drawer.classList.add('open');
+  if (btn) btn.classList.add('active');
+  renderNinetyDays();
+  switchNdTab(ndActiveTab);
+}
+
+function toggleNdDrawer() {
+  const drawer = document.getElementById('nd-drawer');
+  if (!drawer) return;
+  if (drawer.classList.contains('open')) { closeAllDrawers(); }
+  else { openNdDrawer(); }
+}
+
+function switchNdTab(tab) {
+  ndActiveTab = tab;
+  document.querySelectorAll('.nd-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.ndtab === tab);
+  });
+  const inp = document.getElementById('nd-drawer-input');
+  const placeholders = {
+    wins: 'Add a win…',
+    skills: 'Add a skill learned…',
+    feedback: 'Add feedback received…',
+    unclear: 'Something still unclear…',
+  };
+  if (inp) inp.placeholder = placeholders[tab] || 'Add entry…';
+  renderNdDrawerList();
+}
+
+function renderNdDrawerList() {
+  const nd   = loadND();
+  const list = nd[ndActiveTab] || [];
+  const el   = document.getElementById('nd-active-list');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = '<div class="nd-drawer-empty">Nothing here yet — add your first entry above.</div>';
+    return;
+  }
+  el.innerHTML = list.map((item, i) => `
+    <div class="nd-drawer-entry">
+      <div class="nd-drawer-entry-text">${escapeHtml(item.text)}</div>
+      <div class="nd-drawer-entry-meta">
+        <span>${new Date(item.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</span>
+        <button class="nd-drawer-del" onclick="deleteNdDrawerEntry(${i})" title="Delete">
+          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function addNdDrawerEntry() {
+  const inp  = document.getElementById('nd-drawer-input');
+  const text = inp?.value?.trim();
+  if (!text) return;
+  const nd = loadND();
+  if (!nd[ndActiveTab]) nd[ndActiveTab] = [];
+  nd[ndActiveTab].unshift({ text, date: new Date().toISOString() });
+  saveND(nd);
+  if (inp) inp.value = '';
+  renderNdDrawerList();
+  renderNdStats();
+}
+
+function deleteNdDrawerEntry(idx) {
+  const nd = loadND();
+  nd[ndActiveTab].splice(idx, 1);
+  saveND(nd);
+  renderNdDrawerList();
+  renderNdStats();
+}
+
+// ── Mistakes Log Drawer ──────────────────────────────────────────
+let mlActiveTab = 'personal';
+
+function openMlDrawer() {
+  closeAllDrawers();
+  const drawer = document.getElementById('ml-drawer');
+  const btn    = document.getElementById('ml-drawer-tab');
+  if (!drawer) return;
+  drawer.classList.add('open');
+  if (btn) btn.classList.add('active');
+  switchMlTab(mlActiveTab);
+}
+
+function toggleMlDrawer() {
+  const drawer = document.getElementById('ml-drawer');
+  if (!drawer) return;
+  if (drawer.classList.contains('open')) { closeAllDrawers(); }
+  else { openMlDrawer(); }
+}
+
+function switchMlTab(tab) {
+  mlActiveTab = tab;
+  document.querySelectorAll('[data-mltab]').forEach(t => {
+    t.classList.toggle('active', t.dataset.mltab === tab);
+  });
+  const form = document.getElementById('ml-personal-form');
+  const list = document.getElementById('ml-drawer-list');
+  if (tab === 'personal') {
+    if (form) form.style.display = 'block';
+    renderMlPersonalList();
+  } else {
+    if (form) form.style.display = 'none';
+    renderMlCommonList();
+  }
+}
+
+function renderMlPersonalList() {
+  const el   = document.getElementById('ml-drawer-list');
+  if (!el) return;
+  const list = loadPersonalMistakes();
+  if (!list.length) {
+    el.innerHTML = '<div class="nd-drawer-empty">No personal entries yet. Add your first above.</div>';
+    return;
+  }
+  el.innerHTML = list.map((m, i) => `
+    <div class="ml-drawer-entry">
+      <div class="ml-entry-task">${escapeHtml(m.task)}</div>
+      <div class="ml-entry-what">✗ ${escapeHtml(m.mistake)}</div>
+      <div class="ml-entry-fix">→ ${escapeHtml(m.fix)}</div>
+      <button class="nd-drawer-del" onclick="deleteMlDrawerEntry(${i})" style="margin-top:6px" title="Delete">
+        <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function renderMlCommonList() {
+  const el = document.getElementById('ml-drawer-list');
+  if (!el) return;
+  el.innerHTML = PRELOADED_MISTAKES.map((m, i) => `
+    <div class="ml-drawer-entry">
+      <div class="ml-entry-num">#${i+1} · ${m.task}</div>
+      <div class="ml-entry-what">✗ ${m.what}</div>
+      <div class="ml-entry-fix">→ ${m.fix}</div>
+    </div>`).join('');
+}
+
+function deleteMlDrawerEntry(idx) {
+  const list = loadPersonalMistakes();
+  list.splice(idx, 1);
+  savePersonalMistakes(list);
+  renderMlPersonalList();
+  renderPersonalMistakes(); // sync main page if ever visible
+}
+
+function addMistake() {
+  const task    = document.getElementById('ml-what')?.value?.trim();
+  const mistake = document.getElementById('ml-mistake')?.value?.trim();
+  const fix     = document.getElementById('ml-fix')?.value?.trim();
+  if (!task || !mistake || !fix) return;
+  const list = loadPersonalMistakes();
+  list.unshift({ task, mistake, fix, date: new Date().toISOString() });
+  savePersonalMistakes(list);
+  ['ml-what','ml-mistake','ml-fix'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderMlPersonalList();
+}
+
+// ── Notes Drawer (override toggle to close others) ───────────────
+function toggleNotesDrawer() {
+  const drawer = document.getElementById('notes-drawer');
+  const btn    = document.getElementById('notes-toggle-btn');
+  if (!drawer) return;
+  if (drawer.classList.contains('open')) {
+    closeAllDrawers();
+  } else {
+    closeAllDrawers();
+    drawer.classList.add('open');
+    if (btn) btn.classList.add('active');
+    renderNotesList();
+  }
 }
 
 // ── INIT ────────────────────────────────────────────────────────
