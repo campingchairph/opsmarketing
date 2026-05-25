@@ -2955,7 +2955,7 @@ function toggleAiKeyPanel() {
   if (!isOpen) {
     // Show placeholder dots if key already saved
     const inp = document.getElementById('ai-key-input');
-    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'AIza…';
+    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'gsk_…';
     inp.value = '';
   }
 }
@@ -2964,24 +2964,27 @@ function toggleAiKeyPanel() {
 async function callClaude(systemPrompt, userMessage) {
   const key = getAiKey();
   if (!key) throw new Error('NO_KEY');
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-        generationConfig: { maxOutputTokens: 1024 }
-      })
-    }
-  );
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'authorization': `Bearer ${key}`
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1024,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userMessage }
+      ]
+    })
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err?.error?.message || `API error ${res.status}`);
   }
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received from Gemini.';
+  return data.choices?.[0]?.message?.content ?? 'No response received.';
 }
 
 // ── Shared UI helpers ────────────────────────────────────────────
@@ -3008,7 +3011,7 @@ function aiSetBtn(btnId, loading, defaultLabel, loadingLabel) {
 }
 
 function aiNoKey(featureName) {
-  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Google Gemini API key, and click Save.\n\nGet a free key at: aistudio.google.com → Get API Key (no credit card needed).`);
+  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Groq API key, and click Save.\n\nGet a free key at: console.groq.com → API Keys (no credit card needed).`);
 }
 
 // ── Feature 1: AI Email Drafter ──────────────────────────────────
