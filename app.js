@@ -2955,7 +2955,7 @@ function toggleAiKeyPanel() {
   if (!isOpen) {
     // Show placeholder dots if key already saved
     const inp = document.getElementById('ai-key-input');
-    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'sk-ant-…';
+    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'AIza…';
     inp.value = '';
   }
 }
@@ -2964,27 +2964,24 @@ function toggleAiKeyPanel() {
 async function callClaude(systemPrompt, userMessage) {
   const key = getAiKey();
   if (!key) throw new Error('NO_KEY');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMessage }]
-    })
-  });
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+        generationConfig: { maxOutputTokens: 1024 }
+      })
+    }
+  );
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err?.error?.message || `API error ${res.status}`);
   }
   const data = await res.json();
-  return data.content?.[0]?.text ?? 'No response received from Claude.';
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received from Gemini.';
 }
 
 // ── Shared UI helpers ────────────────────────────────────────────
@@ -3011,7 +3008,7 @@ function aiSetBtn(btnId, loading, defaultLabel, loadingLabel) {
 }
 
 function aiNoKey(featureName) {
-  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Anthropic API key, and click Save.\n\nYou can get a key at console.anthropic.com.`);
+  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Google Gemini API key, and click Save.\n\nGet a free key at: aistudio.google.com → Get API Key (no credit card needed).`);
 }
 
 // ── Feature 1: AI Email Drafter ──────────────────────────────────
