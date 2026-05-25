@@ -2176,3 +2176,47 @@ body {
   font-size: 11px;
   letter-spacing: 0.04em;
 }
+
+/* ── AI Usage Meter ── */
+.ai-meter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+.ai-meter-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.ai-meter-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+.ai-meter-dim {
+  font-weight: 400;
+  color: var(--text-3);
+}
+.ai-meter-track {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ai-meter-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease, background 0.3s;
+}
+.ai-meter-footer {
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-3);
+  line-height: 1.5;
+}

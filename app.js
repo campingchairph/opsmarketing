@@ -2957,7 +2957,66 @@ function toggleAiKeyPanel() {
     const inp = document.getElementById('ai-key-input');
     if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'gsk_…';
     inp.value = '';
+    renderAiMeter();
   }
+}
+
+// ── Usage tracking ───────────────────────────────────────────────
+const AI_USAGE_KEY   = 'msc_groq_usage';
+const DAILY_TOKEN_LIMIT   = 100000;
+const DAILY_REQUEST_LIMIT = 1000;
+
+function getTodayStr() {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function loadAiUsage() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(AI_USAGE_KEY));
+    if (raw?.date === getTodayStr()) return raw;
+  } catch {}
+  return { date: getTodayStr(), tokens: 0, requests: 0 };
+}
+
+function saveAiUsage(u) {
+  localStorage.setItem(AI_USAGE_KEY, JSON.stringify(u));
+}
+
+function trackAiUsage(tokensUsed) {
+  const u = loadAiUsage();
+  u.tokens   += tokensUsed;
+  u.requests += 1;
+  saveAiUsage(u);
+  renderAiMeter();
+}
+
+function renderAiMeter() {
+  const u        = loadAiUsage();
+  const tPct     = Math.min(100, (u.tokens   / DAILY_TOKEN_LIMIT)   * 100);
+  const rPct     = Math.min(100, (u.requests / DAILY_REQUEST_LIMIT) * 100);
+  const tLeft    = Math.max(0, DAILY_TOKEN_LIMIT   - u.tokens);
+  const rLeft    = Math.max(0, DAILY_REQUEST_LIMIT - u.requests);
+
+  // colour: green → amber → red
+  const colour = tPct < 60 ? 'var(--accent)' : tPct < 85 ? 'var(--gold)' : 'var(--rust)';
+
+  const el = document.getElementById('ai-usage-meter');
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="ai-meter-row">
+      <span class="ai-meter-label">Tokens today</span>
+      <span class="ai-meter-val">${u.tokens.toLocaleString()} <span class="ai-meter-dim">/ ${DAILY_TOKEN_LIMIT.toLocaleString()}</span></span>
+    </div>
+    <div class="ai-meter-track"><div class="ai-meter-fill" style="width:${tPct}%;background:${colour}"></div></div>
+    <div class="ai-meter-row" style="margin-top:8px">
+      <span class="ai-meter-label">Requests today</span>
+      <span class="ai-meter-val">${u.requests} <span class="ai-meter-dim">/ ${DAILY_REQUEST_LIMIT}</span></span>
+    </div>
+    <div class="ai-meter-track"><div class="ai-meter-fill" style="width:${rPct}%;background:${colour}"></div></div>
+    <div class="ai-meter-footer">
+      ~${tLeft.toLocaleString()} tokens · ${rLeft} requests left today · resets midnight UTC
+    </div>`;
 }
 
 // ── Core API helper ──────────────────────────────────────────────
@@ -2984,6 +3043,9 @@ async function callClaude(systemPrompt, userMessage) {
     throw new Error(err?.error?.message || `API error ${res.status}`);
   }
   const data = await res.json();
+  // Track usage from response
+  const used = data.usage?.total_tokens || 0;
+  if (used) trackAiUsage(used);
   return data.choices?.[0]?.message?.content ?? 'No response received.';
 }
 
@@ -3121,6 +3183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = document.getElementById('ai-key-toggle-label');
     if (link) link.textContent = 'AI Settings ✓';
   }
+  renderAiMeter();
 
   navigate('daily');
 });
