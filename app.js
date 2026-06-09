@@ -2652,6 +2652,21 @@ const GLOSSARY = [
   { term:'Go-live', tag:'marketing', def:'The moment a campaign, webpage, or material is published or sent to its audience. Nothing goes live without written sign-off. Confirm go-live date and time in the brief before scheduling.' },
   { term:'Stakeholder', tag:'marketing', def:'Anyone with an interest in or influence over a project — typically your Marketing Lead, compliance team, fund managers, or external clients. Understanding who the stakeholders are on a task helps you know whose approval you need.' },
   { term:'KPI', tag:'marketing', def:'Key Performance Indicator. A measurable target for a campaign or task (e.g. open rate > 22%, event attendance > 50). You\'ll report against KPIs — pull the data accurately, don\'t interpret unless asked.' },
+
+  // ── Assetline Capital product & company terms ──
+  { term:'Assetline Capital', tag:'company', def:'Your employer. A broker-first non-bank lender backed by AltX Financial Group. Specialises in short-term, property-secured lending across five products: Short-Term Capital Lending, Development Finance, Private Lending, Horizon Mortgages, and Bridging Loans. Brand promise: make complex capital feel certain, every deal, every time.' },
+  { term:'Non-bank lender', tag:'finance', def:'A lender that provides credit without holding a banking licence. Assetline sits between banks (capital but no agility) and small private lenders (speed but no scale). It offers institutional-grade process at non-bank speed — this distinction is central to all Assetline messaging.' },
+  { term:'Short-Term Capital Lending', tag:'product', def:'Assetline\'s flagship product. Property-secured loans up to $40m. Same-day indicative offers, settlement within days of valuation. Designed for borrowers and property professionals who need capital deployed quickly. Language: speed, certainty, fast turnaround.' },
+  { term:'Development Finance', tag:'product', def:'Assetline product for funding construction and development projects. Funding is released in milestones as the project progresses. Material metaphor in brand: raw concrete — the substance of construction. Language: milestone, structure, stage funding.' },
+  { term:'Private Lending', tag:'product', def:'Assetline product for tight loan structures with clear LVRs. Precision-focused — decisions that hold. Material metaphor: brushed metal. Language: precise, tight, measured, clear LVR.' },
+  { term:'Horizon Mortgages', tag:'product', def:'Assetline\'s long-term mortgage product. Designed for stable, long-view financing — purchase, refinance, or equity release with drawdowns. Material metaphor: timber (grown over decades, built to last). Language: long-term, flexible, structured, stable.' },
+  { term:'Bridging Loans', tag:'product', def:'Short-term finance that bridges a gap between two property positions — buying before selling, or moving capital between deals. Also covers Bridging Finance and Equity Release products. Material metaphor: stone — literally the oldest bridging material. Language: momentum, speed, connection.' },
+  { term:'Equity Release', tag:'product', def:'Assetline bridging product: short-term finance that unlocks equity before a property sale completes. Useful for homeowners, investors, and downsizers who need to access capital before settlement. Part of the Bridging Loans product family.' },
+  { term:'LVR', tag:'finance', def:'Loan-to-Value Ratio. The loan amount expressed as a percentage of the property value. Central to Assetline\'s Private Lending product — "tight LVRs, decisions that hold." If a brief mentions LVR, it refers to the ratio of the loan to the assessed or purchase price of the security property.' },
+  { term:'Indicative offer', tag:'finance', def:'A non-binding initial loan offer Assetline provides to brokers — often same day. It gives the broker (and their client) confidence that the deal is workable before formal assessment begins. Key brand differentiator: speed of indicative offer vs bank timelines.' },
+  { term:'Broker-first', tag:'company', def:'Assetline\'s operating philosophy. Brokers are the primary channel — they place deals, their reputation is on the line, and everything Assetline does is built to serve them. Marketing communications always lead with broker benefit, not product features.' },
+  { term:'AltX Financial Group', tag:'company', def:'The parent/backing entity of Assetline Capital. Provides funding depth and operational scale. Assetline operates with its own credit culture and market position within the AltX group — brokers get institutional backing with non-bank directness.' },
+  { term:'Settlement', tag:'finance', def:'The legal completion of a property transaction or loan. Assetline\'s promise for Short-Term Capital Lending is settlement within days of valuation — this speed is a core brand differentiator and appears frequently in broker communications.' },
 ];
 
 function filterGlossary() {
@@ -3074,8 +3089,8 @@ async function draftBrokerEmail() {
   if (!getAiKey()) { aiNoKey(); return; }
   aiSetBtn('email-draft-btn', true, 'Draft email →', 'Drafting…');
   try {
-    const system = `You are a professional financial services marketing coordinator. Write broker update emails that are clear, compliant, and well-structured. Always include a subject line at the top formatted as:\nSubject: [subject line here]\n\nThen write the full email body. Never include legal advice. Use Australian English spelling.`;
-    const prompt = `Write a ${tone} broker update email based on these bullet points:\n${bullets}`;
+    const system = `You are a professional marketing coordinator at Assetline Capital — a broker-first non-bank lender based in Australia. Assetline specialises in short-term capital lending (up to $40m secured against property), development finance, private lending, Horizon Mortgages, bridging loans, and equity release. The brand voice is: confident, commercial, direct — broker-first. Write broker update emails that are clear, compliant, and well-structured. Always include a subject line at the top formatted as:\nSubject: [subject line here]\n\nThen write the full email body. No jargon, no fluff. Use Australian English spelling. Never include legal advice.`;
+    const prompt = `Write a ${tone} broker update email for Assetline Capital based on these bullet points:\n${bullets}`;
     const result = await callClaude(system, prompt);
     const out = document.getElementById('email-output');
     document.getElementById('email-result').value = result;
@@ -3120,7 +3135,7 @@ async function generateCoverNote() {
   if (!getAiKey()) { aiNoKey(); return; }
   aiSetBtn('cover-note-btn', true, 'Generate cover note →', 'Generating…');
   try {
-    const system = `You are a marketing coordinator writing a brief, professional internal note to a manager. The note accompanies a test email forwarded for approval. Keep it to 4–6 sentences. Use Australian English. Tone: professional and clear. Do not write "Dear" — start directly with context.`;
+    const system = `You are a marketing coordinator at Assetline Capital — a broker-first non-bank lender. Write a brief, professional internal cover note to accompany a test email forwarded for manager approval. Assetline's voice is confident, commercial, and direct. Keep it to 4–6 sentences. Use Australian English. Tone: professional and clear. Do not write "Dear" — start directly with context. Never use unnecessary jargon or filler phrases.`;
     const prompt = `Write a manager cover note for the following test email submission:\nCampaign: ${campaign}\nPlanned send date: ${senddate || 'TBC'}\nAudience: ${audience || 'TBC'}\nAdditional notes: ${notes || 'None'}`;
     const result = await callClaude(system, prompt);
     const out = document.getElementById('cover-note-output');
@@ -3143,7 +3158,7 @@ async function generateEODSummary() {
   if (!getAiKey()) { aiNoKey(); return; }
   aiSetBtn('eod-btn', true, 'Write summary →', 'Writing…');
   try {
-    const system = `You are a marketing coordinator writing a concise ${type} update to your manager. Write exactly 5 sentences. Structure: 1–2 sentences on what was completed, 1 sentence on what is in progress, 1 sentence on any blockers or needs, 1 closing sentence. Professional, clear, Australian English. Do not use bullet points — write in flowing prose.`;
+    const system = `You are a marketing coordinator at Assetline Capital — a broker-first non-bank lender. Write a concise ${type} update for your manager. Write exactly 5 sentences. Structure: 1–2 sentences on what was completed, 1 sentence on what is in progress, 1 sentence on any blockers or needs, 1 closing sentence. Tone: professional, direct, commercial — no fluff. Australian English. Do not use bullet points — write in flowing prose.`;
     const prompt = `Write my ${type} manager update:\nCompleted: ${completed}\nIn progress: ${inprogress || 'Nothing new to add.'}\nBlockers / needs: ${blockers || 'None at this stage.'}`;
     const result = await callClaude(system, prompt);
     const out = document.getElementById('eod-output');
