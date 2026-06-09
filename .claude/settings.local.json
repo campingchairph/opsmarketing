@@ -7,7 +7,12 @@
       "Bash(git commit -m ' *)",
       "Bash(findstr /c:\"Outfit\\\\|JetBrains\\\\|Inter\" style.css)",
       "Bash(n\\\\\"\")",
-      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css' | Select-Object -First 3\\) -join \\\\\"`n\\\\\"\")"
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css' | Select-Object -First 3\\) -join \\\\\"`n\\\\\"\")",
+      "Bash(python -c \"from pypdf import PdfReader; r = PdfReader\\(r'C:\\\\Users\\\\josep\\\\Downloads\\\\Assetline Capital Brand Deck V2.pdf'\\); print\\(f'Pages: {len\\(r.pages\\)}'\\); [print\\(f'--- PAGE {i+1} ---\\\\n{r.pages[i].extract_text\\(\\)[:800]}'\\) for i in range\\(min\\(15, len\\(r.pages\\)\\)\\)]\")",
+      "Bash(py --version)",
+      "Bash(where python*)",
+      "Bash(\"/c/Python312/python.exe\" -m pip install pypdf pdfplumber --quiet)",
+      "Bash(find \"/c/Users/josep\" -name \"*.pdf\" 2>/dev/null | head -20; echo \"---\"; ls \"/c/Users/josep/Downloads/\" 2>/dev/null | head -30)"
     ]
   }
 }
