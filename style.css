@@ -3409,6 +3409,236 @@ code.edm-code {
 }
 .edm-phase-label:first-child { border-top: none; margin-top: 0; }
 
+/* Reference card body — 3-column grid layout */
+.edm-ref-body-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.edm-ref-body-grid .edm-ref-group {
+  border-right: 1px solid var(--border);
+}
+.edm-ref-body-grid .edm-ref-group:last-child {
+  border-right: none;
+}
+
+/* Recipient Lists — collapsed pill */
+.edm-lists-collapsed {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.edm-lists-collapsed:hover {
+  border-color: var(--border-md);
+  background: var(--bg-3);
+}
+
+/* Phase cards grid */
+.edm-phases-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.edm-phase-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.edm-phase-card.phase-complete {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 1px var(--sage-dim);
+}
+
+.edm-phase-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-3);
+  border-bottom: 1px solid var(--border);
+}
+.edm-phase-card.phase-complete .edm-phase-card-header {
+  background: var(--sage-dim);
+  border-bottom-color: var(--sage);
+}
+.edm-phase-card-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.edm-phase-card.phase-complete .edm-phase-card-num { color: var(--sage); }
+.edm-phase-card-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  flex: 1;
+}
+.edm-phase-card-prog {
+  flex-shrink: 0;
+}
+.edm-phase-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  background: var(--bg-4);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.edm-phase-done {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sage);
+  background: var(--sage-dim);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.edm-phase-card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Step items inside phase cards */
+.edm-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.edm-step-item:last-child { border-bottom: none; }
+.edm-step-item:hover { background: var(--bg-3); }
+.edm-step-item.done { opacity: 0.55; }
+.edm-step-item.done .edm-step-title { text-decoration: line-through; color: var(--text-3); }
+.edm-step-item .check-box { margin-top: 2px; flex-shrink: 0; }
+
+.edm-step-body { flex: 1; min-width: 0; }
+.edm-step-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.edm-step-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+.edm-phase-card.phase-complete .edm-step-num { color: var(--sage); }
+.edm-step-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1.35;
+}
+.edm-step-desc {
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: 1.55;
+}
+
+/* Floating EDM Notes widget */
+.edm-floating-notes {
+  position: fixed;
+  bottom: 20px;
+  right: 56px; /* clear the right-tabs-stack */
+  width: 280px;
+  z-index: 1050;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  border: 1px solid var(--border-md);
+}
+.edm-fn-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  background: var(--bg-3);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-1);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.edm-fn-header:hover { background: var(--bg-4); }
+.edm-fn-body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+}
+.edm-fn-textarea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 220px;
+  background: var(--bg-2);
+  border: none;
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.55;
+}
+.edm-fn-textarea::placeholder { color: var(--text-3); font-size: 11.5px; }
+.edm-fn-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-3);
+}
+.edm-fn-hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+.edm-fn-clear {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-3);
+  font-size: 10px;
+  font-family: var(--font-body);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.edm-fn-clear:hover { color: var(--rust); border-color: var(--rust); }
+
+@media (max-width: 1100px) {
+  .edm-phases-grid { grid-template-columns: 1fr; }
+  .edm-ref-body-grid { grid-template-columns: 1fr; }
+  .edm-ref-body-grid .edm-ref-group { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
 /* Key reminders list */
 .edm-reminders-list {
   padding-left: 18px;

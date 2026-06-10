@@ -269,7 +269,8 @@ function navigate(pageId) {
   // Init calendar if needed
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
   if (pageId === 'intake')      { renderIntakeSaved(); }
-  if (pageId === 'salesforce')  { renderEdmQA(); }
+  if (pageId === 'salesforce')  { renderEdmLists(); renderEdmPhases(); renderEdmQA(); showEdmFloatingNotes(true); }
+  else { showEdmFloatingNotes(false); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
   if (pageId === 'goodlooks')   { renderGoodLooks(); }
@@ -3309,7 +3310,7 @@ function escapeHtml(str) {
 // ══════════════════════════════════════════════════════════════════
 
 const EDM_QA_ITEMS = [
-  { id:'eq1', label:'Subject line is correct — matches Ben\'s brief exactly', sub:'Check the Chrome tab title of index.html was typed accurately. Spelling and capitalisation matter.', badge:'critical' },
+  { id:'eq1', label:'Subject line is correct — matches Petro\'s brief exactly', sub:'Check the Chrome tab title of index.html was typed accurately. Spelling and capitalisation matter.', badge:'critical' },
   { id:'eq2', label:'HTML version looks correct in the editor — all pages reviewed', sub:'Scroll through every section. Check wording, layout, and that no content is missing or duplicated.' },
   { id:'eq3', label:'Plain text version added and roughly matches the HTML content', sub:'Text tab should have the plain text pasted in. No need to be perfect, but major content should match.' },
   { id:'eq4', label:'All links work — every clickable element tested', sub:'Click every link in the test email. CTAs, banners, social icons, footer links. Dead links are a compliance risk.' },
@@ -3318,6 +3319,300 @@ const EDM_QA_ITEMS = [
   { id:'eq7', label:'All 4 recipient lists selected', sub:'All Brokers (Leads + Contacts) · James Green Database · Assetline Team Managerial/Executive · State Managers. All 4, every time.', badge:'critical' },
   { id:'eq8', label:'Sender is "Assetline Capital" / apply@assetline.com.au — reply-to matches', sub:'Sending tab: Sender name = Assetline Capital · Sender email = apply@assetline.com.au · Reply-to = apply@assetline.com.au', badge:'critical' },
 ];
+
+// ── Phase Cards data ─────────────────────────────────────────────
+const EDM_PHASES = [
+  { id:'ph1', num:1, title:'Receive & Open Files', steps:[
+    { id:'ph1s1', num:1, title:'Receive the ZIP from Petro via Teams', badge:null,
+      desc:'Petro sends a Teams message with a ZIP file. Check his message for: the HTML file, campaign name, send date and time. All three should be in the message.' },
+    { id:'ph1s2', num:2, title:'Extract and open both files in Chrome', badge:null,
+      desc:'Open the folder named with the date/description. Find <code class="edm-code">index.html</code> and <code class="edm-code">plain-text-version.txt</code> — right-click each → <strong>Open with Google Chrome</strong>. Keep both tabs open.' },
+  ]},
+  { id:'ph2', num:2, title:'Create the Template', steps:[
+    { id:'ph2s3', num:3, title:'Create new template in Account Engagement', badge:null,
+      desc:'<strong>Account Engagement Email → Templates → New.</strong><br>Name: <code class="edm-code">YYMMDD_Description</code> · Campaign: from Petro\'s message · Tracker: <code class="edm-code">go.assetline.com.au</code> · Save.' },
+    { id:'ph2s4', num:4, title:'Skip the layout step', badge:null,
+      desc:'On the next screen, skip the layout step entirely. The HTML already contains the full email structure — no additional layout template is needed.' },
+    { id:'ph2s5', num:5, title:'Build the email — subject, HTML, plain text', badge:null,
+      desc:'<strong>Subject:</strong> Chrome tab title of index.html — type exactly, check spelling.<br><strong>HTML tab:</strong> View Page Source → Select All → Copy → Salesforce HTML tab → Delete → Paste → Save.<br><strong>Text tab:</strong> Chrome plain text tab → Select All → Copy → Paste into Text tab → Save.' },
+  ]},
+  { id:'ph3', num:3, title:'Review & Fix', steps:[
+    { id:'ph3s6', num:6, title:'Check in the Editor tab', badge:null,
+      desc:'Email should appear. Check wording accuracy, content, and layout. <em>Minor spacing glitches in the editor are normal — they won\'t appear in the sent email.</em>' },
+    { id:'ph3s7', num:7, title:'Add missing links — especially LinkedIn', badge:'warn',
+      desc:'Check all icons for missing URLs. <strong>LinkedIn icon frequently comes through without a URL</strong> — add <code class="edm-code">linkedin.com/company/assetline-capital</code> manually every time.' },
+    { id:'ph3s8', num:8, title:'Verify merge fields in Preview tab', badge:null,
+      desc:'<strong>Preview tab</strong> → select a sample prospect (e.g. Billy) → confirm first name renders correctly. Merge fields don\'t show in test emails — <em>Preview tab only.</em> Save.' },
+  ]},
+  { id:'ph4', num:4, title:'Sender Setup', steps:[
+    { id:'ph4s9', num:9, title:'Set sender details in the Sending tab', badge:'critical',
+      desc:'Sender name: <code class="edm-code">Assetline Capital</code><br>Sender email: <code class="edm-code">apply@assetline.com.au</code><br>Reply-to: <code class="edm-code">apply@assetline.com.au</code>' },
+  ]},
+  { id:'ph5', num:5, title:'Test & Publish', steps:[
+    { id:'ph5s10', num:10, title:'Send test emails — yourself first, then Petro', badge:null,
+      desc:'Test to yourself first: design, all links, wording, no errors. Once satisfied, send test to <strong>Petro</strong>. <strong>Wait for Petro\'s approval before publishing.</strong>' },
+    { id:'ph5s11', num:11, title:'Publish the template', badge:'warn',
+      desc:'Once both you and Petro are happy, publish the template. <strong>Publishing does NOT send the email</strong> — it makes the template available to create a Send from.' },
+  ]},
+  { id:'ph6', num:6, title:'Build the Send', steps:[
+    { id:'ph6s12', num:12, title:'Create a new Send', badge:null,
+      desc:'<strong>Sends tab → New Send.</strong> Name: <code class="edm-code">YYMMDD_Description</code> (same as template). Campaign: same campaign. Leave tracker domain — it inherits. Save.' },
+    { id:'ph6s13', num:13, title:'Apply the template to the Send', badge:null,
+      desc:'Search for template by name, select and apply. Subject, HTML, text, and sender details carry over automatically.' },
+    { id:'ph6s14', num:14, title:'Add all 4 recipient lists', badge:'critical',
+      desc:'Add: <strong>All Brokers (Leads + Contacts)</strong> + <strong>James Green Database</strong> + <strong>Assetline Team Managerial/Executive</strong> + <strong>State Managers</strong>. All 4 — every time. Do not skip any.' },
+    { id:'ph6s15', num:15, title:'Run Final QA — use the checklist below', badge:null,
+      desc:'Complete the Final QA checklist below before sending or scheduling. All 8 items must be confirmed.' },
+  ]},
+  { id:'ph7', num:7, title:'Send or Schedule', steps:[
+    { id:'ph7s16', num:16, title:'Send now or schedule', badge:'critical',
+      desc:'<strong>Send now</strong> — sends immediately.<br><strong>Schedule</strong> — use when Petro specifies a date and time.<br><br><strong>⚠ Timezone:</strong> Scheduling uses <em>your local timezone</em>. If the email goes at 9 AM Sydney time and you\'re in a different timezone, adjust accordingly. <strong>Confirm with Petro when scheduling for the first time.</strong>' },
+  ]},
+];
+
+// ── Recipient Lists (editable) ───────────────────────────────────
+const EDM_LISTS_KEY = 'msc_edm_lists_v1';
+const EDM_LISTS_DEFAULT = [
+  { id:'el1', name:'All Brokers — Leads and Contacts', type:'Customer · Brokers', count:'15,210' },
+  { id:'el2', name:'James Green Database',             type:'Customer · Brokers', count:'6,355' },
+  { id:'el3', name:'Assetline Team — Managerial / Executive', type:'Internal',    count:'4' },
+  { id:'el4', name:'Assetline Team — State Managers',  type:'Internal',           count:'2' },
+];
+function loadEdmLists() { try { const r=JSON.parse(localStorage.getItem(EDM_LISTS_KEY)); return r?.length?r:[...EDM_LISTS_DEFAULT]; } catch { return [...EDM_LISTS_DEFAULT]; } }
+function saveEdmLists(d) { localStorage.setItem(EDM_LISTS_KEY, JSON.stringify(d)); }
+
+let edmListsOpen   = false;
+let edmListsEditing = false;
+
+function toggleEdmLists() {
+  edmListsOpen = !edmListsOpen;
+  if (!edmListsOpen) edmListsEditing = false;
+  renderEdmLists();
+}
+
+function startEdmListsEdit() {
+  edmListsEditing = true;
+  renderEdmLists();
+  // focus first input
+  setTimeout(() => document.querySelector('.edm-list-edit-name')?.focus(), 50);
+}
+
+function saveEdmListsEdit() {
+  const rows = document.querySelectorAll('.edm-list-edit-row');
+  const lists = [];
+  rows.forEach((row, i) => {
+    const def = EDM_LISTS_DEFAULT[i] || {};
+    lists.push({
+      id:   def.id || 'el' + (i+1),
+      name: row.querySelector('.edm-list-edit-name')?.value?.trim() || def.name,
+      type: row.querySelector('.edm-list-edit-type')?.value?.trim() || def.type,
+      count:row.querySelector('.edm-list-edit-count')?.value?.trim() || def.count,
+    });
+  });
+  saveEdmLists(lists);
+  edmListsEditing = false;
+  renderEdmLists();
+  showAiToast('✓ Recipient lists updated');
+}
+
+function cancelEdmListsEdit() {
+  edmListsEditing = false;
+  renderEdmLists();
+}
+
+function renderEdmLists() {
+  const el = document.getElementById('edm-lists-card');
+  if (!el) return;
+  const lists = loadEdmLists();
+
+  if (!edmListsOpen) {
+    el.innerHTML = `
+      <div class="edm-lists-collapsed" onclick="toggleEdmLists()">
+        <div class="sh-icon green" style="width:28px;height:28px;flex-shrink:0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-1)">Recipient Lists</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px">${lists.length} lists · always add all of them · click to expand</div>
+        </div>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--text-3)"><polyline points="4,6 8,10 12,6"/></svg>
+      </div>`;
+    return;
+  }
+
+  if (edmListsEditing) {
+    el.innerHTML = `
+      <div class="section-block" style="border:1px solid var(--border-md)">
+        <div class="section-block-header">
+          <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div>
+          <span class="sh-title">Recipient Lists — Edit</span>
+          <button class="btn-add" style="width:auto;padding:5px 12px;font-size:11px;margin-left:auto" onclick="saveEdmListsEdit()">Save changes</button>
+          <button onclick="cancelEdmListsEdit()" style="margin-left:6px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-3);font-size:11px;padding:5px 10px;cursor:pointer">Cancel</button>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          ${lists.map((l,i) => `
+          <div class="edm-list-edit-row">
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">List ${i+1}</div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center">
+              <input class="form-input edm-list-edit-name" value="${escapeHtml(l.name)}" placeholder="List name" style="font-size:12px"/>
+              <input class="form-input edm-list-edit-type" value="${escapeHtml(l.type)}" placeholder="Type" style="width:130px;font-size:12px"/>
+              <input class="form-input edm-list-edit-count" value="${escapeHtml(l.count)}" placeholder="Count" style="width:70px;font-size:12px;text-align:right"/>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Expanded view mode
+  el.innerHTML = `
+    <div class="section-block" style="border:1px solid var(--border-md)">
+      <div class="section-block-header">
+        <div class="sh-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg></div>
+        <span class="sh-title">Recipient Lists — always add all ${lists.length}</span>
+        <button onclick="startEdmListsEdit()" style="margin-left:auto;background:none;border:1px solid var(--border-md);border-radius:6px;color:var(--text-3);font-size:11px;padding:4px 10px;cursor:pointer;font-family:var(--font-body)">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="width:11px;height:11px"><path d="M9 2l3 3-7 7H2v-3l7-7z"/></svg> Edit
+        </button>
+        <button onclick="toggleEdmLists()" style="margin-left:6px;background:none;border:none;color:var(--text-3);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1" title="Collapse">×</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-3);font-style:italic;padding:8px 16px;border-bottom:1px solid var(--border)">Add all ${lists.length} lists every time you send a designed marketing eDM. Do not skip any.</div>
+      ${lists.map(l => `
+      <div class="edm-list-item">
+        <div class="edm-list-left">
+          <div class="edm-list-name">${escapeHtml(l.name)}</div>
+          <span class="edm-list-type">${escapeHtml(l.type)}</span>
+        </div>
+        <div class="edm-list-count">${escapeHtml(l.count)}</div>
+      </div>`).join('')}
+      <div class="edm-list-total"><span>Total reach</span><span>~${calcEdmTotal(lists)}</span></div>
+    </div>`;
+}
+
+function calcEdmTotal(lists) {
+  const n = lists.reduce((sum, l) => {
+    const num = parseInt((l.count || '').replace(/,/g,''), 10);
+    return sum + (isNaN(num) ? 0 : num);
+  }, 0);
+  return n.toLocaleString();
+}
+
+// ── Phase Cards ──────────────────────────────────────────────────
+const EDM_STEPS_KEY = 'msc_edm_steps_v1';
+function loadEdmSteps()  { try { return JSON.parse(localStorage.getItem(EDM_STEPS_KEY)) || {}; } catch { return {}; } }
+function saveEdmSteps(d) { localStorage.setItem(EDM_STEPS_KEY, JSON.stringify(d)); }
+
+function renderEdmPhases() {
+  const el = document.getElementById('edm-phases-container');
+  if (!el) return;
+  const state = loadEdmSteps();
+
+  el.innerHTML =
+    '<div class="edm-phases-grid">' +
+    EDM_PHASES.map(phase => {
+      const total = phase.steps.length;
+      const done  = phase.steps.filter(s => state[s.id]).length;
+      const complete = done === total;
+      return `
+        <div class="edm-phase-card${complete?' phase-complete':''}" id="edm-card-${phase.id}">
+          <div class="edm-phase-card-header">
+            <div class="edm-phase-card-num">Phase ${phase.num}</div>
+            <div class="edm-phase-card-title">${phase.title}</div>
+            <div class="edm-phase-card-prog" id="edm-prog-${phase.id}">
+              ${complete
+                ? '<span class="edm-phase-done">✓ Done</span>'
+                : `<span class="edm-phase-count">${done}/${total}</span>`}
+            </div>
+          </div>
+          <div class="edm-phase-card-body">
+            ${phase.steps.map(step => {
+              const checked = !!state[step.id];
+              let badge = '';
+              if (step.badge === 'critical') badge = '<span class="ci-badge critical">critical</span>';
+              else if (step.badge === 'warn') badge = '<span class="ci-badge warn">note</span>';
+              return `
+                <div class="edm-step-item${checked?' done':''}" onclick="toggleEdmStep('${step.id}','${phase.id}')">
+                  <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
+                  <div class="edm-step-body">
+                    <div class="edm-step-header">
+                      <span class="edm-step-num">Step ${step.num}</span>
+                      <span class="edm-step-title">${step.title}${badge}</span>
+                    </div>
+                    <div class="edm-step-desc">${step.desc}</div>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('') +
+    '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:4px">' +
+    '<button class="btn-reset" onclick="resetEdmPhases()" style="margin-top:0">' +
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>Reset all phase steps</button>' +
+    '</div></div>';
+}
+
+function toggleEdmStep(stepId, phaseId) {
+  const state = loadEdmSteps();
+  if (state[stepId]) delete state[stepId]; else state[stepId] = true;
+  saveEdmSteps(state);
+
+  // Toggle check-item class
+  document.querySelectorAll(`[onclick*="'${stepId}'"]`).forEach(el => el.classList.toggle('done', !!state[stepId]));
+
+  // Update phase card progress
+  const phase = EDM_PHASES.find(p => p.id === phaseId);
+  if (!phase) return;
+  const total = phase.steps.length;
+  const done  = phase.steps.filter(s => state[s.id]).length;
+  const complete = done === total;
+  const card  = document.getElementById('edm-card-' + phaseId);
+  const prog  = document.getElementById('edm-prog-' + phaseId);
+  if (card) card.classList.toggle('phase-complete', complete);
+  if (prog) prog.innerHTML = complete
+    ? '<span class="edm-phase-done">✓ Done</span>'
+    : `<span class="edm-phase-count">${done}/${total}</span>`;
+}
+
+function resetEdmPhases() {
+  saveEdmSteps({});
+  renderEdmPhases();
+}
+
+// ── Floating EDM Notes ───────────────────────────────────────────
+const EDM_NOTES_KEY = 'msc_edm_floatnotes_v1';
+let edmNotesOpen = false;
+
+function loadEdmFloatingNotes() { return localStorage.getItem(EDM_NOTES_KEY) || ''; }
+function saveEdmFloatingNotes(text) { localStorage.setItem(EDM_NOTES_KEY, text); }
+
+function showEdmFloatingNotes(show) {
+  const w = document.getElementById('edm-floating-notes');
+  if (w) w.style.display = show ? 'block' : 'none';
+  if (show) {
+    const ta = document.getElementById('edm-fn-textarea');
+    if (ta) ta.value = loadEdmFloatingNotes();
+  }
+}
+
+function toggleEdmNotes() {
+  edmNotesOpen = !edmNotesOpen;
+  const body    = document.getElementById('edm-fn-body');
+  const chevron = document.getElementById('edm-fn-chevron');
+  const label   = document.getElementById('edm-fn-label');
+  if (body)    body.style.display = edmNotesOpen ? 'flex' : 'none';
+  if (chevron) chevron.style.transform = edmNotesOpen ? 'rotate(180deg)' : '';
+  if (label)   label.textContent = edmNotesOpen ? 'EDM Notes' : 'EDM Notes';
+  if (edmNotesOpen) {
+    const ta = document.getElementById('edm-fn-textarea');
+    if (ta) { ta.value = loadEdmFloatingNotes(); ta.focus(); }
+  }
+}
+
+function clearEdmFloatingNotes() {
+  saveEdmFloatingNotes('');
+  const ta = document.getElementById('edm-fn-textarea');
+  if (ta) ta.value = '';
+  showAiToast('EDM notes cleared');
+}
 
 const EDM_QA_KEY = 'msc_edm_qa_v1';
 
