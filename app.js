@@ -252,6 +252,7 @@ function navigate(pageId) {
     timesheet:    ['Timesheet', 'Log work, track hours, backtrack any day'],
     glossary:     ['Finance Glossary', 'Financial services terms explained'],
     goodlooks:    ['What Good Looks Like', 'Pass vs Good vs Impressive'],
+    diffcheck:    ['Text Compare', 'Spot differences between two versions of any text'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -3426,6 +3427,9 @@ let edmPetroMsgIdx = 0;
 let edmSendMsgIdx  = 0;
 
 function getEdmTemplateName() {
+  // Read from live DOM first so message previews update as you type
+  const dom = document.getElementById('edm-camp-name')?.value?.trim();
+  if (dom) return dom;
   return loadEdmCampaign().campaign?.trim() || 'this send';
 }
 
@@ -3515,16 +3519,66 @@ function renderEdmCampaignCard() {
           <input class="form-input" id="edm-camp-reply" value="${escapeHtml(d.replyTo)}" placeholder="e.g. apply@assetline.com.au" oninput="saveEdmCampaignEdit()"/>
         </div>
       </div>
-      <div class="edm-camp-note">All values provided by Petro in Teams each time. Auto-saves as you type. Template name auto-fills into your Petro message templates.</div>
+      <div class="edm-camp-footer">
+        <div class="edm-camp-note">All values provided by Petro in Teams each time. Auto-saves as you type. Template name fills your Petro messages automatically.</div>
+        <button class="edm-start-timer-btn" onclick="addEdmToTimer()" title="Add this EDM as a task in the Task Timer">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="9" r="5"/><polyline points="8,6 8,9 10,11"/><line x1="6" y1="1" x2="10" y2="1"/></svg>
+          Add to Timer →
+        </button>
+      </div>
     </div>`;
 }
 
 function refreshEdmMsgPreviews() {
-  // Update the live message previews in the phase card widget
-  const el = document.getElementById('edm-petro-msg-text');
-  if (el) el.textContent = fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx]);
+  const el  = document.getElementById('edm-petro-msg-text');
+  if (el)  el.textContent  = fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx]);
   const el2 = document.getElementById('edm-send-msg-text');
   if (el2) el2.textContent = fillEdmMsg(EDM_SEND_MSGS[edmSendMsgIdx]);
+}
+
+function addEdmToTimer() {
+  const d = loadEdmCampaign();
+  const name = d.campaign?.trim() || 'EDM Send';
+  if (!name || name === 'this send') {
+    showAiToast('Enter the Template name first, then add to timer');
+    document.getElementById('edm-camp-name')?.focus();
+    return;
+  }
+
+  // Build brief like Brief Intake does
+  const taskType = 'email_campaign';
+  const map      = TASK_TYPE_MAP[taskType];
+  const checklist = [
+    ...(PRIORITY_ITEMS.high || []),
+    ...(map?.checklistKeys?.flatMap(key => (CHECKLISTS[key] || []).map(i => ({ ...i }))) || []),
+  ];
+
+  const brief = {
+    id:          'brief_' + Date.now(),
+    name,
+    requestor:   'Petro',
+    taskType,
+    priority:    'high',
+    deadline:    new Date().toISOString().slice(0,10),
+    description: `Salesforce EDM send${d.campaignLib ? ' — ' + d.campaignLib : ''}. Sender: ${d.senderName} <${d.senderEmail}>`,
+    status:      'active',
+    sessions:    [],
+    totalMins:   0,
+    createdAt:   new Date().toISOString(),
+    checklist,
+    checkState:  {},
+    guideSteps:  map?.guideSteps || [],
+    templateIds: map?.templateIds || [],
+    addedToTimesheet: false,
+    timerNotes:  [],
+  };
+
+  const briefs = loadBriefs();
+  briefs[brief.id] = brief;
+  saveBriefs(briefs);
+
+  showAiToast('✓ "' + name + '" added to Task Timer');
+  setTimeout(() => navigate('timer'), 800);
 }
 
 // ── Recipient Lists (editable) ───────────────────────────────────
@@ -3863,6 +3917,16 @@ function showEdmSendModal() {
   modal.style.display = 'flex';
 }
 
+// ── EDM Sidebar notes collapsible ───────────────────────────────
+let edmSbNotesOpen = true;
+function toggleEdmSbNotes() {
+  edmSbNotesOpen = !edmSbNotesOpen;
+  const body    = document.getElementById('edm-sb-notes-body');
+  const chevron = document.getElementById('edm-sb-notes-chevron');
+  if (body)    body.style.display      = edmSbNotesOpen ? 'block' : 'none';
+  if (chevron) chevron.style.transform = edmSbNotesOpen ? '' : 'rotate(-90deg)';
+}
+
 // ── EDM Sidebar show/hide ────────────────────────────────────────
 function setEdmSidebarVisible(visible) {
   const sidebar   = document.getElementById('edm-sidebar');
@@ -3900,6 +3964,156 @@ function copyEdmRef(text, el) {
       setTimeout(() => { el.textContent = orig; }, 1600);
     }
   });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TEXT COMPARE — Diff Checker
+// ══════════════════════════════════════════════════════════════════
+
+function computeLineDiff(a, b) {
+  const m = a.length, n = b.length;
+  // DP table — use flat array for speed
+  const dp = new Int32Array((m+1) * (n+1));
+  const idx = (i,j) => i*(n+1)+j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[idx(i,j)] = a[i-1] === b[j-1]
+        ? dp[idx(i-1,j-1)] + 1
+        : Math.max(dp[idx(i-1,j)], dp[idx(i,j-1)]);
+    }
+  }
+  // Iterative backtrack
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
+      ops.unshift({ t:'eq', l:a[i-1], r:b[j-1] });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[idx(i,j-1)] >= dp[idx(i-1,j)])) {
+      ops.unshift({ t:'add', r:b[j-1] });
+      j--;
+    } else {
+      ops.unshift({ t:'del', l:a[i-1] });
+      i--;
+    }
+  }
+  // Pair adjacent del+add as 'mod'
+  const out = [];
+  for (let k = 0; k < ops.length; k++) {
+    if (ops[k].t === 'del' && k+1 < ops.length && ops[k+1].t === 'add') {
+      out.push({ t:'mod', l:ops[k].l, r:ops[k+1].r });
+      k++;
+    } else {
+      out.push(ops[k]);
+    }
+  }
+  return out;
+}
+
+function computeWordDiff(left, right) {
+  // Tokenise into words + whitespace runs
+  const tok = s => s.match(/\S+|\s+/g) || [''];
+  const a = tok(left), b = tok(right);
+  const m = a.length, n = b.length;
+  const dp = new Int32Array((m+1)*(n+1));
+  const idx = (i,j) => i*(n+1)+j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[idx(i,j)] = a[i-1] === b[j-1] ? dp[idx(i-1,j-1)]+1 : Math.max(dp[idx(i-1,j)], dp[idx(i,j-1)]);
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'eq',v:a[i-1]}); i--; j--; }
+    else if (j > 0 && (i === 0 || dp[idx(i,j-1)] >= dp[idx(i-1,j)])) { ops.unshift({t:'add',v:b[j-1]}); j--; }
+    else { ops.unshift({t:'del',v:a[i-1]}); i--; }
+  }
+  let lHtml = '', rHtml = '';
+  for (const op of ops) {
+    const v = dEsc(op.v);
+    if (op.t === 'eq')  { lHtml += v; rHtml += v; }
+    else if (op.t === 'del') lHtml += `<mark class="diff-word-del">${v}</mark>`;
+    else                     rHtml += `<mark class="diff-word-add">${v}</mark>`;
+  }
+  return [lHtml, rHtml];
+}
+
+// HTML-escape for diff output
+function dEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function runDiffCheck() {
+  const t1 = document.getElementById('diff-left')?.value  ?? '';
+  const t2 = document.getElementById('diff-right')?.value ?? '';
+  if (!t1.trim() && !t2.trim()) { showAiToast('Paste text into both panels first'); return; }
+
+  const lines1 = t1.split('\n');
+  const lines2 = t2.split('\n');
+
+  if (lines1.length > 3000 || lines2.length > 3000) {
+    showAiToast('Text is very long — results may be slow');
+  }
+
+  const hunks = computeLineDiff(lines1, lines2);
+
+  let added = 0, removed = 0, modified = 0, equal = 0;
+  let lHtmlAll = '', rHtmlAll = '';
+  let lNum = 1, rNum = 1;
+
+  for (const h of hunks) {
+    if (h.t === 'eq') {
+      const v = dEsc(h.l);
+      lHtmlAll += `<div class="diff-line diff-eq"><span class="diff-ln">${lNum++}</span><span class="diff-ct">${v}</span></div>`;
+      rHtmlAll += `<div class="diff-line diff-eq"><span class="diff-ln">${rNum++}</span><span class="diff-ct">${v}</span></div>`;
+      equal++;
+    } else if (h.t === 'del') {
+      lHtmlAll += `<div class="diff-line diff-del"><span class="diff-ln">${lNum++}</span><span class="diff-ct">${dEsc(h.l)}</span></div>`;
+      rHtmlAll += `<div class="diff-line diff-empty"><span class="diff-ln"></span><span class="diff-ct"></span></div>`;
+      removed++;
+    } else if (h.t === 'add') {
+      lHtmlAll += `<div class="diff-line diff-empty"><span class="diff-ln"></span><span class="diff-ct"></span></div>`;
+      rHtmlAll += `<div class="diff-line diff-add"><span class="diff-ln">${rNum++}</span><span class="diff-ct">${dEsc(h.r)}</span></div>`;
+      added++;
+    } else { // mod
+      const [lW, rW] = computeWordDiff(h.l, h.r);
+      lHtmlAll += `<div class="diff-line diff-mod-del"><span class="diff-ln">${lNum++}</span><span class="diff-ct">${lW}</span></div>`;
+      rHtmlAll += `<div class="diff-line diff-mod-add"><span class="diff-ln">${rNum++}</span><span class="diff-ct">${rW}</span></div>`;
+      modified++;
+    }
+  }
+
+  document.getElementById('diff-panel-left').innerHTML  = lHtmlAll || '<div class="diff-empty-state">No content</div>';
+  document.getElementById('diff-panel-right').innerHTML = rHtmlAll || '<div class="diff-empty-state">No content</div>';
+
+  // Stats
+  const noChange = added === 0 && removed === 0 && modified === 0;
+  const statsEl = document.getElementById('diff-stats');
+  statsEl.style.display = 'flex';
+  statsEl.innerHTML = noChange
+    ? `<span class="diff-stat diff-stat-eq">✓ No differences found — texts are identical</span>`
+    : [
+        added    ? `<span class="diff-stat diff-stat-add">+${added} added</span>` : '',
+        removed  ? `<span class="diff-stat diff-stat-del">−${removed} removed</span>` : '',
+        modified ? `<span class="diff-stat diff-stat-mod">~ ${modified} modified</span>` : '',
+        `<span class="diff-stat diff-stat-eq">${equal} unchanged</span>`,
+      ].filter(Boolean).join('');
+
+  document.getElementById('diff-output').style.display = 'block';
+  document.getElementById('diff-output').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function clearDiffOutput() {
+  document.getElementById('diff-output').style.display = 'none';
+  document.getElementById('diff-stats').style.display  = 'none';
+}
+function clearDiffSide(side) {
+  document.getElementById(side === 'left' ? 'diff-left' : 'diff-right').value = '';
+  clearDiffOutput();
+}
+function clearAllDiff() {
+  document.getElementById('diff-left').value  = '';
+  document.getElementById('diff-right').value = '';
+  clearDiffOutput();
 }
 
 // ══════════════════════════════════════════════════════════════════
