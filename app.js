@@ -240,6 +240,7 @@ function navigate(pageId) {
     events:       ['Events',    'Setup, materials & post-event'],
     brand:        ['Brand & Compliance', 'QC checklist + InDesign preflight'],
     aiwriter:     ['AI Write & QC', 'Draft emails, QC checklists & manager notes'],
+    salesforce:   ['Salesforce EDM', 'Designed eDM — build, test & send in Account Engagement'],
     taskbuilder:  ['Task Builder', 'Generate a custom plan for any task'],
     intake:       ['Brief Intake', 'Receive a task — fill this in first'],
     timer:        ['Task Timer', 'Focus mode — Pomodoro timer'],
@@ -268,6 +269,7 @@ function navigate(pageId) {
   // Init calendar if needed
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
   if (pageId === 'intake')      { renderIntakeSaved(); }
+  if (pageId === 'salesforce')  { renderEdmQA(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
   if (pageId === 'goodlooks')   { renderGoodLooks(); }
@@ -3300,6 +3302,102 @@ function renderNotesList() {
 
 function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALESFORCE EDM — Final QA Checklist
+// ══════════════════════════════════════════════════════════════════
+
+const EDM_QA_ITEMS = [
+  { id:'eq1', label:'Subject line is correct — matches Ben\'s brief exactly', sub:'Check the Chrome tab title of index.html was typed accurately. Spelling and capitalisation matter.', badge:'critical' },
+  { id:'eq2', label:'HTML version looks correct in the editor — all pages reviewed', sub:'Scroll through every section. Check wording, layout, and that no content is missing or duplicated.' },
+  { id:'eq3', label:'Plain text version added and roughly matches the HTML content', sub:'Text tab should have the plain text pasted in. No need to be perfect, but major content should match.' },
+  { id:'eq4', label:'All links work — every clickable element tested', sub:'Click every link in the test email. CTAs, banners, social icons, footer links. Dead links are a compliance risk.' },
+  { id:'eq5', label:'LinkedIn icon URL added manually — linkedin.com/company/assetline-capital', sub:'This icon frequently comes through without a URL from Figma. Always check and add manually.', badge:'common miss' },
+  { id:'eq6', label:'Merge fields verified in Preview tab — first name renders correctly', sub:'Preview tab → select a sample prospect (e.g. Billy). Merge fields don\'t show in test emails — only here.' },
+  { id:'eq7', label:'All 4 recipient lists selected', sub:'All Brokers (Leads + Contacts) · James Green Database · Assetline Team Managerial/Executive · State Managers. All 4, every time.', badge:'critical' },
+  { id:'eq8', label:'Sender is "Assetline Capital" / apply@assetline.com.au — reply-to matches', sub:'Sending tab: Sender name = Assetline Capital · Sender email = apply@assetline.com.au · Reply-to = apply@assetline.com.au', badge:'critical' },
+];
+
+const EDM_QA_KEY = 'msc_edm_qa_v1';
+
+function loadEdmQA()  { try { return JSON.parse(localStorage.getItem(EDM_QA_KEY)) || {}; } catch { return {}; } }
+function saveEdmQA(d) { localStorage.setItem(EDM_QA_KEY, JSON.stringify(d)); }
+
+function renderEdmQA() {
+  const el    = document.getElementById('list-edm-qa');
+  const count = document.getElementById('count-edm-qa');
+  const status = document.getElementById('edm-qa-status');
+  const btn   = document.getElementById('edm-qa-btn');
+  if (!el) return;
+
+  const state  = loadEdmQA();
+  const total  = EDM_QA_ITEMS.length;
+  const done   = EDM_QA_ITEMS.filter(i => state[i.id]).length;
+
+  el.innerHTML = EDM_QA_ITEMS.map(item => {
+    const isDone = !!state[item.id];
+    let badge = '';
+    if (item.badge === 'critical')    badge = '<span class="ci-badge critical">critical</span>';
+    else if (item.badge === 'common miss') badge = '<span class="ci-badge warn">common miss</span>';
+    return `
+      <div class="check-item${isDone ? ' done' : ''}" data-edm-id="${item.id}" onclick="toggleEdmQAItem('${item.id}')">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
+        <div>
+          <div class="ci-label">${item.label}${badge}</div>
+          ${item.sub ? `<div class="ci-sub">${item.sub}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  if (count)  count.textContent  = `${done}/${total}`;
+  if (status) status.textContent = `${done} / ${total} checked`;
+  if (btn) {
+    btn.disabled = done < total;
+    btn.classList.toggle('qc-ready', done === total);
+  }
+}
+
+function toggleEdmQAItem(id) {
+  const state = loadEdmQA();
+  if (state[id]) delete state[id]; else state[id] = true;
+  saveEdmQA(state);
+  const el = document.querySelector(`[data-edm-id="${id}"]`);
+  if (el) el.classList.toggle('done');
+  // Update counter/button without full re-render
+  const done  = EDM_QA_ITEMS.filter(i => state[i.id]).length;
+  const total = EDM_QA_ITEMS.length;
+  const count  = document.getElementById('count-edm-qa');
+  const status = document.getElementById('edm-qa-status');
+  const btn    = document.getElementById('edm-qa-btn');
+  if (count)  count.textContent  = `${done}/${total}`;
+  if (status) status.textContent = `${done} / ${total} checked`;
+  if (btn) { btn.disabled = done < total; btn.classList.toggle('qc-ready', done === total); }
+}
+
+function markEdmQADone() {
+  const btn = document.getElementById('edm-qa-btn');
+  if (btn) { btn.textContent = '✓ QA complete — ready to send'; btn.disabled = true; btn.classList.add('qc-done'); }
+  showAiToast('✓ Final QA complete — send or schedule in Salesforce');
+}
+
+function resetEdmQA() {
+  saveEdmQA({});
+  renderEdmQA();
+  const btn = document.getElementById('edm-qa-btn');
+  if (btn) { btn.textContent = 'Ready to Send ✓'; btn.classList.remove('qc-done', 'qc-ready'); btn.disabled = true; }
+}
+
+function copyEdmRef(text, el) {
+  navigator.clipboard.writeText(text).then(() => {
+    showAiToast('✓ Copied — ' + text);
+    if (el) {
+      const orig = el.dataset.orig || el.textContent;
+      el.dataset.orig = orig;
+      el.textContent = '✓ Copied!';
+      setTimeout(() => { el.textContent = orig; }, 1600);
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════
