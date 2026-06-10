@@ -3917,7 +3917,7 @@ function showEdmSendModal() {
   modal.style.display = 'flex';
 }
 
-// ── EDM Sidebar notes collapsible ───────────────────────────────
+// ── EDM Sidebar notes collapsible (inner textarea only) ─────────
 let edmSbNotesOpen = true;
 function toggleEdmSbNotes() {
   edmSbNotesOpen = !edmSbNotesOpen;
@@ -3927,15 +3927,61 @@ function toggleEdmSbNotes() {
   if (chevron) chevron.style.transform = edmSbNotesOpen ? '' : 'rotate(-90deg)';
 }
 
+// ── EDM Sidebar full collapse / expand ──────────────────────────
+let edmSidebarCollapsed = false;
+
+function collapseEdmSidebar() {
+  edmSidebarCollapsed = true;
+  const sidebar  = document.getElementById('edm-sidebar');
+  const tab      = document.getElementById('edm-sidebar-reopen-tab');
+  const content  = document.querySelector('.content');
+  if (sidebar)  sidebar.classList.add('edm-sidebar-collapsed');
+  if (content)  content.classList.remove('edm-sidebar-open');
+  // Show re-open tab after slide animation
+  setTimeout(() => {
+    if (tab && edmSidebarCollapsed) tab.style.display = 'flex';
+  }, 280);
+}
+
+function expandEdmSidebar() {
+  edmSidebarCollapsed = false;
+  const sidebar = document.getElementById('edm-sidebar');
+  const tab     = document.getElementById('edm-sidebar-reopen-tab');
+  const content = document.querySelector('.content');
+  if (tab)     tab.style.display = 'none';
+  if (sidebar) sidebar.classList.remove('edm-sidebar-collapsed');
+  if (content) content.classList.add('edm-sidebar-open');
+}
+
 // ── EDM Sidebar show/hide ────────────────────────────────────────
 function setEdmSidebarVisible(visible) {
   const sidebar   = document.getElementById('edm-sidebar');
   const content   = document.querySelector('.content');
   const rightTabs = document.querySelector('.right-tabs-stack');
-  if (sidebar)   sidebar.style.display = visible ? 'flex' : 'none';
-  if (content)   content.classList.toggle('edm-sidebar-open', visible);
-  if (rightTabs) rightTabs.style.display = visible ? 'none' : 'flex';
-  if (visible) {
+  const tab       = document.getElementById('edm-sidebar-reopen-tab');
+
+  if (!visible) {
+    // Leaving salesforce tab — hide everything, restore hub tabs
+    if (sidebar)   { sidebar.style.display = 'none'; sidebar.classList.remove('edm-sidebar-collapsed'); }
+    if (content)   content.classList.remove('edm-sidebar-open');
+    if (rightTabs) rightTabs.style.display = 'flex';
+    if (tab)       tab.style.display = 'none';
+    edmSidebarCollapsed = false;
+    return;
+  }
+
+  // Entering salesforce tab
+  if (rightTabs) rightTabs.style.display = 'none';
+
+  if (edmSidebarCollapsed) {
+    // Sidebar was collapsed before — keep it collapsed, just show reopen tab
+    if (sidebar) sidebar.style.display = 'flex';
+    if (tab)     tab.style.display = 'flex';
+    if (content) content.classList.remove('edm-sidebar-open');
+  } else {
+    if (sidebar) { sidebar.style.display = 'flex'; sidebar.classList.remove('edm-sidebar-collapsed'); }
+    if (content) content.classList.add('edm-sidebar-open');
+    if (tab)     tab.style.display = 'none';
     const ta = document.getElementById('edm-fn-textarea');
     if (ta) ta.value = loadEdmFloatingNotes();
     renderEdmLists();

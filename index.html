@@ -1745,6 +1745,9 @@
     <div class="edm-sb-header">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>
       EDM Workspace
+      <button class="edm-sb-collapse-btn" onclick="collapseEdmSidebar()" title="Collapse sidebar">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5,4 9,8 5,12"/><polyline points="9,4 13,8 9,12"/></svg>
+      </button>
     </div>
 
     <div class="edm-sb-section">
@@ -1789,6 +1792,12 @@
     </div>
 
   </div>
+
+  <!-- EDM Sidebar re-open tab — only visible when sidebar is collapsed on the salesforce tab -->
+  <button id="edm-sidebar-reopen-tab" class="edm-sidebar-reopen-tab" onclick="expandEdmSidebar()" title="Open EDM Workspace" style="display:none">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>
+    <span>Workspace</span>
+  </button>
 
   <div class="right-tabs-stack">
     <button id="nd-drawer-tab" class="right-tab nd-tab-btn" onclick="toggleNdDrawer()" title="90-Day Tracker">
