@@ -460,42 +460,6 @@
         <!-- Campaign Details — changes every send, provided by Petro -->
         <div id="edm-campaign-card" style="margin-bottom:12px"></div>
 
-        <!-- Important Links & Sender Details (full width) -->
-        <div class="section-block edm-ref-card" style="margin-bottom:12px">
-          <div class="section-block-header">
-            <div class="sh-icon" style="background:var(--accent-dim);color:var(--accent)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
-            </div>
-            <span class="sh-title">Important Links &amp; Sender Details</span>
-            <span class="edm-ref-badge">SAVE THESE</span>
-          </div>
-          <div class="edm-ref-body edm-ref-body-grid">
-            <div class="edm-ref-group">
-              <div class="edm-ref-label">Assetline LinkedIn — add to every EDM manually</div>
-              <a class="edm-ref-link" href="https://www.linkedin.com/company/assetline-capital/?originalSubdomain=au" target="_blank" rel="noopener">
-                <svg viewBox="0 0 16 16" fill="currentColor" style="width:11px;height:11px"><path d="M2.5 1a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM1 5.5h3V14H1V5.5zM5.5 5.5H8v1.1C8.5 5.9 9.4 5.3 10.5 5.3c2.2 0 3 1.5 3 3.4V14h-3v-4.6c0-.9-.3-1.4-1-1.4-.8 0-1.1.5-1.1 1.4V14h-3V5.5z"/></svg>
-                linkedin.com/company/assetline-capital ↗
-              </a>
-              <div class="edm-ref-note">LinkedIn icon often comes through without a URL — add it manually every time.</div>
-            </div>
-            <div class="edm-ref-group">
-              <div class="edm-ref-label">Sender &amp; Reply-to</div>
-              <div class="edm-ref-row"><span class="edm-ref-key">Sender name</span><span class="edm-ref-val">Assetline Capital</span></div>
-              <div class="edm-ref-row"><span class="edm-ref-key">Sender email</span><span class="edm-ref-val edm-copy-val" onclick="copyEdmRef('apply@assetline.com.au',this)" title="Click to copy">apply@assetline.com.au</span></div>
-              <div class="edm-ref-row"><span class="edm-ref-key">Reply-to</span><span class="edm-ref-val edm-copy-val" onclick="copyEdmRef('apply@assetline.com.au',this)" title="Click to copy">apply@assetline.com.au</span></div>
-            </div>
-            <div class="edm-ref-group">
-              <div class="edm-ref-label">Naming &amp; Tracker</div>
-              <div class="edm-ref-row"><span class="edm-ref-key">Name format</span><span class="edm-ref-val"><code class="edm-code">YYMMDD_Description</code></span></div>
-              <div class="edm-ref-row"><span class="edm-ref-key">Example</span><span class="edm-ref-val"><code class="edm-code">260610_SMSF</code></span></div>
-              <div class="edm-ref-row"><span class="edm-ref-key">Tracker domain</span><span class="edm-ref-val edm-copy-val" onclick="copyEdmRef('go.assetline.com.au',this)" title="Click to copy"><code class="edm-code">go.assetline.com.au</code></span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recipient Lists — collapsible + editable (rendered by JS) -->
-        <div id="edm-lists-card" style="margin-bottom:16px"></div>
-
         <!-- Phase Cards — rendered by JS -->
         <div id="edm-phases-container" style="margin-bottom:16px"></div>
 
@@ -1716,20 +1680,51 @@
     </div>
   </div>
 
-  <!-- Floating EDM Notes — shown only on Salesforce tab -->
-  <div id="edm-floating-notes" class="edm-floating-notes" style="display:none">
-    <div class="edm-fn-header" onclick="toggleEdmNotes()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
-      <span id="edm-fn-label">EDM Notes</span>
-      <svg id="edm-fn-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;margin-left:auto;transition:transform 0.2s"><polyline points="4,6 8,10 12,6"/></svg>
+  <!-- EDM Sidebar — fixed right panel, visible only on Salesforce EDM tab -->
+  <div id="edm-sidebar" class="edm-sidebar" style="display:none">
+
+    <!-- Section: Notes -->
+    <div class="edm-sb-header">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>
+      EDM Workspace
     </div>
-    <div id="edm-fn-body" class="edm-fn-body" style="display:none">
-      <textarea id="edm-fn-textarea" class="edm-fn-textarea" placeholder="Notes for this EDM send — campaign name, send time, anything Petro mentioned…" oninput="saveEdmFloatingNotes(this.value)"></textarea>
-      <div class="edm-fn-footer">
-        <span class="edm-fn-hint">Auto-saved · specific to Salesforce EDM tab</span>
-        <button class="edm-fn-clear" onclick="clearEdmFloatingNotes()">Clear</button>
+
+    <div class="edm-sb-section">
+      <div class="edm-sb-section-label">Send Notes</div>
+      <textarea id="edm-fn-textarea" class="edm-sb-notes" placeholder="Notes for this send — template name, Petro's instructions, send time, anything to remember…" oninput="saveEdmFloatingNotes(this.value)"></textarea>
+      <button class="edm-sb-clear-btn" onclick="clearEdmFloatingNotes()">Clear notes</button>
+    </div>
+
+    <div class="edm-sb-divider"></div>
+
+    <!-- Section: Recipient Lists (same JS target ID) -->
+    <div class="edm-sb-section" id="edm-lists-card"></div>
+
+    <div class="edm-sb-divider"></div>
+
+    <!-- Section: Important Links -->
+    <div class="edm-sb-section">
+      <div class="edm-sb-section-label">Important Links &amp; Defaults</div>
+      <div class="edm-sb-links-body">
+        <div class="edm-sb-link-row">
+          <div class="edm-sb-link-key">LinkedIn</div>
+          <a class="edm-sb-link-val" href="https://www.linkedin.com/company/assetline-capital/?originalSubdomain=au" target="_blank" rel="noopener">
+            linkedin.com/company/assetline-capital ↗
+          </a>
+        </div>
+        <div class="edm-sb-note">Add LinkedIn URL to the icon in every EDM — it often comes through blank.</div>
+        <div class="edm-sb-divider" style="margin:8px 0"></div>
+        <div class="edm-sb-link-row">
+          <div class="edm-sb-link-key">Name format</div>
+          <code class="edm-code edm-sb-link-val">YYMMDD_Description</code>
+        </div>
+        <div class="edm-sb-link-row">
+          <div class="edm-sb-link-key">Tracker</div>
+          <span class="edm-sb-link-val edm-copy-val" onclick="copyEdmRef('go.assetline.com.au',this)" title="Click to copy"><code class="edm-code">go.assetline.com.au</code></span>
+        </div>
       </div>
     </div>
+
   </div>
 
   <div class="right-tabs-stack">

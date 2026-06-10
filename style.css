@@ -540,8 +540,10 @@ body {
   background: transparent;
   transition: all 0.15s;
 }
-.check-item.done .check-box { background: var(--accent); border-color: var(--accent); }
-.check-item.done .check-box svg { display: block; }
+.check-item.done .check-box,
+.edm-step-item.done .check-box { background: var(--sage); border-color: var(--sage); }
+.check-item.done .check-box svg,
+.edm-step-item.done .check-box svg { display: block; }
 .check-box svg { display: none; width: 10px; height: 10px; stroke: var(--bg); stroke-width: 3; fill: none; }
 
 .ci-label { font-size: 13px; color: var(--text-1); line-height: 1.45; }
@@ -3449,6 +3451,148 @@ code.edm-code {
   color: var(--text-3);
   font-style: italic;
   padding: 6px 16px 12px;
+}
+
+/* ── EDM Sidebar (fixed right panel, Salesforce tab only) ── */
+.edm-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 264px;
+  height: 100vh;
+  background: var(--bg-2);
+  border-left: 1px solid var(--border-md);
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.25);
+}
+
+/* When sidebar is open, push page content left */
+.content.edm-sidebar-open {
+  padding-right: 280px !important;
+}
+
+.edm-sb-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 14px 10px;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-1);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-3);
+}
+
+.edm-sb-section {
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.edm-sb-section:last-child {
+  flex: 1;
+  overflow-y: auto;
+}
+.edm-sb-section:last-child::-webkit-scrollbar { width: 3px; }
+.edm-sb-section:last-child::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.edm-sb-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 9px 14px 5px;
+}
+
+.edm-sb-notes {
+  width: 100%;
+  min-height: 90px;
+  max-height: 150px;
+  background: var(--bg-2);
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 10px 14px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.55;
+  display: block;
+}
+.edm-sb-notes::placeholder { color: var(--text-3); font-size: 11px; }
+
+.edm-sb-clear-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px;
+  cursor: pointer;
+  text-align: right;
+  padding-right: 14px;
+  transition: color 0.15s;
+}
+.edm-sb-clear-btn:hover { color: var(--rust); }
+
+.edm-sb-divider { height: 1px; background: var(--border); flex-shrink: 0; }
+
+.edm-sb-links-body {
+  padding: 8px 14px 12px;
+}
+.edm-sb-link-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.edm-sb-link-key {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-3);
+  min-width: 58px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.edm-sb-link-val {
+  font-size: 11.5px;
+  color: var(--text-1);
+}
+a.edm-sb-link-val {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 11px;
+}
+a.edm-sb-link-val:hover { text-decoration: underline; }
+.edm-sb-note {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-style: italic;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+
+/* When sidebar is visible, the recipient list card inside it should be compact */
+#edm-sidebar .edm-lists-collapsed {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+}
+#edm-sidebar .section-block {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
 }
 
 /* ── Petro message widget (inside Step 13) ── */

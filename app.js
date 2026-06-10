@@ -269,8 +269,8 @@ function navigate(pageId) {
   // Init calendar if needed
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
   if (pageId === 'intake')      { renderIntakeSaved(); }
-  if (pageId === 'salesforce')  { renderEdmCampaignCard(); renderEdmLists(); renderEdmPhases(); renderEdmQA(); showEdmFloatingNotes(true); }
-  else { showEdmFloatingNotes(false); }
+  if (pageId === 'salesforce')  { setEdmSidebarVisible(true);  renderEdmCampaignCard(); renderEdmPhases(); renderEdmQA(); }
+  else                          { setEdmSidebarVisible(false); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
   if (pageId === 'goodlooks')   { renderGoodLooks(); }
@@ -3396,47 +3396,55 @@ const EDM_PHASES = [
 
 // ── Petro notification messages (Step 13 — template applied to Send) ──
 const EDM_PETRO_TEST_MSGS = [
-  "Hi Petro, I've applied the template to the Send and it's all looking good on my end. Sending you the test now — can you please review and let me know when you're happy for me to proceed?",
-  "Hey Petro, test email for [campaign] is in your inbox. I've checked the layout, links, and merge fields — all good on my side. Let me know once you've had a look.",
-  "Hi Petro, I've run the test on [campaign] and everything checks out. Forwarding to you now for your review — let me know if anything needs adjusting.",
-  "Petro — test is ready. Subject, HTML, links, and merge fields all confirmed on my end. Sending to you now. Waiting on your thumbs up before we go live.",
-  "Hi Petro, [campaign] test email is heading your way. I've done a full QC pass — design looks clean, all links live. Let me know when you've reviewed.",
-  "Hey Petro, sending the test for [campaign] now. I've gone through everything on my end and it's looking good. Let me know if you spot anything.",
-  "Hi Petro, test sent. Layout's clean, links all work, merge fields confirmed. Just need your sign-off before I add the lists and schedule.",
-  "Petro, I've applied the template and run my checks on [campaign]. Test is in your inbox — let me know once you're happy and I'll add the recipient lists and finalise.",
-  "Hi Petro, [campaign] test is ready for your review. I've verified the design, wording, and all links on my end. Waiting on your approval to move forward.",
-  "Hey Petro — all looking good on the [campaign] test. Sending to you now. Just let me know you're happy and I'll complete the send setup.",
+  "Hi Petro, sending you the [templateName] test now — let me know when you've had a chance to review.",
+  "Hey Petro, [templateName] test is in your inbox. Let me know if anything needs adjusting.",
+  "Hi Petro, the [templateName] test is heading your way. Let me know once you've had a look.",
+  "Petro — [templateName] test is ready and sent. Waiting on your thumbs up.",
+  "Hi Petro, I've sent you through the [templateName] test — let me know if you're happy for me to proceed.",
+  "Hey Petro, just sent the [templateName] test. Let me know once you've reviewed.",
+  "Hi Petro, [templateName] test is with you now. Let me know if you'd like any changes.",
+  "Petro, [templateName] test sent — let me know once you've had a look.",
+  "Hi Petro, sending through the [templateName] test for your sign-off.",
+  "Hey Petro, [templateName] is ready — test email on its way to you now.",
 ];
 
 // ── Ready-to-send messages (after Final QA — notify Petro) ──────
 const EDM_SEND_MSGS = [
-  "Hi Petro, [campaign] has passed all 8 Final QA checks and is ready to send. What time would you like me to schedule it?",
-  "Hey Petro, Final QA complete on [campaign] — all checks passed. Ready when you are. Please confirm the send time.",
-  "Hi Petro, [campaign] is QC'd and ready to go. Waiting on your send instruction — do you want to schedule or send now?",
-  "Petro, Final QA done on [campaign]. All 8 items confirmed. Just need your go-ahead on timing.",
-  "Hi Petro, all checks are done on [campaign] and it's ready to send. What's the send time?",
-  "Hey Petro — [campaign] is ready. Final QA passed, lists added, everything confirmed. Can you confirm the schedule?",
-  "Hi Petro, [campaign] is QA-approved and ready to go live. Please confirm send time and I'll schedule it now.",
-  "Hey Petro, done — [campaign] has passed Final QA. All 8 items ticked off. Do you want it sent now or scheduled for a specific time?",
-  "Hi Petro, [campaign] is ready to send. QA complete, all clear. Waiting on your send confirmation.",
-  "Petro — Final QA passed on [campaign]. Ready to send or schedule on your instruction. What time are we going?",
+  "Hi Petro, [templateName] is ready to go. What time would you like me to schedule the send?",
+  "Hey Petro, [templateName] is all set and ready. Please confirm the send time.",
+  "Hi Petro, [templateName] is good to go. Do you want me to send now or schedule for a specific time?",
+  "Petro, [templateName] is ready. Can you confirm the send time?",
+  "Hi Petro, all done on [templateName] and ready to send. What's the timing?",
+  "Hey Petro — [templateName] is set. Do you want it sent now or scheduled?",
+  "Hi Petro, [templateName] is ready to go live. Please confirm timing and I'll get it done.",
+  "Hey Petro, [templateName] is done and ready. Send now or at a specific time?",
+  "Hi Petro, [templateName] is ready and waiting on your instruction. Now or schedule?",
+  "Petro, [templateName] is ready to send. Just say the word.",
 ];
 
 let edmPetroMsgIdx = 0;
 let edmSendMsgIdx  = 0;
 
+function getEdmTemplateName() {
+  return loadEdmCampaign().campaign?.trim() || 'this send';
+}
+
+function fillEdmMsg(raw) {
+  return raw.replace(/\[templateName\]/g, getEdmTemplateName());
+}
+
 function shuffleEdmMsg(type) {
   if (type === 'test') {
     edmPetroMsgIdx = Math.floor(Math.random() * EDM_PETRO_TEST_MSGS.length);
-    const el = document.getElementById('edm-petro-msg-text');
+    const el      = document.getElementById('edm-petro-msg-text');
     const counter = document.getElementById('edm-petro-msg-counter');
-    if (el) el.textContent = EDM_PETRO_TEST_MSGS[edmPetroMsgIdx];
+    if (el)      el.textContent = fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx]);
     if (counter) counter.textContent = `${edmPetroMsgIdx + 1} of ${EDM_PETRO_TEST_MSGS.length}`;
   } else {
     edmSendMsgIdx = Math.floor(Math.random() * EDM_SEND_MSGS.length);
-    const el = document.getElementById('edm-send-msg-text');
+    const el      = document.getElementById('edm-send-msg-text');
     const counter = document.getElementById('edm-send-msg-counter');
-    if (el) el.textContent = EDM_SEND_MSGS[edmSendMsgIdx];
+    if (el)      el.textContent = fillEdmMsg(EDM_SEND_MSGS[edmSendMsgIdx]);
     if (counter) counter.textContent = `${edmSendMsgIdx + 1} of ${EDM_SEND_MSGS.length}`;
   }
 }
@@ -3444,7 +3452,8 @@ function shuffleEdmMsg(type) {
 function copyEdmMsg(type) {
   const msgs = type === 'test' ? EDM_PETRO_TEST_MSGS : EDM_SEND_MSGS;
   const idx  = type === 'test' ? edmPetroMsgIdx : edmSendMsgIdx;
-  navigator.clipboard.writeText(msgs[idx]).then(() => showAiToast('✓ Message copied — paste into Teams or email'));
+  const text = fillEdmMsg(msgs[idx]);
+  navigator.clipboard.writeText(text).then(() => showAiToast('✓ Copied — paste into Teams'));
 }
 
 // ── Campaign Details card (changes per send — provided by Petro) ─
@@ -3457,12 +3466,12 @@ function saveEdmCampaignData(d) { localStorage.setItem(EDM_CAMPAIGN_KEY, JSON.st
 function saveEdmCampaignEdit() {
   const d = {
     campaign:    document.getElementById('edm-camp-name')?.value?.trim()  || '',
+    campaignLib: document.getElementById('edm-camp-lib')?.value?.trim()   || '',
     senderName:  document.getElementById('edm-camp-sndr')?.value?.trim()  || 'Assetline Capital',
     senderEmail: document.getElementById('edm-camp-email')?.value?.trim() || 'apply@assetline.com.au',
     replyTo:     document.getElementById('edm-camp-reply')?.value?.trim() || 'apply@assetline.com.au',
   };
   saveEdmCampaignData(d);
-  showAiToast('✓ Campaign details saved');
 }
 
 function clearEdmCampaign() {
@@ -3481,13 +3490,17 @@ function renderEdmCampaignCard() {
         <div class="sh-icon" style="background:var(--gold-dim);color:var(--gold)">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
         </div>
-        <span class="sh-title">Campaign Details <span style="font-weight:400;font-size:11px;color:var(--text-3)">(Petro provides these — update for every send)</span></span>
+        <span class="sh-title">This Send's Details <span style="font-weight:400;font-size:11px;color:var(--text-3)">(Petro provides all — update every time)</span></span>
         <button onclick="clearEdmCampaign()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-3);font-size:10.5px;padding:3px 9px;cursor:pointer;font-family:var(--font-body)">Clear for next send</button>
       </div>
       <div class="edm-campaign-grid">
         <div class="edm-camp-field">
-          <label class="edm-camp-label">Campaign name <span class="edm-camp-required">*</span></label>
-          <input class="form-input" id="edm-camp-name" value="${escapeHtml(d.campaign)}" placeholder="e.g. 260610_SMSF — from Petro's Teams message" oninput="saveEdmCampaignEdit()"/>
+          <label class="edm-camp-label">Template name <span class="edm-camp-required">*</span><span style="font-weight:400;color:var(--text-3)"> — from the HTML filename Petro sends</span></label>
+          <input class="form-input" id="edm-camp-name" value="${escapeHtml(d.campaign)}" placeholder="e.g. 260610_SMSF  (date + underscore + name from Petro)" oninput="saveEdmCampaignEdit(); refreshEdmMsgPreviews()"/>
+        </div>
+        <div class="edm-camp-field">
+          <label class="edm-camp-label">Campaign library <span class="edm-camp-required">*</span><span style="font-weight:400;color:var(--text-3)"> — Salesforce campaign bucket</span></label>
+          <input class="form-input" id="edm-camp-lib" value="${escapeHtml(d.campaignLib||'')}" placeholder="e.g. Broker eDM 2026 — exact name from Petro" oninput="saveEdmCampaignEdit()"/>
         </div>
         <div class="edm-camp-field">
           <label class="edm-camp-label">Sender name <span class="edm-camp-required">*</span></label>
@@ -3497,13 +3510,21 @@ function renderEdmCampaignCard() {
           <label class="edm-camp-label">Sender email <span class="edm-camp-required">*</span></label>
           <input class="form-input" id="edm-camp-email" value="${escapeHtml(d.senderEmail)}" placeholder="e.g. apply@assetline.com.au" oninput="saveEdmCampaignEdit()"/>
         </div>
-        <div class="edm-camp-field">
+        <div class="edm-camp-field" style="grid-column:1/-1">
           <label class="edm-camp-label">Reply-to email <span class="edm-camp-required">*</span></label>
           <input class="form-input" id="edm-camp-reply" value="${escapeHtml(d.replyTo)}" placeholder="e.g. apply@assetline.com.au" oninput="saveEdmCampaignEdit()"/>
         </div>
       </div>
-      <div class="edm-camp-note">All fields provided by Petro in Teams. Auto-saves as you type. Click "Clear for next send" when starting a new campaign.</div>
+      <div class="edm-camp-note">All values provided by Petro in Teams each time. Auto-saves as you type. Template name auto-fills into your Petro message templates.</div>
     </div>`;
+}
+
+function refreshEdmMsgPreviews() {
+  // Update the live message previews in the phase card widget
+  const el = document.getElementById('edm-petro-msg-text');
+  if (el) el.textContent = fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx]);
+  const el2 = document.getElementById('edm-send-msg-text');
+  if (el2) el2.textContent = fillEdmMsg(EDM_SEND_MSGS[edmSendMsgIdx]);
 }
 
 // ── Recipient Lists (editable) ───────────────────────────────────
@@ -3672,7 +3693,7 @@ function renderEdmPhases() {
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:12px;height:12px"><path d="M14 9a6 6 0 01-6 6H2L4 13a5 5 0 01-1-3A6 6 0 018 4h0a6 6 0 016 5z"/></svg>
                     Message to send to Petro in Teams
                   </div>
-                  <div class="edm-msg-text" id="edm-petro-msg-text">${EDM_PETRO_TEST_MSGS[edmPetroMsgIdx]}</div>
+                  <div class="edm-msg-text" id="edm-petro-msg-text">${fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx])}</div>
                   <div class="edm-msg-actions">
                     <span class="edm-msg-counter" id="edm-petro-msg-counter">1 of ${EDM_PETRO_TEST_MSGS.length}</span>
                     <button class="edm-shuffle-btn" onclick="shuffleEdmMsg('test')" title="Show a different message">
@@ -3837,9 +3858,24 @@ function showEdmSendModal() {
   edmSendMsgIdx = Math.floor(Math.random() * EDM_SEND_MSGS.length);
   const msgEl = document.getElementById('edm-send-msg-text');
   const cntEl = document.getElementById('edm-send-msg-counter');
-  if (msgEl) msgEl.textContent = EDM_SEND_MSGS[edmSendMsgIdx];
+  if (msgEl) msgEl.textContent = fillEdmMsg(EDM_SEND_MSGS[edmSendMsgIdx]);
   if (cntEl) cntEl.textContent = `${edmSendMsgIdx + 1} of ${EDM_SEND_MSGS.length}`;
   modal.style.display = 'flex';
+}
+
+// ── EDM Sidebar show/hide ────────────────────────────────────────
+function setEdmSidebarVisible(visible) {
+  const sidebar   = document.getElementById('edm-sidebar');
+  const content   = document.querySelector('.content');
+  const rightTabs = document.querySelector('.right-tabs-stack');
+  if (sidebar)   sidebar.style.display = visible ? 'flex' : 'none';
+  if (content)   content.classList.toggle('edm-sidebar-open', visible);
+  if (rightTabs) rightTabs.style.display = visible ? 'none' : 'flex';
+  if (visible) {
+    const ta = document.getElementById('edm-fn-textarea');
+    if (ta) ta.value = loadEdmFloatingNotes();
+    renderEdmLists();
+  }
 }
 
 function closeEdmSendModal() {
