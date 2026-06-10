@@ -457,6 +457,9 @@
           <p>This covers <strong>designed HTML EDMs only</strong>. Plain text EDMs are a separate process. Designed and plain text EDMs alternate week by week — Petro will tell you which type each time.</p>
         </div>
 
+        <!-- Campaign Details — changes every send, provided by Petro -->
+        <div id="edm-campaign-card" style="margin-bottom:12px"></div>
+
         <!-- Important Links & Sender Details (full width) -->
         <div class="section-block edm-ref-card" style="margin-bottom:12px">
           <div class="section-block-header">
@@ -1684,6 +1687,35 @@
   <!-- ══════════════════════════════════════
        RIGHT TABS STACK
   ══════════════════════════════════════ -->
+  <!-- EDM Ready-to-Send Modal -->
+  <div id="edm-send-modal" class="edm-send-modal" style="display:none" onclick="if(event.target===this)closeEdmSendModal()">
+    <div class="edm-send-modal-card">
+      <div class="edm-send-modal-header">
+        <div class="edm-send-modal-title">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;color:var(--sage)"><polyline points="3,8 6,11 13,4"/><circle cx="8" cy="8" r="7"/></svg>
+          Final QA Passed — Notify Petro
+        </div>
+        <div class="edm-send-modal-sub">Copy one of these messages and send to Petro in Teams to confirm the send.</div>
+      </div>
+      <div class="edm-send-modal-body">
+        <div class="edm-msg-text" id="edm-send-msg-text" style="min-height:80px;font-size:13px"></div>
+        <div class="edm-msg-actions" style="margin-top:12px">
+          <span class="edm-msg-counter" id="edm-send-msg-counter">1 of 10</span>
+          <button class="edm-shuffle-btn" onclick="shuffleEdmMsg('send')" title="Show a different message">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9l3 4-3 4H2"/><path d="M14 4l-3 4 3 4"/></svg> Shuffle
+          </button>
+          <button class="edm-copy-msg-btn" onclick="copyEdmMsg('send')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg> Copy message
+          </button>
+        </div>
+      </div>
+      <div class="edm-send-modal-footer">
+        <div class="edm-send-modal-note">Remember to replace <strong>[campaign]</strong> with the actual campaign name before sending.</div>
+        <button class="btn-add" style="width:auto;padding:9px 20px" onclick="closeEdmSendModal()">Done — go to Salesforce</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Floating EDM Notes — shown only on Salesforce tab -->
   <div id="edm-floating-notes" class="edm-floating-notes" style="display:none">
     <div class="edm-fn-header" onclick="toggleEdmNotes()">

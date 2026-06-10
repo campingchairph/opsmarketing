@@ -269,7 +269,7 @@ function navigate(pageId) {
   // Init calendar if needed
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
   if (pageId === 'intake')      { renderIntakeSaved(); }
-  if (pageId === 'salesforce')  { renderEdmLists(); renderEdmPhases(); renderEdmQA(); showEdmFloatingNotes(true); }
+  if (pageId === 'salesforce')  { renderEdmCampaignCard(); renderEdmLists(); renderEdmPhases(); renderEdmQA(); showEdmFloatingNotes(true); }
   else { showEdmFloatingNotes(false); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
@@ -3321,44 +3321,66 @@ const EDM_QA_ITEMS = [
 ];
 
 // ── Phase Cards data ─────────────────────────────────────────────
+// ── Tab name + Save helpers (used in step desc HTML) ─────────────
+const T = s => `<span class="edm-tab-name">${s}</span>`;   // bold green tab label
+const S = `<span class="edm-save-word">Save</span>`;        // red bold Save
+
 const EDM_PHASES = [
   { id:'ph1', num:1, title:'Receive & Open Files', steps:[
     { id:'ph1s1', num:1, title:'Receive the ZIP from Petro via Teams', badge:null,
-      desc:'Petro sends a Teams message with a ZIP file. Check his message for: the HTML file, campaign name, send date and time. All three should be in the message.' },
+      desc:'Petro sends a Teams message with a ZIP file. Check his message for: the HTML file, campaign name, send date and time — all in the message. Update the <strong>Campaign Details</strong> card at the top with the campaign name and any sender changes Petro specifies.' },
     { id:'ph1s2', num:2, title:'Extract and open both files in Chrome', badge:null,
-      desc:'Open the folder named with the date/description. Find <code class="edm-code">index.html</code> and <code class="edm-code">plain-text-version.txt</code> — right-click each → <strong>Open with Google Chrome</strong>. Keep both tabs open.' },
+      desc:`Open the date-named folder. Find <code class="edm-code">index.html</code> and <code class="edm-code">plain-text-version.txt</code> — right-click each → <strong>Open with Google Chrome</strong>. Keep both Chrome tabs open throughout the whole process.` },
   ]},
   { id:'ph2', num:2, title:'Create the Template', steps:[
     { id:'ph2s3', num:3, title:'Create new template in Account Engagement', badge:null,
-      desc:'<strong>Account Engagement Email → Templates → New.</strong><br>Name: <code class="edm-code">YYMMDD_Description</code> · Campaign: from Petro\'s message · Tracker: <code class="edm-code">go.assetline.com.au</code> · Save.' },
+      desc:`Navigate to ${T('Account Engagement Email')} → ${T('Templates')} → <strong>New</strong>.<br>
+            • <strong>Name:</strong> <code class="edm-code">YYMMDD_Description</code><br>
+            • <strong>Campaign:</strong> use exactly what Petro sent (copy from Campaign Details card)<br>
+            • <strong>Tracker domain:</strong> <code class="edm-code">go.assetline.com.au</code> (confirm default)<br>
+            Click ${S}.` },
     { id:'ph2s4', num:4, title:'Skip the layout step', badge:null,
-      desc:'On the next screen, skip the layout step entirely. The HTML already contains the full email structure — no additional layout template is needed.' },
+      desc:'On the next screen, <strong>skip the layout step entirely</strong>. The HTML already contains the full email structure — no layout template is needed.' },
     { id:'ph2s5', num:5, title:'Build the email — subject, HTML, plain text', badge:null,
-      desc:'<strong>Subject:</strong> Chrome tab title of index.html — type exactly, check spelling.<br><strong>HTML tab:</strong> View Page Source → Select All → Copy → Salesforce HTML tab → Delete → Paste → Save.<br><strong>Text tab:</strong> Chrome plain text tab → Select All → Copy → Paste into Text tab → Save.' },
+      desc:`<strong>Subject line:</strong> Chrome tab title of <code class="edm-code">index.html</code> — type exactly, check spelling.<br><br>
+            ${T('HTML tab')}: Chrome → click in body → View Page Source → Select All → Copy → go to ${T('HTML tab')} in Salesforce → Delete existing → Paste → ${S}.<br><br>
+            ${T('Text tab')}: Chrome plain-text tab → Select All → Copy → go to ${T('Text tab')} → Paste → ${S}.` },
   ]},
   { id:'ph3', num:3, title:'Review & Fix', steps:[
     { id:'ph3s6', num:6, title:'Check in the Editor tab', badge:null,
-      desc:'Email should appear. Check wording accuracy, content, and layout. <em>Minor spacing glitches in the editor are normal — they won\'t appear in the sent email.</em>' },
+      desc:`Go to the ${T('Editor tab')} — the email should appear. Check wording, content accuracy, and layout. <em>Minor spacing glitches in the editor are normal and won't appear in the sent email — don't worry about these.</em>` },
     { id:'ph3s7', num:7, title:'Add missing links — especially LinkedIn', badge:'warn',
-      desc:'Check all icons for missing URLs. <strong>LinkedIn icon frequently comes through without a URL</strong> — add <code class="edm-code">linkedin.com/company/assetline-capital</code> manually every time.' },
+      desc:'Check <strong>every</strong> clickable icon for missing URLs. The <strong>LinkedIn icon frequently comes through without a URL</strong> — add <code class="edm-code">linkedin.com/company/assetline-capital</code> manually every single time.' },
     { id:'ph3s8', num:8, title:'Verify merge fields in Preview tab', badge:null,
-      desc:'<strong>Preview tab</strong> → select a sample prospect (e.g. Billy) → confirm first name renders correctly. Merge fields don\'t show in test emails — <em>Preview tab only.</em> Save.' },
+      desc:`Go to the ${T('Preview tab')} → select a sample prospect (e.g. Billy) → confirm the first name merge field renders correctly. Merge fields won\'t display in test emails — ${T('Preview tab')} is the only way to verify. ${S}.` },
   ]},
   { id:'ph4', num:4, title:'Sender Setup', steps:[
     { id:'ph4s9', num:9, title:'Set sender details in the Sending tab', badge:'critical',
-      desc:'Sender name: <code class="edm-code">Assetline Capital</code><br>Sender email: <code class="edm-code">apply@assetline.com.au</code><br>Reply-to: <code class="edm-code">apply@assetline.com.au</code>' },
+      desc:`Go to the ${T('Sending tab')}. Copy the values from the <strong>Campaign Details</strong> card at the top of this page — Petro provides these for each send.<br>
+            • <strong>Sender name:</strong> as provided<br>
+            • <strong>Sender email:</strong> as provided → ${S}<br>
+            • <strong>Reply-to:</strong> as provided → ${S}` },
   ]},
   { id:'ph5', num:5, title:'Test & Publish', steps:[
-    { id:'ph5s10', num:10, title:'Send test emails — yourself first, then Petro', badge:null,
-      desc:'Test to yourself first: design, all links, wording, no errors. Once satisfied, send test to <strong>Petro</strong>. <strong>Wait for Petro\'s approval before publishing.</strong>' },
-    { id:'ph5s11', num:11, title:'Publish the template', badge:'warn',
-      desc:'Once both you and Petro are happy, publish the template. <strong>Publishing does NOT send the email</strong> — it makes the template available to create a Send from.' },
+    { id:'ph5s10', num:10, title:'Send test email to YOURSELF only', badge:null,
+      petroSelf: true,
+      desc:`In the ${T('Template')}, send a test email to <strong>yourself only</strong>.<br>
+            Check: design and layout, all links work, wording correct, merge fields visible, no errors.<br><br>
+            <strong>⚠ Do not send to Petro yet</strong> — you will notify Petro <em>only after</em> you have applied the template to a Send in Phase 6.` },
+    { id:'ph5s11', num:11, title:'Publish the template — does NOT send it', badge:'warn',
+      desc:`Once you are happy with your own test, click <strong>Publish</strong> from the ${T('Editor tab')}.<br>
+            <strong>Publishing does NOT send the email</strong> — it only makes the template available to build a Send from. Nothing goes to recipients yet.` },
   ]},
   { id:'ph6', num:6, title:'Build the Send', steps:[
-    { id:'ph6s12', num:12, title:'Create a new Send', badge:null,
-      desc:'<strong>Sends tab → New Send.</strong> Name: <code class="edm-code">YYMMDD_Description</code> (same as template). Campaign: same campaign. Leave tracker domain — it inherits. Save.' },
-    { id:'ph6s13', num:13, title:'Apply the template to the Send', badge:null,
-      desc:'Search for template by name, select and apply. Subject, HTML, text, and sender details carry over automatically.' },
+    { id:'ph6s12', num:12, title:'Create a new Send in the Sends tab', badge:null,
+      desc:`Go to ${T('Sends tab')} → <strong>New Send</strong>.<br>
+            • <strong>Name:</strong> <code class="edm-code">YYMMDD_Description</code> (same as the template)<br>
+            • <strong>Campaign:</strong> same campaign from Campaign Details card<br>
+            Leave tracker domain — it inherits from the template. ${S}.` },
+    { id:'ph6s13', num:13, title:'Apply template — then notify Petro for his test review', badge:null,
+      petroMsg: true,
+      desc:`In the ${T('Send')}, search for the template by name (paste the name). Select it and apply. Subject, HTML, text, and sender details all carry over automatically.<br><br>
+            <strong>Now send a test email to Petro</strong> — this is the first time Petro sees it. Use a message from the widget below, copy it, and send it in Teams or email.` },
     { id:'ph6s14', num:14, title:'Add all 4 recipient lists', badge:'critical',
       desc:'Add: <strong>All Brokers (Leads + Contacts)</strong> + <strong>James Green Database</strong> + <strong>Assetline Team Managerial/Executive</strong> + <strong>State Managers</strong>. All 4 — every time. Do not skip any.' },
     { id:'ph6s15', num:15, title:'Run Final QA — use the checklist below', badge:null,
@@ -3366,9 +3388,123 @@ const EDM_PHASES = [
   ]},
   { id:'ph7', num:7, title:'Send or Schedule', steps:[
     { id:'ph7s16', num:16, title:'Send now or schedule', badge:'critical',
-      desc:'<strong>Send now</strong> — sends immediately.<br><strong>Schedule</strong> — use when Petro specifies a date and time.<br><br><strong>⚠ Timezone:</strong> Scheduling uses <em>your local timezone</em>. If the email goes at 9 AM Sydney time and you\'re in a different timezone, adjust accordingly. <strong>Confirm with Petro when scheduling for the first time.</strong>' },
+      desc:`<strong>Send now</strong> — sends immediately.<br>
+            <strong>Schedule</strong> — use when Petro specifies a date and time.<br><br>
+            <span class="ci-badge critical">timezone</span> Scheduling uses <strong>your local timezone</strong>. If the email goes at 9 AM Sydney time and you\'re in the Philippines, subtract 3 hours → schedule at 6 AM your time. <strong>Confirm with Petro when scheduling for the first time.</strong>` },
   ]},
 ];
+
+// ── Petro notification messages (Step 13 — template applied to Send) ──
+const EDM_PETRO_TEST_MSGS = [
+  "Hi Petro, I've applied the template to the Send and it's all looking good on my end. Sending you the test now — can you please review and let me know when you're happy for me to proceed?",
+  "Hey Petro, test email for [campaign] is in your inbox. I've checked the layout, links, and merge fields — all good on my side. Let me know once you've had a look.",
+  "Hi Petro, I've run the test on [campaign] and everything checks out. Forwarding to you now for your review — let me know if anything needs adjusting.",
+  "Petro — test is ready. Subject, HTML, links, and merge fields all confirmed on my end. Sending to you now. Waiting on your thumbs up before we go live.",
+  "Hi Petro, [campaign] test email is heading your way. I've done a full QC pass — design looks clean, all links live. Let me know when you've reviewed.",
+  "Hey Petro, sending the test for [campaign] now. I've gone through everything on my end and it's looking good. Let me know if you spot anything.",
+  "Hi Petro, test sent. Layout's clean, links all work, merge fields confirmed. Just need your sign-off before I add the lists and schedule.",
+  "Petro, I've applied the template and run my checks on [campaign]. Test is in your inbox — let me know once you're happy and I'll add the recipient lists and finalise.",
+  "Hi Petro, [campaign] test is ready for your review. I've verified the design, wording, and all links on my end. Waiting on your approval to move forward.",
+  "Hey Petro — all looking good on the [campaign] test. Sending to you now. Just let me know you're happy and I'll complete the send setup.",
+];
+
+// ── Ready-to-send messages (after Final QA — notify Petro) ──────
+const EDM_SEND_MSGS = [
+  "Hi Petro, [campaign] has passed all 8 Final QA checks and is ready to send. What time would you like me to schedule it?",
+  "Hey Petro, Final QA complete on [campaign] — all checks passed. Ready when you are. Please confirm the send time.",
+  "Hi Petro, [campaign] is QC'd and ready to go. Waiting on your send instruction — do you want to schedule or send now?",
+  "Petro, Final QA done on [campaign]. All 8 items confirmed. Just need your go-ahead on timing.",
+  "Hi Petro, all checks are done on [campaign] and it's ready to send. What's the send time?",
+  "Hey Petro — [campaign] is ready. Final QA passed, lists added, everything confirmed. Can you confirm the schedule?",
+  "Hi Petro, [campaign] is QA-approved and ready to go live. Please confirm send time and I'll schedule it now.",
+  "Hey Petro, done — [campaign] has passed Final QA. All 8 items ticked off. Do you want it sent now or scheduled for a specific time?",
+  "Hi Petro, [campaign] is ready to send. QA complete, all clear. Waiting on your send confirmation.",
+  "Petro — Final QA passed on [campaign]. Ready to send or schedule on your instruction. What time are we going?",
+];
+
+let edmPetroMsgIdx = 0;
+let edmSendMsgIdx  = 0;
+
+function shuffleEdmMsg(type) {
+  if (type === 'test') {
+    edmPetroMsgIdx = Math.floor(Math.random() * EDM_PETRO_TEST_MSGS.length);
+    const el = document.getElementById('edm-petro-msg-text');
+    const counter = document.getElementById('edm-petro-msg-counter');
+    if (el) el.textContent = EDM_PETRO_TEST_MSGS[edmPetroMsgIdx];
+    if (counter) counter.textContent = `${edmPetroMsgIdx + 1} of ${EDM_PETRO_TEST_MSGS.length}`;
+  } else {
+    edmSendMsgIdx = Math.floor(Math.random() * EDM_SEND_MSGS.length);
+    const el = document.getElementById('edm-send-msg-text');
+    const counter = document.getElementById('edm-send-msg-counter');
+    if (el) el.textContent = EDM_SEND_MSGS[edmSendMsgIdx];
+    if (counter) counter.textContent = `${edmSendMsgIdx + 1} of ${EDM_SEND_MSGS.length}`;
+  }
+}
+
+function copyEdmMsg(type) {
+  const msgs = type === 'test' ? EDM_PETRO_TEST_MSGS : EDM_SEND_MSGS;
+  const idx  = type === 'test' ? edmPetroMsgIdx : edmSendMsgIdx;
+  navigator.clipboard.writeText(msgs[idx]).then(() => showAiToast('✓ Message copied — paste into Teams or email'));
+}
+
+// ── Campaign Details card (changes per send — provided by Petro) ─
+const EDM_CAMPAIGN_KEY = 'msc_edm_campaign_v1';
+const EDM_CAMPAIGN_DEFAULT = { campaign:'', senderName:'Assetline Capital', senderEmail:'apply@assetline.com.au', replyTo:'apply@assetline.com.au' };
+
+function loadEdmCampaign() { try { return { ...EDM_CAMPAIGN_DEFAULT, ...JSON.parse(localStorage.getItem(EDM_CAMPAIGN_KEY)) }; } catch { return { ...EDM_CAMPAIGN_DEFAULT }; } }
+function saveEdmCampaignData(d) { localStorage.setItem(EDM_CAMPAIGN_KEY, JSON.stringify(d)); }
+
+function saveEdmCampaignEdit() {
+  const d = {
+    campaign:    document.getElementById('edm-camp-name')?.value?.trim()  || '',
+    senderName:  document.getElementById('edm-camp-sndr')?.value?.trim()  || 'Assetline Capital',
+    senderEmail: document.getElementById('edm-camp-email')?.value?.trim() || 'apply@assetline.com.au',
+    replyTo:     document.getElementById('edm-camp-reply')?.value?.trim() || 'apply@assetline.com.au',
+  };
+  saveEdmCampaignData(d);
+  showAiToast('✓ Campaign details saved');
+}
+
+function clearEdmCampaign() {
+  saveEdmCampaignData({ ...EDM_CAMPAIGN_DEFAULT, campaign:'' });
+  renderEdmCampaignCard();
+  showAiToast('Campaign details cleared — ready for next send');
+}
+
+function renderEdmCampaignCard() {
+  const el = document.getElementById('edm-campaign-card');
+  if (!el) return;
+  const d = loadEdmCampaign();
+  el.innerHTML = `
+    <div class="section-block edm-campaign-block">
+      <div class="section-block-header">
+        <div class="sh-icon" style="background:var(--gold-dim);color:var(--gold)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9H2z"/><polyline points="2,4 8,9 14,4"/></svg>
+        </div>
+        <span class="sh-title">Campaign Details <span style="font-weight:400;font-size:11px;color:var(--text-3)">(Petro provides these — update for every send)</span></span>
+        <button onclick="clearEdmCampaign()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-3);font-size:10.5px;padding:3px 9px;cursor:pointer;font-family:var(--font-body)">Clear for next send</button>
+      </div>
+      <div class="edm-campaign-grid">
+        <div class="edm-camp-field">
+          <label class="edm-camp-label">Campaign name <span class="edm-camp-required">*</span></label>
+          <input class="form-input" id="edm-camp-name" value="${escapeHtml(d.campaign)}" placeholder="e.g. 260610_SMSF — from Petro's Teams message" oninput="saveEdmCampaignEdit()"/>
+        </div>
+        <div class="edm-camp-field">
+          <label class="edm-camp-label">Sender name <span class="edm-camp-required">*</span></label>
+          <input class="form-input" id="edm-camp-sndr" value="${escapeHtml(d.senderName)}" placeholder="e.g. Assetline Capital" oninput="saveEdmCampaignEdit()"/>
+        </div>
+        <div class="edm-camp-field">
+          <label class="edm-camp-label">Sender email <span class="edm-camp-required">*</span></label>
+          <input class="form-input" id="edm-camp-email" value="${escapeHtml(d.senderEmail)}" placeholder="e.g. apply@assetline.com.au" oninput="saveEdmCampaignEdit()"/>
+        </div>
+        <div class="edm-camp-field">
+          <label class="edm-camp-label">Reply-to email <span class="edm-camp-required">*</span></label>
+          <input class="form-input" id="edm-camp-reply" value="${escapeHtml(d.replyTo)}" placeholder="e.g. apply@assetline.com.au" oninput="saveEdmCampaignEdit()"/>
+        </div>
+      </div>
+      <div class="edm-camp-note">All fields provided by Petro in Teams. Auto-saves as you type. Click "Clear for next send" when starting a new campaign.</div>
+    </div>`;
+}
 
 // ── Recipient Lists (editable) ───────────────────────────────────
 const EDM_LISTS_KEY = 'msc_edm_lists_v1';
@@ -3529,6 +3665,24 @@ function renderEdmPhases() {
               let badge = '';
               if (step.badge === 'critical') badge = '<span class="ci-badge critical">critical</span>';
               else if (step.badge === 'warn') badge = '<span class="ci-badge warn">note</span>';
+              // Petro message widget for Step 13
+              const petroWidget = step.petroMsg ? `
+                <div class="edm-msg-widget" onclick="event.stopPropagation()">
+                  <div class="edm-msg-widget-label">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:12px;height:12px"><path d="M14 9a6 6 0 01-6 6H2L4 13a5 5 0 01-1-3A6 6 0 018 4h0a6 6 0 016 5z"/></svg>
+                    Message to send to Petro in Teams
+                  </div>
+                  <div class="edm-msg-text" id="edm-petro-msg-text">${EDM_PETRO_TEST_MSGS[edmPetroMsgIdx]}</div>
+                  <div class="edm-msg-actions">
+                    <span class="edm-msg-counter" id="edm-petro-msg-counter">1 of ${EDM_PETRO_TEST_MSGS.length}</span>
+                    <button class="edm-shuffle-btn" onclick="shuffleEdmMsg('test')" title="Show a different message">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9l3 4-3 4H2"/><path d="M14 4l-3 4 3 4"/></svg> Shuffle
+                    </button>
+                    <button class="edm-copy-msg-btn" onclick="copyEdmMsg('test')">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg> Copy
+                    </button>
+                  </div>
+                </div>` : '';
               return `
                 <div class="edm-step-item${checked?' done':''}" onclick="toggleEdmStep('${step.id}','${phase.id}')">
                   <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
@@ -3538,6 +3692,7 @@ function renderEdmPhases() {
                       <span class="edm-step-title">${step.title}${badge}</span>
                     </div>
                     <div class="edm-step-desc">${step.desc}</div>
+                    ${petroWidget}
                   </div>
                 </div>`;
             }).join('')}
@@ -3673,7 +3828,23 @@ function toggleEdmQAItem(id) {
 function markEdmQADone() {
   const btn = document.getElementById('edm-qa-btn');
   if (btn) { btn.textContent = '✓ QA complete — ready to send'; btn.disabled = true; btn.classList.add('qc-done'); }
-  showAiToast('✓ Final QA complete — send or schedule in Salesforce');
+  showEdmSendModal();
+}
+
+function showEdmSendModal() {
+  const modal = document.getElementById('edm-send-modal');
+  if (!modal) return;
+  edmSendMsgIdx = Math.floor(Math.random() * EDM_SEND_MSGS.length);
+  const msgEl = document.getElementById('edm-send-msg-text');
+  const cntEl = document.getElementById('edm-send-msg-counter');
+  if (msgEl) msgEl.textContent = EDM_SEND_MSGS[edmSendMsgIdx];
+  if (cntEl) cntEl.textContent = `${edmSendMsgIdx + 1} of ${EDM_SEND_MSGS.length}`;
+  modal.style.display = 'flex';
+}
+
+function closeEdmSendModal() {
+  const modal = document.getElementById('edm-send-modal');
+  if (modal) modal.style.display = 'none';
 }
 
 function resetEdmQA() {
