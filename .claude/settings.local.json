@@ -12,7 +12,12 @@
       "Bash(py --version)",
       "Bash(where python*)",
       "Bash(\"/c/Python312/python.exe\" -m pip install pypdf pdfplumber --quiet)",
-      "Bash(find \"/c/Users/josep\" -name \"*.pdf\" 2>/dev/null | head -20; echo \"---\"; ls \"/c/Users/josep/Downloads/\" 2>/dev/null | head -30)"
+      "Bash(find \"/c/Users/josep\" -name \"*.pdf\" 2>/dev/null | head -20; echo \"---\"; ls \"/c/Users/josep/Downloads/\" 2>/dev/null | head -30)",
+      "Bash(node --input-type=module)",
+      "Bash(node -e \"require\\('fs'\\).readFileSync\\('app.js','utf8'\\)\")",
+      "Bash(/c/Python312/python.exe -c ' *)",
+      "Bash(git commit *)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

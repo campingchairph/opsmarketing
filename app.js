@@ -2713,57 +2713,84 @@ function renderGlossaryList(q = '') {
 // ══════════════════════════════════════════════════════════════════
 const GOOD_LOOKS = [
   {
-    type: 'Email Campaign',
+    type: 'Salesforce EDM',
+    tab: 'salesforce',
+    tabLabel: 'Salesforce EDM',
     icon: '📧',
-    pass: ['Sent on time', 'No broken links', 'Unsubscribe link present', 'Correct list segment used', 'Approval email exists'],
-    good: ['Test email reviewed on mobile AND desktop', 'Open rate pulled within 24 hours of send', 'Bounces and unsubscribes logged same day', 'Approval documented in shared folder, not just a chat message', 'Subject line and sender name double-checked against brief'],
-    impressive: ['Performance report sent to Marketing Lead with brief commentary (not just numbers)', 'Notes any anomalies proactively (high bounce = possible list issue)', 'Comparison to previous campaign included in report', 'Sends a pre-flight checklist screenshot with approval request', 'Archives the campaign version with send date in file name'],
+    pass: ['HTML file uploaded correctly in Account Engagement', 'Test send completed before scheduling', 'Unsubscribe link present and functional', 'Correct list / prospect list applied', 'Approval documented before scheduling'],
+    good: ['Test email reviewed on mobile AND desktop before requesting approval', 'Sender name and reply-to address verified against brief', 'All merge fields tested with real data — no {{FirstName}} showing in test', 'Scheduled send time confirmed with Marketing Lead in writing', 'Bounces and unsubscribes logged within 24 hours of send'],
+    impressive: ['Sends a preflight screenshot alongside the approval request', 'Performance report delivered to Marketing Lead within 24 hours with brief commentary', 'Notes anomalies proactively — high bounce = flags possible list issue, not just reports number', 'Compares open/click rate to previous EDM in the same report', 'Archives the sent HTML file and approval email with the campaign send date in the file name'],
   },
   {
-    type: 'InDesign Collateral',
-    icon: '🖨',
-    pass: ['Correct template used', 'Logo present', 'Disclaimer included', 'No spelling errors', 'PDF exported and sent'],
-    good: ['Preflight run with zero errors before export', 'Correct colour mode for channel (CMYK print / RGB digital)', 'Links panel checked — no missing or modified links', 'File named correctly with version number', 'Source file saved and packaged alongside the PDF'],
-    impressive: ['Prints a physical proof or zooms to 100% and reads every word', 'Includes a QC checklist screenshot with approval request', 'Notes any brand deviations they spotted and flagged before submitting', 'Packages the file with fonts and links, named to convention, uploaded to correct folder', 'Mentions the bleed spec used if print job'],
-  },
-  {
-    type: 'Event Coordination',
-    icon: '📅',
-    pass: ['Invitations sent on time', 'RSVP list maintained', 'Venue and logistics confirmed', 'Name badges prepared'],
-    good: ['RSVP tracker updated same day as each response', 'Reminder emails sent at 1 week and 1 day out', 'Supplier confirmations documented (email trail)', 'Attendance list cross-checked against name badges before event', 'Post-event materials archived same week'],
-    impressive: ['Proactively flags RSVP count vs capacity before it becomes a problem', 'Prepares a run sheet for the day — timeline, contacts, venue, backup contacts', 'Reconciles attendance vs RSVP within 24 hours post-event', 'Sends CRM update and follow-up list to Marketing Lead before being asked', 'Submits supplier invoices within 2 business days of event'],
-  },
-  {
-    type: 'CRM & Data',
+    type: 'CRM & List Management',
+    tab: 'salesforce',
+    tabLabel: 'Salesforce EDM',
     icon: '📊',
-    pass: ['List uploaded correctly', 'Segment applied', 'Opt-outs checked before send', 'No obvious data errors'],
-    good: ['Cross-references the upload against the source file before confirming', 'Flags any contacts missing consent flags before proceeding', 'Checks for duplicate records before upload', 'Confirms list count with Marketing Lead before campaign is scheduled', 'Documents where the list came from and when it was last cleaned'],
-    impressive: ['Proactively checks that the list aligns with the TMD for the product being promoted', 'Reports unsubscribe count post-campaign alongside bounce rate', 'Flags any unusual patterns (e.g. spike in hard bounces = outdated list)', 'Keeps a simple log of list sizes over time to spot data decay', 'Asks whether contacts require re-consent if list is older than 12 months'],
+    pass: ['List uploaded correctly', 'Correct segment / prospect list applied', 'Opt-outs and suppressions checked before send', 'No obvious data errors in preview'],
+    good: ['Cross-references upload against source file before confirming count', 'Flags any contacts missing consent flags before proceeding', 'Checks for duplicate records before upload', 'Confirms final list count with Marketing Lead before campaign is scheduled', 'Documents where the list came from and when it was last cleaned'],
+    impressive: ['Proactively checks that the list aligns with the TMD for the product being promoted', 'Reports unsubscribe and bounce count post-campaign alongside open/click rates', 'Flags unusual patterns — spike in hard bounces = flags possible outdated list', 'Keeps a simple log of list sizes over time to monitor data decay', 'Asks whether contacts require re-consent if list is older than 12 months'],
   },
   {
-    type: 'Performance Report',
+    type: 'EDM Performance Report',
+    tab: 'salesforce',
+    tabLabel: 'Salesforce EDM',
     icon: '📈',
-    pass: ['Numbers pulled from the platform', 'Sent to Marketing Lead', 'Covers open rate and clicks'],
-    good: ['Compares to previous campaign or industry benchmark', 'Delivered within 24 hours of campaign close', 'Includes context (was send time different? Was subject line tested?)', 'Notes any deliverability issues (bounces, suppressions)', 'Attached as a formatted document, not a screenshot'],
-    impressive: ['Provides one-paragraph narrative: what worked, what didn\'t, what to consider next time', 'Includes a trend chart if multiple campaigns run', 'Flags any compliance issues discovered post-send', 'Suggests one testable change for the next campaign', 'Keeps a running campaign log so patterns emerge over time'],
+    pass: ['Open rate, clicks and bounces pulled from Account Engagement', 'Report sent to Marketing Lead', 'Unsubscribe count included'],
+    good: ['Delivered within 24 hours of campaign close', 'Compares to previous EDM or industry benchmark', 'Includes context — was send time different? Was subject line changed?', 'Notes any deliverability issues (bounces, suppressions)', 'Formatted as a document or structured email, not a screenshot'],
+    impressive: ['One-paragraph narrative: what worked, what didn\'t, what to consider next EDM', 'Flags any compliance issues discovered post-send', 'Suggests one testable change for the next send', 'Keeps a running EDM log so patterns emerge over time', 'Includes a comparison chart if multiple EDMs have been sent'],
+  },
+  {
+    type: 'Brand QC — InDesign Collateral',
+    tab: 'brand',
+    tabLabel: 'Brand & Compliance',
+    icon: '🖨',
+    pass: ['Correct template used', 'Assetline logo present in correct version', 'Disclaimer included', 'No spelling errors', 'PDF exported and sent for approval'],
+    good: ['Preflight run with zero errors before export (Window → Output → Preflight)', 'Correct colour mode — CMYK for print, RGB for digital', 'Links panel checked — no missing or modified links', 'File named correctly with version number per naming convention', 'Source file saved and packaged alongside the PDF'],
+    impressive: ['Zooms to 100% and reads every word before submitting', 'Includes a QC checklist screenshot with the approval request', 'Notes any brand deviations spotted and flagged before submitting', 'Packages file with fonts and links, named to convention, uploaded to correct folder', 'States the bleed spec used in the approval request for print jobs'],
+  },
+  {
+    type: 'Compliance Check',
+    tab: 'brand',
+    tabLabel: 'Brand & Compliance',
+    icon: '🛡',
+    pass: ['Assetline logo in correct approved version', 'Disclaimer present and unmodified', 'No unapproved performance claims or rate figures', 'Correct Assetline fonts used (Silvana Text + ABC Diatype)', 'Approved colour palette only (#E4572E, #191919, #FAFAF2)'],
+    good: ['Cross-checks every rate or figure against the approved brief — never assumes', 'Flags any claim that could be read as a performance guarantee', 'Confirms disclaimer wording matches the approved legal template, not a paraphrase', 'Notes any brand deviation in writing before submitting — does not silently fix and move on', 'Checks that the correct TMD product scope is reflected in any product-specific material'],
+    impressive: ['Treats every compliance flag as a blocker — does not proceed or self-approve', 'Documents the compliance check as a separate step in the approval chain', 'Proactively asks: "does this material need compliance sign-off beyond Marketing Lead?"', 'Keeps a log of any compliance flags raised per job for reference', 'Reads the disclaimer out loud to catch readability issues, not just legal completeness'],
   },
   {
     type: 'Supplier Management',
+    tab: 'brand',
+    tabLabel: 'Brand & Compliance',
     icon: '📦',
-    pass: ['Brief sent', 'Receipt confirmed', 'File delivered on time', 'Basic QC done'],
-    good: ['Brief includes all specs — format, dimensions, bleed, colour mode, deadline', 'Confirmation email explicitly requests an ETA acknowledgement', 'Reviews the deliverable against the brief point by point (not just a glance)', 'Raises issues specifically — not "this doesn\'t look right" but "logo version is incorrect, should be white on dark"', 'Follows up 48 hours before deadline if no confirmation received'],
-    impressive: ['Maintains a simple supplier log: name, contact, past jobs, turnaround reliability', 'Flags lead time issues proactively — "if we need this by Friday, we need to brief by Tuesday"', 'Checks supplier output against brand guide, not just the brief', 'Escalates supplier issues to Marketing Lead with a proposed resolution, not just a problem', 'Notes any spec corrections on the file itself before archiving, for future reference'],
+    pass: ['Brief sent with approved content only', 'Receipt confirmed by supplier', 'File delivered on time', 'Basic QC done before accepting deliverable'],
+    good: ['Brief includes all specs — format, dimensions, bleed, colour mode, deadline', 'Asks supplier to confirm receipt and ability to meet the deadline in writing', 'Reviews deliverable against brief point by point, not at a glance', 'Raises issues specifically — e.g. "logo version is incorrect, should be white reversed on dark"', 'Follows up 48 hours before deadline if no confirmation received'],
+    impressive: ['Maintains a simple supplier log: name, contact, past jobs, turnaround reliability', 'Flags lead time issues proactively — "if we need this by Friday, brief must go Tuesday"', 'Checks supplier output against the brand guide, not just the brief', 'Escalates supplier issues to Marketing Lead with a proposed resolution — not just a problem', 'Notes any spec corrections on the file itself before archiving for future reference'],
   },
 ];
 
-function renderGoodLooks() {
+function renderGoodLooks(activeFilter) {
   const el = document.getElementById('goodlooks-content');
   if (!el) return;
-  el.innerHTML = GOOD_LOOKS.map(item => `
+  const filter = activeFilter || 'all';
+  const filtered = filter === 'all' ? GOOD_LOOKS : GOOD_LOOKS.filter(i => i.tab === filter);
+
+  const tabColors = {
+    salesforce: 'var(--lavender)',
+    brand: 'var(--teal)',
+  };
+
+  el.innerHTML = `
+    <div class="wgl-filter-bar">
+      <button class="wgl-filter-btn${filter === 'all' ? ' active' : ''}" onclick="renderGoodLooks('all')">All tasks</button>
+      <button class="wgl-filter-btn${filter === 'salesforce' ? ' active' : ''}" onclick="renderGoodLooks('salesforce')">Salesforce EDM</button>
+      <button class="wgl-filter-btn${filter === 'brand' ? ' active' : ''}" onclick="renderGoodLooks('brand')">Brand &amp; Compliance</button>
+    </div>` +
+  filtered.map(item => `
     <div class="wgl-card open" onclick="this.classList.toggle('open')">
       <div class="wgl-card-header">
         <span style="font-size:18px;flex-shrink:0">${item.icon}</span>
         <span class="wgl-card-title">${item.type}</span>
+        <span class="wgl-tab-badge" style="background:${tabColors[item.tab]}">${item.tabLabel}</span>
         <span class="wgl-toggle">▼</span>
       </div>
       <div class="wgl-levels">

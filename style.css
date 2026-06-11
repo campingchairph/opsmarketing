@@ -1775,6 +1775,38 @@ body {
 /* ══════════════════════════════════════
    WHAT GOOD LOOKS LIKE
 ══════════════════════════════════════ */
+.wgl-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.wgl-filter-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-md);
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.wgl-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.wgl-filter-btn.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+.wgl-tab-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
 .wgl-card {
   background: var(--bg-2);
   border: 1px solid var(--border);
