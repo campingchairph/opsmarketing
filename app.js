@@ -280,6 +280,9 @@ function navigate(pageId) {
 
   // Update page-level progress bar
   updatePageProgress(pageId);
+
+  // Re-evaluate chip visibility whenever page changes (chip hides on timer page, shows on others if active)
+  updateTopbarTimer();
 }
 
 function updatePageProgress(pageId) {
@@ -2176,11 +2179,10 @@ function renderTimerTaskList() {
   const el = document.getElementById('timer-task-list');
   if (!el) return;
   const briefs = loadBriefs();
-  const all = Object.values(briefs).sort((a, b) => {
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (b.status === 'completed' && a.status !== 'completed') return -1;
-    return new Date(b.createdAt) - new Date(a.createdAt);
-  });
+  // Only show active (non-completed) tasks in the timer queue
+  const all = Object.values(briefs)
+    .filter(b => b.status !== 'completed')
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (!all.length) {
     el.innerHTML = `
@@ -2360,6 +2362,7 @@ function timerTick() {
   if (timerState.secsLeft <= 0) {
     clearInterval(timerState.interval); timerState.interval = null;
     timerState.running = false;
+    timerState.paused  = false;
     // Log session
     if (timerState.sessionStart) {
       timerState.sessionMins += timerState.modeMins;
@@ -2375,6 +2378,8 @@ function timerTick() {
     // Reset for next round
     timerState.secsLeft = timerState.totalSecs;
     updateSessionLabel();
+    // Hide chip — timer is no longer actively running
+    updateTopbarTimer();
     // Try browser notification
     if (Notification.permission === 'granted') new Notification('Timer done!', { body: timerState.modeMins + ' minutes complete.' });
   }
@@ -2458,41 +2463,60 @@ function updateSessionLabel() {
 function timerFinish() {
   if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; }
   if (timerState.sessionStart) {
-    const elapsed = Math.round((Date.now() - timerState.sessionStart) / 60000);
+    // Use ceil so any partial minute counts — avoids rounding short sessions to 0
+    const elapsed = Math.ceil((Date.now() - timerState.sessionStart) / 60000);
     timerState.sessionMins += elapsed;
     timerState.sessionStart = null;
   }
   timerState.running = false;
 
+  const catMap = {
+    email_campaign: 'campaign', website_content: 'campaign',
+    event_setup: 'events',      post_event: 'events',
+    indesign_collateral: 'design',
+    supplier_brief: 'admin',    general_admin: 'admin',
+  };
+
   const briefId = timerState.briefId;
-  const briefs = loadBriefs();
-  const brief = briefs[briefId];
-  if (brief && timerState.sessionMins > 0) {
-    brief.totalMins = (brief.totalMins || 0) + timerState.sessionMins;
-    brief.sessions.push({ date: new Date().toISOString(), mins: timerState.sessionMins });
+  const briefs  = loadBriefs();
+  const brief   = briefs[briefId];
+
+  if (brief) {
+    const mins = timerState.sessionMins || 0;
+    brief.totalMins = (brief.totalMins || 0) + mins;
+    if (!brief.sessions) brief.sessions = [];
+    brief.sessions.push({ date: new Date().toISOString(), mins });
     brief.status = 'completed';
+    brief.addedToTimesheet = true;
     briefs[briefId] = brief;
     saveBriefs(briefs);
 
-    // Push to timesheet
+    // Always push to timesheet (even 0 mins — marks task as done for the day)
     const now = new Date();
     const key = tsDateKey(now.getFullYear(), now.getMonth(), now.getDate());
-    const ts = loadTimesheet();
+    const ts  = loadTimesheet();
     if (!ts[key]) ts[key] = [];
-    ts[key].push({ title: brief.name, category: brief.category || 'admin', minutes: timerState.sessionMins, notes: 'Logged via Task Timer · ' + timerState.pomodoroCount + ' pomodoro(s)' });
+    const typeLabel = TASK_TYPE_MAP[brief.taskType || 'general_admin']?.label || brief.taskType || 'Task';
+    const pomos = timerState.pomodoroCount;
+    ts[key].push({
+      title:    brief.name,
+      category: catMap[brief.taskType] || 'admin',
+      minutes:  mins,
+      notes:    typeLabel + (brief.deadline ? ' · Due ' + brief.deadline : '') + (pomos ? ' · ' + pomos + ' pomodoro(s)' : '') + (mins ? ' · ' + fmtMins(mins) + ' logged' : ''),
+    });
     saveTimesheet(ts);
   }
 
   stopParticles();
   document.querySelector('.timer-ring-wrap')?.classList.remove('running');
 
-  // Clear timer state so chip hides immediately
-  timerState.briefId = null;
-  timerState.running = false;
-  timerState.paused  = false;
-  timerState.sessionMins = 0;
+  // Clear state fully so chip hides and queue filters correctly
+  timerState.briefId       = null;
+  timerState.running       = false;
+  timerState.paused        = false;
+  timerState.sessionMins   = 0;
   timerState.pomodoroCount = 0;
-  timerState.secsLeft = timerState.totalSecs;
+  timerState.secsLeft      = timerState.totalSecs;
 
   updateTopbarTimer();
   navigate('timesheet');

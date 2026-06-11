@@ -17,7 +17,8 @@
       "Bash(node -e \"require\\('fs'\\).readFileSync\\('app.js','utf8'\\)\")",
       "Bash(/c/Python312/python.exe -c ' *)",
       "Bash(git commit *)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(grep -v \"//\\\\|entry-cat\\\\|addedToTimesheet: false\")"
     ]
   }
 }
