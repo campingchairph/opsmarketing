@@ -2400,22 +2400,25 @@ function updateTopbarTimer() {
   const dot     = document.getElementById('nav-timer-dot');
   const ttcDot  = document.getElementById('ttc-dot');
 
-  const isLoaded  = !!timerState.briefId;                       // task is open in focus view
   const isRunning = timerState.running;
   const isPaused  = timerState.paused && !timerState.running;
+  const isActive  = isRunning || isPaused;  // only running or paused counts as "ongoing"
 
-  // Chip shows whenever a task is loaded (ready, running, or paused)
+  const activePage = document.querySelector('.nav-item.active')?.dataset?.page;
+  const onTimerPage = activePage === 'timer';
+
+  // Chip only shows when timer is actively running/paused AND user has navigated away
   if (chip) {
-    chip.style.display = isLoaded ? 'flex' : 'none';
-    chip.classList.toggle('paused',  isPaused);
-    chip.classList.toggle('ready',   isLoaded && !isRunning && !isPaused);
+    chip.style.display = (isActive && !onTimerPage) ? 'flex' : 'none';
+    chip.classList.toggle('paused', isPaused);
+    chip.classList.remove('ready');
   }
-  // Nav dot shows whenever a task is loaded
-  if (dot)    dot.style.display    = isLoaded ? 'inline-block' : 'none';
+  // Nav dot follows the same rule — only when active
+  if (dot)    dot.style.display    = isActive ? 'inline-block' : 'none';
   if (ttcDot) ttcDot.classList.toggle('paused', isPaused);
 
-  // Always update the displayed time
-  if (isLoaded && display) {
+  // Update the displayed time while active
+  if (isActive && display) {
     const m = Math.floor(timerState.secsLeft / 60);
     const s = timerState.secsLeft % 60;
     display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
@@ -2482,8 +2485,17 @@ function timerFinish() {
 
   stopParticles();
   document.querySelector('.timer-ring-wrap')?.classList.remove('running');
+
+  // Clear timer state so chip hides immediately
+  timerState.briefId = null;
+  timerState.running = false;
+  timerState.paused  = false;
+  timerState.sessionMins = 0;
+  timerState.pomodoroCount = 0;
+  timerState.secsLeft = timerState.totalSecs;
+
   updateTopbarTimer();
-  exitFocus();
+  navigate('timesheet');
 }
 
 function setFaceExpression(type) {
