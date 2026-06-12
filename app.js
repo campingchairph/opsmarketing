@@ -2463,7 +2463,6 @@ function updateSessionLabel() {
 function timerFinish() {
   if (timerState.interval) { clearInterval(timerState.interval); timerState.interval = null; }
   if (timerState.sessionStart) {
-    // Use ceil so any partial minute counts — avoids rounding short sessions to 0
     const elapsed = Math.ceil((Date.now() - timerState.sessionStart) / 60000);
     timerState.sessionMins += elapsed;
     timerState.sessionStart = null;
@@ -2482,35 +2481,47 @@ function timerFinish() {
   const brief   = briefs[briefId];
 
   if (brief) {
-    const mins = timerState.sessionMins || 0;
-    brief.totalMins = (brief.totalMins || 0) + mins;
-    if (!brief.sessions) brief.sessions = [];
-    brief.sessions.push({ date: new Date().toISOString(), mins });
-    brief.status = 'completed';
-    brief.addedToTimesheet = true;
-    briefs[briefId] = brief;
-    saveBriefs(briefs);
+    const mins      = timerState.sessionMins || 0;
+    const pomos     = timerState.pomodoroCount;
+    const typeLabel = TASK_TYPE_MAP[brief.taskType || 'general_admin']?.label || brief.taskType || 'Task';
 
-    // Always push to timesheet (even 0 mins — marks task as done for the day)
+    // Build notes from timer comments — "comment text at HH:MM"
+    const commentLines = (brief.timerNotes || []).map(n => {
+      const t = new Date(n.time).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+      return `${n.text} at ${t}`;
+    });
+    const noteParts = [
+      typeLabel,
+      brief.deadline ? 'Due ' + brief.deadline : null,
+      pomos ? pomos + ' pomodoro(s)' : null,
+      mins  ? fmtMins(mins) + ' logged' : null,
+    ].filter(Boolean).join(' · ');
+    const notes = commentLines.length
+      ? noteParts + '\n' + commentLines.join('\n')
+      : noteParts;
+
+    // Push to timesheet
     const now = new Date();
     const key = tsDateKey(now.getFullYear(), now.getMonth(), now.getDate());
     const ts  = loadTimesheet();
     if (!ts[key]) ts[key] = [];
-    const typeLabel = TASK_TYPE_MAP[brief.taskType || 'general_admin']?.label || brief.taskType || 'Task';
-    const pomos = timerState.pomodoroCount;
     ts[key].push({
       title:    brief.name,
       category: catMap[brief.taskType] || 'admin',
       minutes:  mins,
-      notes:    typeLabel + (brief.deadline ? ' · Due ' + brief.deadline : '') + (pomos ? ' · ' + pomos + ' pomodoro(s)' : '') + (mins ? ' · ' + fmtMins(mins) + ' logged' : ''),
+      notes,
     });
     saveTimesheet(ts);
+
+    // Remove brief entirely — it's now in the timesheet
+    delete briefs[briefId];
+    saveBriefs(briefs);
   }
 
   stopParticles();
   document.querySelector('.timer-ring-wrap')?.classList.remove('running');
 
-  // Clear state fully so chip hides and queue filters correctly
+  // Clear state so chip hides
   timerState.briefId       = null;
   timerState.running       = false;
   timerState.paused        = false;
@@ -4223,6 +4234,188 @@ function clearAllDiff() {
   document.getElementById('diff-left').value  = '';
   document.getElementById('diff-right').value = '';
   clearDiffOutput();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DIFF MODE SWITCHER
+// ══════════════════════════════════════════════════════════════════
+function switchDiffMode(mode) {
+  const textSection  = document.getElementById('diff-text-section');
+  const imageSection = document.getElementById('diff-image-section');
+  const btnText      = document.getElementById('diff-mode-text');
+  const btnImage     = document.getElementById('diff-mode-image');
+  if (!textSection || !imageSection) return;
+  const isText = mode === 'text';
+  textSection.style.display  = isText ? '' : 'none';
+  imageSection.style.display = isText ? 'none' : '';
+  btnText.classList.toggle('active',  isText);
+  btnImage.classList.toggle('active', !isText);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// IMAGE COMPARE
+// ══════════════════════════════════════════════════════════════════
+const imgState = { left: null, right: null };
+
+function imgDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+
+function imgDrop(e, side) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImgFile(file, side);
+}
+
+function imgFileLoad(e, side) {
+  const file = e.target.files[0];
+  if (file) loadImgFile(file, side);
+}
+
+function loadImgFile(file, side) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      imgState[side] = img;
+      const preview = document.getElementById('img-preview-' + side);
+      if (preview) {
+        preview.innerHTML = `<img src="${ev.target.result}" style="max-width:100%;max-height:200px;border-radius:8px;object-fit:contain">
+          <div class="img-zone-label" style="margin-top:8px">${side === 'left' ? 'Original' : 'Modified'}</div>
+          <div class="img-zone-sub" style="color:var(--sage)">${file.name} · ${img.width}×${img.height}</div>`;
+      }
+      // Auto-show actions when both images are loaded
+      if (imgState.left && imgState.right) {
+        const actions = document.getElementById('img-diff-actions');
+        if (actions) actions.style.display = 'flex';
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function runImageDiff() {
+  const imgL = imgState.left, imgR = imgState.right;
+  if (!imgL || !imgR) return;
+
+  const W = Math.max(imgL.width,  imgR.width);
+  const H = Math.max(imgL.height, imgR.height);
+
+  // Draw both images onto offscreen canvases at common size
+  function drawToCanvas(img) {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    c.getContext('2d').drawImage(img, 0, 0, W, H);
+    return c.getContext('2d').getImageData(0, 0, W, H);
+  }
+  const dataL = drawToCanvas(imgL);
+  const dataR = drawToCanvas(imgR);
+
+  // Compute diff
+  const diffCanvas = document.getElementById('img-diff-canvas');
+  diffCanvas.width  = W;
+  diffCanvas.height = H;
+  const ctx  = diffCanvas.getContext('2d');
+  const out  = ctx.createImageData(W, H);
+  const THRESHOLD = 20;
+  let diffPixels = 0;
+  const total = W * H;
+
+  for (let i = 0; i < dataL.data.length; i += 4) {
+    const dr = Math.abs(dataL.data[i]   - dataR.data[i]);
+    const dg = Math.abs(dataL.data[i+1] - dataR.data[i+1]);
+    const db = Math.abs(dataL.data[i+2] - dataR.data[i+2]);
+    const diff = (dr + dg + db) / 3;
+    if (diff > THRESHOLD) {
+      // Highlight in accent orange
+      out.data[i]   = 228;
+      out.data[i+1] = 87;
+      out.data[i+2] = 46;
+      out.data[i+3] = Math.min(255, 80 + diff * 1.5);
+      diffPixels++;
+    } else {
+      // Greyscale of original
+      const g = Math.round((dataL.data[i] * 0.299 + dataL.data[i+1] * 0.587 + dataL.data[i+2] * 0.114) * 0.35);
+      out.data[i] = out.data[i+1] = out.data[i+2] = g;
+      out.data[i+3] = dataL.data[i+3];
+    }
+  }
+  ctx.putImageData(out, 0, 0);
+
+  const pct = ((total - diffPixels) / total * 100).toFixed(1);
+  const diffPct = (diffPixels / total * 100).toFixed(1);
+
+  // Populate side-by-side and slider
+  const srcL = imgL.src, srcR = imgR.src;
+  ['img-result-left','img-slider-left'].forEach(id => { const el = document.getElementById(id); if (el) el.src = srcL; });
+  ['img-result-right','img-slider-right'].forEach(id => { const el = document.getElementById(id); if (el) el.src = srcR; });
+
+  // Stats
+  const statsEl = document.getElementById('img-diff-stats');
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <span class="diff-stat-item match"><strong>${pct}%</strong> identical pixels</span>
+      <span class="diff-stat-item del"><strong>${diffPct}%</strong> changed pixels</span>
+      <span class="diff-stat-item">${W}×${H} · ${diffPixels.toLocaleString()} of ${total.toLocaleString()} pixels differ</span>`;
+    statsEl.style.display = 'flex';
+  }
+
+  document.getElementById('img-diff-result').style.display = 'block';
+  setImgView('side');
+  initSlider();
+}
+
+function setImgView(view) {
+  ['side','slider','diff'].forEach(v => {
+    const btn   = document.getElementById('img-view-' + v);
+    const panel = document.getElementById('img-view-' + v + '-panel');
+    const active = v === view;
+    if (btn)   btn.classList.toggle('active', active);
+    if (panel) panel.style.display = active ? '' : 'none';
+  });
+}
+
+function clearImageDiff() {
+  imgState.left = imgState.right = null;
+  ['left','right'].forEach(side => {
+    const preview = document.getElementById('img-preview-' + side);
+    if (preview) preview.innerHTML = `
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:0.3"><rect x="4" y="8" width="40" height="32" rx="3"/><polyline points="4,32 16,20 24,28 32,18 44,32"/><circle cx="16" cy="18" r="4"/></svg>
+      <div class="img-zone-label">${side === 'left' ? 'Original' : 'Modified'}</div>
+      <div class="img-zone-sub">Click or drag an image here</div>`;
+    const input = document.getElementById('img-input-' + side);
+    if (input) input.value = '';
+  });
+  const actions = document.getElementById('img-diff-actions');
+  if (actions) actions.style.display = 'none';
+  const result = document.getElementById('img-diff-result');
+  if (result) result.style.display = 'none';
+}
+
+// Swipe slider drag
+function initSlider() {
+  const container = document.getElementById('img-slider-container');
+  const handle    = document.getElementById('img-slider-handle');
+  const overlay   = document.getElementById('img-slider-overlay');
+  if (!container || !handle || !overlay) return;
+
+  function setPos(x) {
+    const rect = container.getBoundingClientRect();
+    const pct  = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+    handle.style.left  = (pct * 100) + '%';
+    overlay.style.width = (pct * 100) + '%';
+  }
+
+  setPos(container.getBoundingClientRect().left + container.getBoundingClientRect().width / 2);
+
+  let dragging = false;
+  handle.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
+  handle.addEventListener('touchstart', e => { dragging = true; e.preventDefault(); }, { passive: false });
+  document.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
+  document.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('mouseup',  () => dragging = false);
+  document.addEventListener('touchend', () => dragging = false);
+  container.addEventListener('click', e => setPos(e.clientX));
 }
 
 // ══════════════════════════════════════════════════════════════════

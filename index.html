@@ -1551,52 +1551,147 @@
       <!-- ── TEXT COMPARE ── -->
       <div id="page-diffcheck" class="page">
 
-        <div class="alert-box info" style="margin-bottom:16px">
-          <div class="alert-title">Text Compare — spot differences instantly</div>
-          <p>Paste two versions of any text — email copy, disclaimers, rate card data, subject lines. Changes are highlighted line by line, and word by word on modified lines.</p>
-        </div>
-
-        <div class="diff-input-grid">
-          <div class="diff-input-panel">
-            <div class="diff-input-header">
-              <span class="diff-input-label">
-                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><rect x="1" y="1" width="12" height="12" rx="1"/></svg>
-                Original
-              </span>
-              <button class="diff-clear-side-btn" onclick="clearDiffSide('left')">Clear</button>
-            </div>
-            <textarea id="diff-left" class="diff-textarea" placeholder="Paste the original / old version here…" oninput="clearDiffOutput()"></textarea>
-          </div>
-          <div class="diff-input-panel">
-            <div class="diff-input-header">
-              <span class="diff-input-label">
-                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><rect x="1" y="1" width="12" height="12" rx="1"/></svg>
-                Modified
-              </span>
-              <button class="diff-clear-side-btn" onclick="clearDiffSide('right')">Clear</button>
-            </div>
-            <textarea id="diff-right" class="diff-textarea" placeholder="Paste the new / modified version here…" oninput="clearDiffOutput()"></textarea>
-          </div>
-        </div>
-
-        <div class="diff-action-row">
-          <button class="btn-add diff-compare-btn" onclick="runDiffCheck()">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/><line x1="7" y1="5" x2="9" y2="5"/><line x1="7" y1="8" x2="9" y2="8"/><line x1="7" y1="11" x2="9" y2="11"/></svg>
-            Compare →
+        <!-- Mode toggle -->
+        <div class="diff-mode-bar">
+          <button class="diff-mode-btn active" id="diff-mode-text" onclick="switchDiffMode('text')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/></svg>
+            Text Compare
           </button>
-          <button class="btn-reset" onclick="clearAllDiff()" style="margin-top:0">Clear all</button>
+          <button class="diff-mode-btn" id="diff-mode-image" onclick="switchDiffMode('image')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="1" y="2" width="14" height="11" rx="1"/><polyline points="1,10 5,6 8,9 11,5 15,10"/><circle cx="5" cy="5" r="1.5"/></svg>
+            Image Compare
+          </button>
         </div>
 
-        <div id="diff-stats" class="diff-stats" style="display:none"></div>
-
-        <div id="diff-output" class="diff-output-wrap" style="display:none">
-          <div class="diff-output-headers">
-            <div class="diff-output-col-head diff-head-del">Original</div>
-            <div class="diff-output-col-head diff-head-add">Modified</div>
+        <!-- ── TEXT COMPARE ── -->
+        <div id="diff-text-section">
+          <div class="alert-box info" style="margin-bottom:16px">
+            <div class="alert-title">Text Compare — spot differences instantly</div>
+            <p>Paste two versions of any text — email copy, disclaimers, rate card data, subject lines. Changes are highlighted line by line, and word by word on modified lines.</p>
           </div>
-          <div class="diff-panels">
-            <div class="diff-panel" id="diff-panel-left"></div>
-            <div class="diff-panel" id="diff-panel-right"></div>
+
+          <div class="diff-input-grid">
+            <div class="diff-input-panel">
+              <div class="diff-input-header">
+                <span class="diff-input-label">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><rect x="1" y="1" width="12" height="12" rx="1"/></svg>
+                  Original
+                </span>
+                <button class="diff-clear-side-btn" onclick="clearDiffSide('left')">Clear</button>
+              </div>
+              <textarea id="diff-left" class="diff-textarea" placeholder="Paste the original / old version here…" oninput="clearDiffOutput()"></textarea>
+            </div>
+            <div class="diff-input-panel">
+              <div class="diff-input-header">
+                <span class="diff-input-label">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><rect x="1" y="1" width="12" height="12" rx="1"/></svg>
+                  Modified
+                </span>
+                <button class="diff-clear-side-btn" onclick="clearDiffSide('right')">Clear</button>
+              </div>
+              <textarea id="diff-right" class="diff-textarea" placeholder="Paste the new / modified version here…" oninput="clearDiffOutput()"></textarea>
+            </div>
+          </div>
+
+          <div class="diff-action-row">
+            <button class="btn-add diff-compare-btn" onclick="runDiffCheck()">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/><line x1="7" y1="5" x2="9" y2="5"/><line x1="7" y1="8" x2="9" y2="8"/><line x1="7" y1="11" x2="9" y2="11"/></svg>
+              Compare →
+            </button>
+            <button class="btn-reset" onclick="clearAllDiff()" style="margin-top:0">Clear all</button>
+          </div>
+
+          <div id="diff-stats" class="diff-stats" style="display:none"></div>
+
+          <div id="diff-output" class="diff-output-wrap" style="display:none">
+            <div class="diff-output-headers">
+              <div class="diff-output-col-head diff-head-del">Original</div>
+              <div class="diff-output-col-head diff-head-add">Modified</div>
+            </div>
+            <div class="diff-panels">
+              <div class="diff-panel" id="diff-panel-left"></div>
+              <div class="diff-panel" id="diff-panel-right"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── IMAGE COMPARE ── -->
+        <div id="diff-image-section" style="display:none">
+          <div class="alert-box info" style="margin-bottom:16px">
+            <div class="alert-title">Image Compare — spot visual differences</div>
+            <p>Upload two versions of an image. The diff view highlights every changed pixel — useful for catching layout shifts, copy changes, or artwork revisions.</p>
+          </div>
+
+          <div class="img-diff-upload-grid">
+            <div class="img-diff-zone" id="img-zone-left" onclick="document.getElementById('img-input-left').click()" ondragover="imgDragOver(event)" ondrop="imgDrop(event,'left')">
+              <input type="file" id="img-input-left" accept="image/*" style="display:none" onchange="imgFileLoad(event,'left')">
+              <div class="img-zone-preview" id="img-preview-left">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:0.3"><rect x="4" y="8" width="40" height="32" rx="3"/><polyline points="4,32 16,20 24,28 32,18 44,32"/><circle cx="16" cy="18" r="4"/></svg>
+                <div class="img-zone-label">Original</div>
+                <div class="img-zone-sub">Click or drag an image here</div>
+              </div>
+            </div>
+            <div class="img-diff-zone" id="img-zone-right" onclick="document.getElementById('img-input-right').click()" ondragover="imgDragOver(event)" ondrop="imgDrop(event,'right')">
+              <input type="file" id="img-input-right" accept="image/*" style="display:none" onchange="imgFileLoad(event,'right')">
+              <div class="img-zone-preview" id="img-preview-right">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:0.3"><rect x="4" y="8" width="40" height="32" rx="3"/><polyline points="4,32 16,20 24,28 32,18 44,32"/><circle cx="16" cy="18" r="4"/></svg>
+                <div class="img-zone-label">Modified</div>
+                <div class="img-zone-sub">Click or drag an image here</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="img-diff-actions" style="display:none" class="diff-action-row">
+            <button class="btn-add diff-compare-btn" onclick="runImageDiff()">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/><line x1="7" y1="5" x2="9" y2="5"/><line x1="7" y1="8" x2="9" y2="8"/><line x1="7" y1="11" x2="9" y2="11"/></svg>
+              Compare Images →
+            </button>
+            <button class="btn-reset" onclick="clearImageDiff()" style="margin-top:0">Clear</button>
+          </div>
+
+          <div id="img-diff-result" style="display:none">
+            <div class="img-diff-view-toggle">
+              <button class="img-view-btn active" id="img-view-side" onclick="setImgView('side')">Side by side</button>
+              <button class="img-view-btn" id="img-view-slider" onclick="setImgView('slider')">Swipe</button>
+              <button class="img-view-btn" id="img-view-diff" onclick="setImgView('diff')">Difference</button>
+            </div>
+            <div id="img-diff-stats" class="diff-stats"></div>
+
+            <!-- Side by side -->
+            <div id="img-view-side-panel" class="img-side-grid">
+              <div class="img-side-cell">
+                <div class="img-side-label">Original</div>
+                <img id="img-result-left" class="img-result-img"/>
+              </div>
+              <div class="img-side-cell">
+                <div class="img-side-label">Modified</div>
+                <img id="img-result-right" class="img-result-img"/>
+              </div>
+            </div>
+
+            <!-- Swipe / slider -->
+            <div id="img-view-slider-panel" style="display:none" class="img-slider-wrap">
+              <div class="img-slider-container" id="img-slider-container">
+                <img class="img-slider-base" id="img-slider-left"/>
+                <div class="img-slider-overlay" id="img-slider-overlay">
+                  <img class="img-slider-top" id="img-slider-right"/>
+                </div>
+                <div class="img-slider-handle" id="img-slider-handle">
+                  <div class="img-slider-line"></div>
+                  <div class="img-slider-knob">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="5,4 2,8 5,12"/><polyline points="11,4 14,8 11,12"/></svg>
+                  </div>
+                </div>
+                <div class="img-slider-tag left-tag">Original</div>
+                <div class="img-slider-tag right-tag">Modified</div>
+              </div>
+            </div>
+
+            <!-- Difference canvas -->
+            <div id="img-view-diff-panel" style="display:none" class="img-diff-canvas-wrap">
+              <div class="img-side-label" style="margin-bottom:8px">Pixel differences (highlighted in orange)</div>
+              <canvas id="img-diff-canvas" class="img-result-img"></canvas>
+            </div>
           </div>
         </div>
 

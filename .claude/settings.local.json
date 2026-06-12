@@ -18,7 +18,8 @@
       "Bash(/c/Python312/python.exe -c ' *)",
       "Bash(git commit *)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(grep -v \"//\\\\|entry-cat\\\\|addedToTimesheet: false\")"
+      "Bash(grep -v \"//\\\\|entry-cat\\\\|addedToTimesheet: false\")",
+      "Bash(grep -n \"^\\\\/\\\\* ══\\\\|^\\\\.wgl-filter-bar\" \"C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css\")"
     ]
   }
 }
