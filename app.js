@@ -3403,34 +3403,54 @@ const S = `<span class="edm-save-word">Save</span>`;        // red bold Save
 const EDM_PHASES = [
   { id:'ph1', num:1, title:'Receive & Open Files', steps:[
     { id:'ph1s1', num:1, title:'Receive the ZIP from Petro via Teams', badge:null,
+      tab: null, links: [], save: null,
       desc:'Petro sends a Teams message with a ZIP file. Check his message for: the HTML file, campaign name, send date and time — all in the message. Update the <strong>Campaign Details</strong> card at the top with the campaign name and any sender changes Petro specifies.' },
     { id:'ph1s2', num:2, title:'Extract and open both files in Chrome', badge:null,
+      tab: null, links: [], save: null,
       desc:`Open the date-named folder. Find <code class="edm-code">index.html</code> and <code class="edm-code">plain-text-version.txt</code> — right-click each → <strong>Open with Google Chrome</strong>. Keep both Chrome tabs open throughout the whole process.` },
   ]},
   { id:'ph2', num:2, title:'Create the Template', steps:[
     { id:'ph2s3', num:3, title:'Create new template in Account Engagement', badge:null,
+      tab: 'Account Engagement Email → Templates → New',
+      links: [],
+      save: 'Click Save after entering name, campaign, and tracker domain',
       desc:`Navigate to ${T('Account Engagement Email')} → ${T('Templates')} → <strong>New</strong>.<br>
             • <strong>Name:</strong> <code class="edm-code">YYMMDD_Description</code><br>
             • <strong>Campaign:</strong> use exactly what Petro sent (copy from Campaign Details card)<br>
             • <strong>Tracker domain:</strong> <code class="edm-code">go.assetline.com.au</code> (confirm default)<br>
             Click ${S}.` },
     { id:'ph2s4', num:4, title:'Skip the layout step', badge:null,
+      tab: 'Layout screen — skip it (next screen after creating template)',
+      links: [], save: null,
       desc:'On the next screen, <strong>skip the layout step entirely</strong>. The HTML already contains the full email structure — no layout template is needed.' },
     { id:'ph2s5', num:5, title:'Build the email — subject, HTML, plain text', badge:null,
+      tab: 'Subject field → HTML tab → Text tab',
+      links: [],
+      save: 'Save after pasting HTML · Save after pasting plain text',
       desc:`<strong>Subject line:</strong> Chrome tab title of <code class="edm-code">index.html</code> — type exactly, check spelling.<br><br>
             ${T('HTML tab')}: Chrome → click in body → View Page Source → Select All → Copy → go to ${T('HTML tab')} in Salesforce → Delete existing → Paste → ${S}.<br><br>
             ${T('Text tab')}: Chrome plain-text tab → Select All → Copy → go to ${T('Text tab')} → Paste → ${S}.` },
   ]},
   { id:'ph3', num:3, title:'Review & Fix', steps:[
     { id:'ph3s6', num:6, title:'Check in the Editor tab', badge:null,
+      tab: 'Editor tab', links: [], save: null,
       desc:`Go to the ${T('Editor tab')} — the email should appear. Check wording, content accuracy, and layout. <em>Minor spacing glitches in the editor are normal and won't appear in the sent email — don't worry about these.</em>` },
     { id:'ph3s7', num:7, title:'Add missing links — especially LinkedIn', badge:'warn',
+      tab: 'Editor tab → click each link icon to edit URL',
+      links: [{ label: 'Assetline LinkedIn', url: 'https://linkedin.com/company/assetline-capital' }],
+      save: null,
       desc:'Check <strong>every</strong> clickable icon for missing URLs. The <strong>LinkedIn icon frequently comes through without a URL</strong> — add <code class="edm-code">linkedin.com/company/assetline-capital</code> manually every single time.' },
     { id:'ph3s8', num:8, title:'Verify merge fields in Preview tab', badge:null,
+      tab: 'Preview tab',
+      links: [],
+      save: 'Click Save after verifying merge fields',
       desc:`Go to the ${T('Preview tab')} → select a sample prospect (e.g. Billy) → confirm the first name merge field renders correctly. Merge fields won\'t display in test emails — ${T('Preview tab')} is the only way to verify. ${S}.` },
   ]},
   { id:'ph4', num:4, title:'Sender Setup', steps:[
     { id:'ph4s9', num:9, title:'Set sender details in the Sending tab', badge:'critical',
+      tab: 'Sending tab',
+      links: [],
+      save: 'Save after Sender name · Save after Sender email · Save after Reply-to',
       desc:`Go to the ${T('Sending tab')}. Copy the values from the <strong>Campaign Details</strong> card at the top of this page — Petro provides these for each send.<br>
             • <strong>Sender name:</strong> as provided<br>
             • <strong>Sender email:</strong> as provided → ${S}<br>
@@ -3439,30 +3459,46 @@ const EDM_PHASES = [
   { id:'ph5', num:5, title:'Test & Publish', steps:[
     { id:'ph5s10', num:10, title:'Send test email to YOURSELF only', badge:null,
       petroSelf: true,
+      tab: 'Template → Send Test Email button',
+      links: [], save: null,
       desc:`In the ${T('Template')}, send a test email to <strong>yourself only</strong>.<br>
             Check: design and layout, all links work, wording correct, merge fields visible, no errors.<br><br>
             <strong>⚠ Do not send to Petro yet</strong> — you will notify Petro <em>only after</em> you have applied the template to a Send in Phase 6.` },
     { id:'ph5s11', num:11, title:'Publish the template — does NOT send it', badge:'warn',
+      tab: 'Editor tab → Publish button',
+      links: [],
+      save: 'Click Publish (not Save) — this activates the template for Sends',
       desc:`Once you are happy with your own test, click <strong>Publish</strong> from the ${T('Editor tab')}.<br>
             <strong>Publishing does NOT send the email</strong> — it only makes the template available to build a Send from. Nothing goes to recipients yet.` },
   ]},
   { id:'ph6', num:6, title:'Build the Send', steps:[
     { id:'ph6s12', num:12, title:'Create a new Send in the Sends tab', badge:null,
+      tab: 'Sends tab → New Send',
+      links: [],
+      save: 'Click Save after entering Send name and campaign',
       desc:`Go to ${T('Sends tab')} → <strong>New Send</strong>.<br>
             • <strong>Name:</strong> <code class="edm-code">YYMMDD_Description</code> (same as the template)<br>
             • <strong>Campaign:</strong> same campaign from Campaign Details card<br>
             Leave tracker domain — it inherits from the template. ${S}.` },
     { id:'ph6s13', num:13, title:'Apply template — then notify Petro for his test review', badge:null,
       petroMsg: true,
+      tab: 'Send → Template field (search by name)',
+      links: [], save: null,
       desc:`In the ${T('Send')}, search for the template by name (paste the name). Select it and apply. Subject, HTML, text, and sender details all carry over automatically.<br><br>
             <strong>Now send a test email to Petro</strong> — this is the first time Petro sees it. Use a message from the widget below, copy it, and send it in Teams or email.` },
     { id:'ph6s14', num:14, title:'Add all 4 recipient lists', badge:'critical',
+      tab: 'Send → Recipients section',
+      links: [], save: null,
       desc:'Add: <strong>All Brokers (Leads + Contacts)</strong> + <strong>James Green Database</strong> + <strong>Assetline Team Managerial/Executive</strong> + <strong>State Managers</strong>. All 4 — every time. Do not skip any.' },
     { id:'ph6s15', num:15, title:'Run Final QA — use the checklist below', badge:null,
+      tab: 'Final QA checklist (scroll down below phases)',
+      links: [], save: null,
       desc:'Complete the Final QA checklist below before sending or scheduling. All 8 items must be confirmed.' },
   ]},
   { id:'ph7', num:7, title:'Send or Schedule', steps:[
     { id:'ph7s16', num:16, title:'Send now or schedule', badge:'critical',
+      tab: 'Send → Send Now or Schedule button',
+      links: [], save: null,
       desc:`<strong>Send now</strong> — sends immediately.<br>
             <strong>Schedule</strong> — use when Petro specifies a date and time.<br><br>
             <span class="ci-badge critical">timezone</span> Scheduling uses <strong>your local timezone</strong>. If the email goes at 9 AM Sydney time and you\'re in the Philippines, subtract 3 hours → schedule at 6 AM your time. <strong>Confirm with Petro when scheduling for the first time.</strong>` },
@@ -3919,6 +3955,19 @@ function edmDetailCard() {
       </div>
     </div>` : '';
 
+  const summaryRows = [];
+  if (foundStep.tab) {
+    summaryRows.push(`<div class="edm-summary-row"><span class="edm-summary-label">Tab</span><span class="edm-summary-value">${foundStep.tab}</span></div>`);
+  }
+  if (foundStep.links && foundStep.links.length) {
+    const linkItems = foundStep.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener" class="edm-summary-link">${l.label}</a>`).join('');
+    summaryRows.push(`<div class="edm-summary-row"><span class="edm-summary-label">Links</span><span class="edm-summary-value">${linkItems}</span></div>`);
+  }
+  if (foundStep.save) {
+    summaryRows.push(`<div class="edm-summary-row"><span class="edm-summary-label">Save</span><span class="edm-summary-value">${foundStep.save}</span></div>`);
+  }
+  const summaryBlock = summaryRows.length ? `<div class="edm-detail-summary">${summaryRows.join('')}</div>` : '';
+
   return `
     <div class="edm-detail-header">
       <div class="edm-detail-phase-tag">Phase ${foundPhase.num} — ${foundPhase.title}</div>
@@ -3927,6 +3976,7 @@ function edmDetailCard() {
     <div class="edm-detail-body">
       <div class="edm-detail-desc">${foundStep.desc}</div>
       ${petroWidget}
+      ${summaryBlock}
     </div>`;
 }
 
