@@ -3786,72 +3786,159 @@ const EDM_STEPS_KEY = 'msc_edm_steps_v1';
 function loadEdmSteps()  { try { return JSON.parse(localStorage.getItem(EDM_STEPS_KEY)) || {}; } catch { return {}; } }
 function saveEdmSteps(d) { localStorage.setItem(EDM_STEPS_KEY, JSON.stringify(d)); }
 
+// ── Phases checklist state ───────────────────────────────────────
+let edmSelectedStep = null;
+let edmDoneOpen     = false;
+
 function renderEdmPhases() {
   const el = document.getElementById('edm-phases-container');
   if (!el) return;
   const state = loadEdmSteps();
 
-  el.innerHTML =
-    '<div class="edm-phases-grid">' +
-    EDM_PHASES.map(phase => {
-      const total = phase.steps.length;
-      const done  = phase.steps.filter(s => state[s.id]).length;
-      const complete = done === total;
-      return `
-        <div class="edm-phase-card${complete?' phase-complete':''}" id="edm-card-${phase.id}">
-          <div class="edm-phase-card-header">
-            <div class="edm-phase-card-num">Phase ${phase.num}</div>
-            <div class="edm-phase-card-title">${phase.title}</div>
-            <div class="edm-phase-card-prog" id="edm-prog-${phase.id}">
-              ${complete
-                ? '<span class="edm-phase-done">✓ Done</span>'
-                : `<span class="edm-phase-count">${done}/${total}</span>`}
-            </div>
-          </div>
-          <div class="edm-phase-card-body">
-            ${phase.steps.map(step => {
-              const checked = !!state[step.id];
-              let badge = '';
-              if (step.badge === 'critical') badge = '<span class="ci-badge critical">critical</span>';
-              else if (step.badge === 'warn') badge = '<span class="ci-badge warn">note</span>';
-              // Petro message widget for Step 13
-              const petroWidget = step.petroMsg ? `
-                <div class="edm-msg-widget" onclick="event.stopPropagation()">
-                  <div class="edm-msg-widget-label">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:12px;height:12px"><path d="M14 9a6 6 0 01-6 6H2L4 13a5 5 0 01-1-3A6 6 0 018 4h0a6 6 0 016 5z"/></svg>
-                    Message to send to Petro in Teams
-                  </div>
-                  <div class="edm-msg-text" id="edm-petro-msg-text">${fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx])}</div>
-                  <div class="edm-msg-actions">
-                    <span class="edm-msg-counter" id="edm-petro-msg-counter">1 of ${EDM_PETRO_TEST_MSGS.length}</span>
-                    <button class="edm-shuffle-btn" onclick="shuffleEdmMsg('test')" title="Show a different message">
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9l3 4-3 4H2"/><path d="M14 4l-3 4 3 4"/></svg> Shuffle
-                    </button>
-                    <button class="edm-copy-msg-btn" onclick="copyEdmMsg('test')">
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg> Copy
-                    </button>
-                  </div>
-                </div>` : '';
-              return `
-                <div class="edm-step-item${checked?' done':''}" onclick="toggleEdmStep('${step.id}','${phase.id}')">
-                  <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
-                  <div class="edm-step-body">
-                    <div class="edm-step-header">
-                      <span class="edm-step-num">Step ${step.num}</span>
-                      <span class="edm-step-title">${step.title}${badge}</span>
-                    </div>
-                    <div class="edm-step-desc">${step.desc}</div>
-                    ${petroWidget}
-                  </div>
-                </div>`;
-            }).join('')}
-          </div>
-        </div>`;
-    }).join('') +
-    '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:4px">' +
-    '<button class="btn-reset" onclick="resetEdmPhases()" style="margin-top:0">' +
-    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>Reset all phase steps</button>' +
-    '</div></div>';
+  // Flatten all steps with phase reference
+  const allSteps = EDM_PHASES.flatMap(phase => phase.steps.map(s => ({ ...s, phase })));
+  const doneSteps   = allSteps.filter(s =>  state[s.id]);
+  const activeSteps = allSteps.filter(s => !state[s.id]);
+
+  // Default selection: first unchecked step (only if nothing selected yet)
+  if (!edmSelectedStep && activeSteps.length) edmSelectedStep = activeSteps[0].id;
+
+  // ── Done zone ──────────────────────────────────────────────────
+  const doneCount = doneSteps.length;
+  const doneZoneHtml = doneCount ? `
+    <div class="edm-done-zone">
+      <button class="edm-done-toggle" onclick="toggleEdmDoneZone()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--sage)" stroke-width="1.8" style="width:13px;height:13px;flex-shrink:0"><polyline points="2,5 6,9 14,2"/></svg>
+        <span class="edm-done-label">${doneCount} step${doneCount > 1 ? 's' : ''} completed</span>
+        <svg id="edm-done-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:12px;height:12px;margin-left:auto;flex-shrink:0;transition:transform 0.2s;transform:${edmDoneOpen ? 'rotate(180deg)' : ''}"><polyline points="4,6 8,10 12,6"/></svg>
+      </button>
+      <div id="edm-done-list" style="display:${edmDoneOpen ? 'block' : 'none'}">
+        ${doneSteps.map(s => edmStepRow(s, true)).join('')}
+      </div>
+    </div>` : '';
+
+  // ── Active steps grouped by phase ─────────────────────────────
+  let activeHtml = '';
+  let anyActive = false;
+  EDM_PHASES.forEach(phase => {
+    const phaseActive = phase.steps.filter(s => !state[s.id]);
+    if (!phaseActive.length) return;
+    anyActive = true;
+    const total    = phase.steps.length;
+    const done     = phase.steps.filter(s => state[s.id]).length;
+    const complete = done === total;
+    activeHtml += `
+      <div class="edm-phase-group">
+        <div class="edm-phase-group-header${complete ? ' complete' : ''}">
+          <span class="edm-pg-num">Phase ${phase.num}</span>
+          <span class="edm-pg-title">${phase.title}</span>
+          <span class="edm-pg-count${complete ? ' done' : ''}">${complete ? '✓ Done' : done + '/' + total}</span>
+        </div>
+        ${phaseActive.map(s => edmStepRow({ ...s, phase }, false)).join('')}
+      </div>`;
+  });
+
+  if (!anyActive) {
+    activeHtml = `<div class="edm-all-done">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.5" style="width:30px;height:30px"><polyline points="20,6 9,17 4,12"/></svg>
+      All 16 steps complete
+    </div>`;
+  }
+
+  // ── Detail card ────────────────────────────────────────────────
+  el.innerHTML = `
+    <div class="edm-phases-layout">
+      <div class="edm-phases-left">
+        ${doneZoneHtml}
+        <div class="edm-active-steps">${activeHtml}</div>
+        <div style="padding:10px 14px">
+          <button class="btn-reset" onclick="resetEdmPhases()" style="margin-top:0">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
+            Reset all phase steps
+          </button>
+        </div>
+      </div>
+      <div class="edm-phases-right">
+        <div class="edm-detail-card" id="edm-detail-card">
+          ${edmDetailCard()}
+        </div>
+      </div>
+    </div>`;
+}
+
+function edmStepRow(step, isDone) {
+  const selected = step.id === edmSelectedStep;
+  const badge = step.badge === 'critical' ? ' <span class="ci-badge critical">critical</span>'
+              : step.badge === 'warn'     ? ' <span class="ci-badge warn">note</span>' : '';
+  return `
+    <div class="edm-step-row${isDone ? ' done' : ''}${selected ? ' selected' : ''}" id="esr-${step.id}"
+         onclick="selectEdmStep('${step.id}')">
+      <div class="edm-step-row-check" onclick="event.stopPropagation();toggleEdmStep('${step.id}','${step.phase.id}')">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1,6 4.5,10 11,2"/></svg></div>
+      </div>
+      <div class="edm-step-row-body">
+        <span class="edm-step-num">Step ${step.num}</span>
+        <span class="edm-step-row-title">${step.title}</span>${badge}
+      </div>
+    </div>`;
+}
+
+function edmDetailCard() {
+  if (!edmSelectedStep) return `
+    <div class="edm-detail-empty">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2" style="width:36px;height:36px;opacity:0.2"><path d="M6 40V12a2 2 0 012-2h32a2 2 0 012 2v28l-8-4-8 4-8-4-8 4z"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="27" x2="26" y2="27"/></svg>
+      <div class="edm-detail-empty-title">Select a step</div>
+      <div class="edm-detail-empty-sub">Click any step on the left to see its full instructions here.</div>
+    </div>`;
+
+  let foundStep = null, foundPhase = null;
+  for (const phase of EDM_PHASES) {
+    const s = phase.steps.find(s => s.id === edmSelectedStep);
+    if (s) { foundStep = s; foundPhase = phase; break; }
+  }
+  if (!foundStep) return '';
+
+  const badge = foundStep.badge === 'critical' ? ' <span class="ci-badge critical">critical</span>'
+              : foundStep.badge === 'warn'     ? ' <span class="ci-badge warn">note</span>' : '';
+
+  const petroWidget = foundStep.petroMsg ? `
+    <div class="edm-msg-widget">
+      <div class="edm-msg-widget-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:12px;height:12px"><path d="M14 9a6 6 0 01-6 6H2L4 13a5 5 0 01-1-3A6 6 0 018 4h0a6 6 0 016 5z"/></svg>
+        Message to send to Petro in Teams
+      </div>
+      <div class="edm-msg-text" id="edm-petro-msg-text">${fillEdmMsg(EDM_PETRO_TEST_MSGS[edmPetroMsgIdx])}</div>
+      <div class="edm-msg-actions">
+        <span class="edm-msg-counter" id="edm-petro-msg-counter">${edmPetroMsgIdx + 1} of ${EDM_PETRO_TEST_MSGS.length}</span>
+        <button class="edm-shuffle-btn" onclick="shuffleEdmMsg('test')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9l3 4-3 4H2"/><path d="M14 4l-3 4 3 4"/></svg> Shuffle
+        </button>
+        <button class="edm-copy-msg-btn" onclick="copyEdmMsg('test')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg> Copy
+        </button>
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="edm-detail-header">
+      <div class="edm-detail-phase-tag">Phase ${foundPhase.num} — ${foundPhase.title}</div>
+      <div class="edm-detail-title">Step ${foundStep.num}: ${foundStep.title}${badge}</div>
+    </div>
+    <div class="edm-detail-body">
+      <div class="edm-detail-desc">${foundStep.desc}</div>
+      ${petroWidget}
+    </div>`;
+}
+
+function selectEdmStep(stepId) {
+  edmSelectedStep = stepId;
+  // Highlight the row
+  document.querySelectorAll('.edm-step-row').forEach(r => r.classList.remove('selected'));
+  const row = document.getElementById('esr-' + stepId);
+  if (row) row.classList.add('selected');
+  // Update detail panel only
+  const card = document.getElementById('edm-detail-card');
+  if (card) card.innerHTML = edmDetailCard();
 }
 
 function toggleEdmStep(stepId, phaseId) {
@@ -3859,25 +3946,29 @@ function toggleEdmStep(stepId, phaseId) {
   if (state[stepId]) delete state[stepId]; else state[stepId] = true;
   saveEdmSteps(state);
 
-  // Toggle check-item class
-  document.querySelectorAll(`[onclick*="'${stepId}'"]`).forEach(el => el.classList.toggle('done', !!state[stepId]));
+  // If the checked step was selected, advance selection to next unchecked
+  if (state[stepId] && stepId === edmSelectedStep) {
+    const allSteps = EDM_PHASES.flatMap(p => p.steps);
+    const idx  = allSteps.findIndex(s => s.id === stepId);
+    const next = allSteps.slice(idx + 1).find(s => !state[s.id]);
+    edmSelectedStep = next?.id || null;
+  }
 
-  // Update phase card progress
-  const phase = EDM_PHASES.find(p => p.id === phaseId);
-  if (!phase) return;
-  const total = phase.steps.length;
-  const done  = phase.steps.filter(s => state[s.id]).length;
-  const complete = done === total;
-  const card  = document.getElementById('edm-card-' + phaseId);
-  const prog  = document.getElementById('edm-prog-' + phaseId);
-  if (card) card.classList.toggle('phase-complete', complete);
-  if (prog) prog.innerHTML = complete
-    ? '<span class="edm-phase-done">✓ Done</span>'
-    : `<span class="edm-phase-count">${done}/${total}</span>`;
+  renderEdmPhases();
+}
+
+function toggleEdmDoneZone() {
+  edmDoneOpen = !edmDoneOpen;
+  const list    = document.getElementById('edm-done-list');
+  const chevron = document.getElementById('edm-done-chevron');
+  if (list)    list.style.display        = edmDoneOpen ? 'block' : 'none';
+  if (chevron) chevron.style.transform   = edmDoneOpen ? 'rotate(180deg)' : '';
 }
 
 function resetEdmPhases() {
   saveEdmSteps({});
+  edmSelectedStep = null;
+  edmDoneOpen     = false;
   renderEdmPhases();
 }
 

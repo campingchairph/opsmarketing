@@ -4064,122 +4064,245 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 }
 
 /* Phase cards grid */
-.edm-phases-grid {
+/* ── Phases two-column layout ─────────────────────────────────── */
+.edm-phases-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 320px 1fr;
+  gap: 12px;
+  align-items: start;
 }
 
-.edm-phase-card {
-  background: var(--bg-2);
+/* LEFT: scrollable checklist panel */
+.edm-phases-left {
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  background: var(--bg-2);
   overflow: hidden;
-  transition: border-color 0.2s;
-}
-.edm-phase-card.phase-complete {
-  border-color: var(--sage);
-  box-shadow: 0 0 0 1px var(--sage-dim);
+  max-height: 640px;
+  display: flex;
+  flex-direction: column;
 }
 
-.edm-phase-card-header {
+/* Done zone at top of left panel */
+.edm-done-zone {
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.edm-done-toggle {
   display: flex;
   align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  background: var(--sage-dim);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-2);
+  transition: background 0.15s;
+}
+.edm-done-toggle:hover { background: rgba(90,170,80,0.1); }
+.edm-done-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sage);
+  flex: 1;
+}
+#edm-done-list {
+  overflow-y: auto;
+  max-height: 180px;
+}
+#edm-done-list::-webkit-scrollbar { width: 3px; }
+#edm-done-list::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+/* Active steps area */
+.edm-active-steps {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.edm-active-steps::-webkit-scrollbar { width: 3px; }
+.edm-active-steps::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+/* Phase group headers inside left panel */
+.edm-phase-group { border-bottom: 1px solid var(--border); }
+.edm-phase-group:last-child { border-bottom: none; }
+.edm-phase-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--bg-3);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.edm-pg-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.edm-pg-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  flex: 1;
+}
+.edm-pg-count {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-3);
+  background: var(--bg-4);
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.edm-pg-count.done {
+  color: var(--sage);
+  background: var(--sage-dim);
+}
+
+/* Individual step rows */
+.edm-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.edm-step-row:last-child { border-bottom: none; }
+.edm-step-row:hover { background: var(--bg-3); }
+.edm-step-row.selected { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.edm-step-row.done { opacity: 0.5; }
+.edm-step-row.done .edm-step-row-title { text-decoration: line-through; color: var(--text-3); }
+.edm-step-row.selected .edm-step-num { color: var(--accent); }
+
+.edm-step-row-check {
+  padding: 10px 10px 10px 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.edm-step-row.selected .edm-step-row-check { padding-left: 9px; }
+.edm-step-row-body {
+  flex: 1;
+  padding: 10px 12px 10px 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+}
+.edm-step-row-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-1);
+  line-height: 1.3;
+}
+
+/* Step num badge */
+.edm-step-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-3);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+/* All-done state */
+.edm-all-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 32px 20px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sage);
+}
+
+/* RIGHT: detail card */
+.edm-phases-right {
+  position: sticky;
+  top: 16px;
+}
+.edm-detail-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  overflow: hidden;
+  min-height: 200px;
+}
+.edm-detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.edm-detail-empty-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.edm-detail-empty-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.55;
+  max-width: 240px;
+}
+.edm-detail-header {
+  padding: 14px 18px;
   background: var(--bg-3);
   border-bottom: 1px solid var(--border);
 }
-.edm-phase-card.phase-complete .edm-phase-card-header {
-  background: var(--sage-dim);
-  border-bottom-color: var(--sage);
-}
-.edm-phase-card-num {
+.edm-detail-phase-tag {
   font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
-  flex-shrink: 0;
+  margin-bottom: 5px;
 }
-.edm-phase-card.phase-complete .edm-phase-card-num { color: var(--sage); }
-.edm-phase-card-title {
+.edm-detail-title {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-1);
-  flex: 1;
+  line-height: 1.3;
 }
-.edm-phase-card-prog {
-  flex-shrink: 0;
+.edm-detail-body {
+  padding: 16px 18px;
+  max-height: 540px;
+  overflow-y: auto;
 }
-.edm-phase-count {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-3);
-  background: var(--bg-4);
-  padding: 2px 7px;
-  border-radius: 20px;
-}
-.edm-phase-done {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--sage);
-  background: var(--sage-dim);
-  padding: 2px 8px;
-  border-radius: 20px;
-}
-
-.edm-phase-card-body {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Step items inside phase cards */
-.edm-step-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.edm-step-item:last-child { border-bottom: none; }
-.edm-step-item:hover { background: var(--bg-3); }
-.edm-step-item.done { opacity: 0.55; }
-.edm-step-item.done .edm-step-title { text-decoration: line-through; color: var(--text-3); }
-.edm-step-item .check-box { margin-top: 2px; flex-shrink: 0; }
-
-.edm-step-body { flex: 1; min-width: 0; }
-.edm-step-header {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-.edm-step-num {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  flex-shrink: 0;
-}
-.edm-phase-card.phase-complete .edm-step-num { color: var(--sage); }
-.edm-step-title {
+.edm-detail-body::-webkit-scrollbar { width: 3px; }
+.edm-detail-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+.edm-detail-desc {
   font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-1);
-  line-height: 1.35;
+  color: var(--text-2);
+  line-height: 1.65;
 }
-.edm-step-desc {
-  font-size: 11.5px;
-  color: var(--text-3);
-  line-height: 1.55;
+
+/* Responsive */
+@media (max-width: 900px) {
+  .edm-phases-layout { grid-template-columns: 1fr; }
+  .edm-phases-right  { position: static; }
 }
 
 /* Floating EDM Notes widget */
@@ -4258,7 +4381,6 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 .edm-fn-clear:hover { color: var(--rust); border-color: var(--rust); }
 
 @media (max-width: 1100px) {
-  .edm-phases-grid { grid-template-columns: 1fr; }
   .edm-ref-body-grid { grid-template-columns: 1fr; }
   .edm-ref-body-grid .edm-ref-group { border-right: none; border-bottom: 1px solid var(--border); }
 }
