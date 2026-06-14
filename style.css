@@ -541,9 +541,11 @@ body {
   transition: all 0.15s;
 }
 .check-item.done .check-box,
-.edm-step-item.done .check-box { background: var(--sage); border-color: var(--sage); }
+.edm-step-item.done .check-box,
+.edm-step-row.done .check-box { background: var(--sage); border-color: var(--sage); }
 .check-item.done .check-box svg,
-.edm-step-item.done .check-box svg { display: block; }
+.edm-step-item.done .check-box svg,
+.edm-step-row.done .check-box svg { display: block; }
 .check-box svg { display: none; width: 10px; height: 10px; stroke: var(--bg); stroke-width: 3; fill: none; }
 
 .ci-label { font-size: 13px; color: var(--text-1); line-height: 1.45; }
@@ -892,7 +894,7 @@ body {
 .entry-cat.crm      { background: var(--accent-dim); color: var(--accent); }
 .entry-cat.other    { background: var(--bg-4); color: var(--text-3); }
 .entry-body { flex: 1; min-width: 0; }
-.entry-title { font-size: 13px; font-weight: 600; color: var(--text-1); line-height: 1.3; }
+.entry-title { font-size: 13px; font-weight: 600; color: var(--text-1); line-height: 1.3; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
 .entry-meta  { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-top: 2px; }
 .entry-notes { font-size: 11px; color: var(--text-2); margin-top: 3px; line-height: 1.4; }
 .entry-actions { display: flex; gap: 4px; flex-shrink: 0; }
