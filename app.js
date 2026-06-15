@@ -5139,10 +5139,13 @@ function buildEdmReportHtml(d) {
           ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
           : e.click_map_captured
           ? `<div class="edr-report-img-col"><img src="${e.click_map_captured}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
-          : _edmCapturing.has(e.id)
-          ? `<div class="edr-report-img-col edr-report-img-capturing"><div class="edr-capture-spinner"></div><span>Capturing preview…</span></div>`
           : e.click_map_html
-          ? `<div class="edr-report-img-col edr-report-img-capturing"><span style="font-size:10px;color:var(--text-3)">Capture failed — use Open Full Preview to screenshot and upload</span></div>`
+          ? `<div class="edr-report-img-col">
+              <div class="edr-report-iframe-wrapper">
+                <iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.52,600/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(e){}})(this)"></iframe>
+              </div>
+              ${_edmCapturing.has(e.id) ? `<div class="edr-capture-badge"><div class="edr-capture-spinner-sm"></div> Capturing for print…</div>` : ''}
+             </div>`
           : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map provided</span></div>`}
         <div class="edr-report-stats-col">
           <div class="edr-stats-group" style="--sg-color:#E4572E">
