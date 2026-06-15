@@ -4972,8 +4972,8 @@ function applyEdmParse(entryId) {
   showAiToast('✓ Parsed — ' + Object.keys(parsed).length + ' fields extracted');
 }
 
-function edrStat(val, label, accent) {
-  return `<div class="edr-stat${accent ? ' edr-stat-accent' : ''}">
+function edrStat(val, label) {
+  return `<div class="edr-stat">
     <div class="edr-stat-val">${val}</div>
     <hr class="edr-stat-sep"/>
     <div class="edr-stat-lbl">${label}</div>
@@ -5011,42 +5011,50 @@ function buildEdmReportHtml(d) {
           ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click map" class="edr-report-img"/></div>`
           : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map</span></div>`}
         <div class="edr-report-stats-col">
-          <div class="edr-stats-group">
+          <div class="edr-stats-group" style="--sg-color:#E4572E">
             <div class="edr-stats-group-label">Key Metrics</div>
             <div class="edr-stats-grid">
-              ${edrStat(edrPct(e.html_open_rate),       'HTML Open Rate',     true)}
-              ${edrStat(edrPct(e.unique_ctr),            'Unique CTR',         true)}
-              ${edrStat(edrPct(e.click_to_open_ratio),   'Click-to-Open',      true)}
+              ${edrStat(edrPct(e.html_open_rate),      'HTML Open Rate')}
+              ${edrStat(edrPct(e.unique_ctr),           'Unique CTR')}
+              ${edrStat(edrPct(e.click_to_open_ratio),  'Click-to-Open')}
             </div>
           </div>
-          <div class="edr-stats-group">
+          <div class="edr-stats-group" style="--sg-color:#191919">
             <div class="edr-stats-group-label">Volume</div>
             <div class="edr-stats-grid">
-              ${edrStat(edrNum(e.total_delivered),  'Delivered',     false)}
-              ${edrStat(edrNum(e.unique_html_opens || ''), 'Unique Opens', false)}
-              ${edrStat(edrNum(e.unique_clicks),    'Unique Clicks', false)}
-              ${edrStat(edrPct(e.total_ctr),        'Total CTR',     false)}
-              ${edrStat(edrNum(e.total_clicks),     'Total Clicks',  false)}
-              ${e.read_rate  ? edrStat(edrPct(e.read_rate),  'Read Rate',  false) : ''}
-              ${e.skim_rate  ? edrStat(edrPct(e.skim_rate),  'Skim Rate',  false) : ''}
+              ${edrStat(edrNum(e.total_delivered),           'Delivered')}
+              ${edrStat(edrNum(e.unique_html_opens || ''),   'Unique Opens')}
+              ${edrStat(edrNum(e.unique_clicks),             'Unique Clicks')}
+              ${edrStat(edrPct(e.total_ctr),                 'Total CTR')}
+              ${edrStat(edrNum(e.total_clicks),              'Total Clicks')}
             </div>
           </div>
-          <div class="edr-stats-group">
+          ${e.read_rate || e.skim_rate ? `<div class="edr-stats-group" style="--sg-color:#404040">
+            <div class="edr-stats-group-label">Interaction</div>
+            <div class="edr-stats-grid">
+              ${e.read_rate ? edrStat(edrPct(e.read_rate), 'Read Rate') : ''}
+              ${e.skim_rate ? edrStat(edrPct(e.skim_rate), 'Skim Rate') : ''}
+            </div>
+          </div>` : ''}
+          <div class="edr-stats-group" style="--sg-color:#292929">
             <div class="edr-stats-group-label">Opt-outs &amp; Spam</div>
             <div class="edr-stats-grid">
-              ${edrStat(edrNum(e.total_opt_outs), 'Opt-outs',      false)}
-              ${edrStat(edrPct(e.opt_out_rate),   'Opt-out Rate',  false)}
-              ${edrStat(edrNum(e.total_spam),     'Spam',          false)}
-              ${edrStat(edrPct(e.spam_rate),      'Spam Rate',     false)}
+              ${edrStat(edrNum(e.total_opt_outs), 'Opt-outs')}
+              ${edrStat(edrPct(e.opt_out_rate),   'Opt-out Rate')}
+              ${edrStat(edrNum(e.total_spam),     'Spam')}
+              ${edrStat(edrPct(e.spam_rate),      'Spam Rate')}
             </div>
           </div>
-          ${e.delivery_rate || e.total_sent ? `<div class="edr-stats-group">
+          ${e.delivery_rate || e.total_sent ? `<div class="edr-stats-group" style="--sg-color:#8c8a85">
             <div class="edr-stats-group-label">Delivery</div>
             <div class="edr-stats-grid">
-              ${e.delivery_rate ? edrStat(edrPct(e.delivery_rate), 'Delivery Rate', false) : ''}
-              ${e.total_sent    ? edrStat(edrNum(e.total_sent),    'Total Sent',    false) : ''}
-              ${e.total_bounced ? edrStat(escapeHtml(e.total_bounced), 'Bounced', false) : ''}
+              ${e.delivery_rate ? edrStat(edrPct(e.delivery_rate), 'Delivery Rate') : ''}
+              ${e.total_sent    ? edrStat(edrNum(e.total_sent),    'Total Sent') : ''}
             </div>
+            ${e.total_bounced ? `<div class="edr-delivery-bounced">
+              <div class="edr-bounced-lbl">Bounced</div>
+              <div class="edr-bounced-val">${escapeHtml(e.total_bounced)}</div>
+            </div>` : ''}
           </div>` : ''}
         </div>
       </div>
@@ -5056,11 +5064,11 @@ function buildEdmReportHtml(d) {
   const mo = computeEdmMonthlyAverages(d.entries);
   if (mo.avg_html_open_rate || mo.avg_unique_ctr || mo.avg_click_to_open) {
     html += `<div class="edr-report-monthly">
-      <div class="edr-report-monthly-label">Monthly Averages</div>
-      <div class="edr-stats-grid edr-stats-monthly">
-        ${mo.avg_html_open_rate ? edrStat(edrPct(mo.avg_html_open_rate), 'Avg HTML Open Rate', true) : ''}
-        ${mo.avg_unique_ctr     ? edrStat(edrPct(mo.avg_unique_ctr),     'Avg Unique CTR',     true) : ''}
-        ${mo.avg_click_to_open  ? edrStat(edrPct(mo.avg_click_to_open),  'Avg Click-to-Open',  true) : ''}
+      <div class="edr-report-monthly-label">Monthly Averages${monthLabel ? ' — ' + monthLabel : ''}</div>
+      <div class="edr-stats-grid edr-stats-monthly" style="--sg-color:#E4572E">
+        ${mo.avg_html_open_rate ? edrStat(edrPct(mo.avg_html_open_rate), 'Avg HTML Open Rate') : ''}
+        ${mo.avg_unique_ctr     ? edrStat(edrPct(mo.avg_unique_ctr),     'Avg Unique CTR') : ''}
+        ${mo.avg_click_to_open  ? edrStat(edrPct(mo.avg_click_to_open),  'Avg Click-to-Open') : ''}
       </div>
     </div>`;
   }

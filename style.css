@@ -5014,15 +5014,24 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 }
 
 /* Generated report document */
-.edr-report-doc { padding: 14px; }
+.edr-report-doc {
+  padding: 32px 36px;
+  background: #fff;
+  color: #191919;
+  --text-1: #191919;
+  --text-2: #555;
+  --text-3: #8c8a85;
+  --border: #e8e8e4;
+}
 .edr-report-doc-title {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--text-1);
+  color: #191919;
   margin-bottom: 14px;
-  padding-bottom: 10px;
+  padding-bottom: 7px;
   border-bottom: 2px solid var(--accent);
+  letter-spacing: -0.01em;
 }
 
 /* Report entry block — A4-friendly */
@@ -5057,9 +5066,10 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   padding-top: 2px;
 }
 .edr-report-block-name {
+  font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
-  color: var(--text-1);
+  color: #191919;
   line-height: 1.3;
 }
 .edr-report-block-subject {
@@ -5114,69 +5124,84 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 }
 
 /* Stat groups */
-.edr-stats-group { display: flex; flex-direction: column; gap: 6px; }
+.edr-stats-group { display: flex; flex-direction: column; gap: 8px; --sg-color: #191919; }
 .edr-stats-group-label {
-  font-size: 9px;
+  font-family: var(--font-body);
+  font-size: 8px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-3);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 3px;
+  letter-spacing: 0.1em;
+  color: var(--sg-color);
+  border-bottom: 1px solid var(--sg-color);
+  padding-bottom: 4px;
+  opacity: 0.9;
 }
 .edr-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px 12px;
-}
-.edr-stats-monthly {
-  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 14px;
 }
 
 /* Individual stat: big number, separator, label */
 .edr-stat { display: flex; flex-direction: column; }
 .edr-stat-val {
-  font-family: var(--font-mono);
-  font-size: 20px;
+  font-family: var(--font-body);
+  font-size: 22px;
   font-weight: 700;
-  color: var(--text-1);
+  color: var(--sg-color);
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
-.edr-stat-accent .edr-stat-val { color: var(--accent); }
 .edr-stat-sep {
   border: none;
-  border-top: 1px solid var(--border);
-  margin: 4px 0 3px;
+  border-top: 1.5px solid var(--sg-color);
+  opacity: 0.2;
+  width: 24px;
+  margin: 5px 0 3px;
 }
-.edr-stat-accent .edr-stat-sep { border-color: var(--accent); opacity: 0.35; }
 .edr-stat-lbl {
-  font-size: 9px;
-  color: var(--text-3);
+  font-family: var(--font-body);
+  font-size: 8.5px;
+  color: #8c8a85;
+  line-height: 1.3;
+}
+
+/* Bounced row below delivery grid */
+.edr-delivery-bounced {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #ececec;
+}
+.edr-bounced-lbl {
+  font-family: var(--font-body);
+  font-size: 8px;
+  color: #8c8a85;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.2;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+.edr-bounced-val {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: #8c8a85;
 }
 
 /* Monthly summary in report */
 .edr-report-monthly {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(120,104,184,0.3);
-  border-radius: var(--radius);
-  background: rgba(120,104,184,0.06);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #ececec;
 }
 .edr-report-monthly-label {
-  font-size: 9px;
+  font-family: var(--font-body);
+  font-size: 8px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--lavender);
-  margin-bottom: 8px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 10px;
 }
-.edr-report-monthly .edr-stat-val { font-size: 22px; }
-.edr-report-monthly .edr-stat-accent .edr-stat-val { color: var(--lavender); }
-.edr-report-monthly .edr-stat-accent .edr-stat-sep { border-color: var(--lavender); }
 
 /* Responsive */
 @media (max-width: 960px) {
@@ -5191,7 +5216,7 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   .sidebar, .topbar, .edr-left, .edr-page-header, .edr-preview-header { display: none !important; }
   .edr-right  { position: static; }
   #edr-report-preview { border: none; max-height: none; overflow: visible; }
-  .edr-report-doc { padding: 0; }
+  .edr-report-doc { padding: 0.5in; }
   .edr-report-block { page-break-inside: avoid; break-inside: avoid; }
   .edr-stat-val { font-size: 18px; }
 }
