@@ -272,6 +272,7 @@ function navigate(pageId) {
   if (pageId === 'intake')      { renderIntakeSaved(); }
   if (pageId === 'salesforce')  { setEdmSidebarVisible(true);  renderEdmCampaignCard(); renderEdmPhases(); renderEdmQA(); }
   else                          { setEdmSidebarVisible(false); }
+  if (pageId === 'edmreport')   { renderEdmReportPage(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
   if (pageId === 'goodlooks')   { renderGoodLooks(); }
@@ -4776,3 +4777,350 @@ document.addEventListener('DOMContentLoaded', () => {
 
   navigate('daily');
 });
+
+// ── EDM REPORTING ────────────────────────────────────────────────
+const EDM_REPORT_KEY = 'msc_edm_report_v1';
+
+function loadEdmReportData() {
+  try {
+    const d = JSON.parse(localStorage.getItem(EDM_REPORT_KEY));
+    if (d && d.entries) return d;
+  } catch {}
+  return { month: new Date().toISOString().slice(0, 7), entries: [], monthly: { avg_html_open_rate: '', avg_unique_ctr: '', avg_click_to_open: '' } };
+}
+
+function saveEdmReportData(d) {
+  localStorage.setItem(EDM_REPORT_KEY, JSON.stringify(d));
+}
+
+function addEdmReportEntry() {
+  const d = loadEdmReportData();
+  d.entries.push({
+    id: 'edr_' + Date.now(),
+    email_name: '', subject: '', started_at: '',
+    html_open_rate: '', click_to_open_ratio: '',
+    total_delivered: '', total_clicks: '', total_ctr: '',
+    unique_clicks: '', unique_ctr: '',
+    total_opt_outs: '', opt_out_rate: '',
+    total_spam: '', spam_rate: '',
+    read_rate: '', skim_rate: '',
+    click_map_image: null, open: true,
+  });
+  saveEdmReportData(d);
+  renderEdmReportEntries();
+  updateEdmReportPreview();
+}
+
+function deleteEdmReportEntry(id) {
+  const d = loadEdmReportData();
+  d.entries = d.entries.filter(e => e.id !== id);
+  saveEdmReportData(d);
+  renderEdmReportEntries();
+  updateEdmReportPreview();
+}
+
+function toggleEdmReportEntry(id) {
+  const d = loadEdmReportData();
+  const e = d.entries.find(e => e.id === id);
+  if (e) { e.open = !e.open; saveEdmReportData(d); }
+  const card = document.getElementById('edr-card-' + id);
+  if (card) card.classList.toggle('open', !!e?.open);
+}
+
+function saveEdmReportField(id, field, value) {
+  const pctFields = ['html_open_rate','click_to_open_ratio','total_ctr','unique_ctr','opt_out_rate','spam_rate','read_rate','skim_rate','avg_html_open_rate','avg_unique_ctr','avg_click_to_open'];
+  if (pctFields.includes(field)) value = value.replace(/%/g, '').trim();
+  const d = loadEdmReportData();
+  if (id === 'monthly') {
+    d.monthly[field] = value;
+  } else {
+    const e = d.entries.find(e => e.id === id);
+    if (e) e[field] = value;
+  }
+  saveEdmReportData(d);
+  updateEdmReportPreview();
+}
+
+function saveEdmReportMonth(value) {
+  const d = loadEdmReportData();
+  d.month = value;
+  saveEdmReportData(d);
+  updateEdmReportPreview();
+}
+
+function clearEdmReport() {
+  if (!confirm('Clear all eDM report data for this month?')) return;
+  saveEdmReportData({ month: new Date().toISOString().slice(0, 7), entries: [], monthly: { avg_html_open_rate: '', avg_unique_ctr: '', avg_click_to_open: '' } });
+  renderEdmReportPage();
+}
+
+function handleEdmClickMap(id, file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const d = loadEdmReportData();
+    const entry = d.entries.find(e => e.id === id);
+    if (entry) {
+      entry.click_map_image = ev.target.result;
+      saveEdmReportData(d);
+    }
+    const zone = document.getElementById('edr-clickmap-zone-' + id);
+    if (zone) {
+      zone.innerHTML = `<img src="${ev.target.result}" alt="Click map" class="edr-clickmap-preview"/>
+        <button class="edr-remove-img-btn" onclick="event.stopPropagation();removeEdmClickMap('${id}')">Remove</button>`;
+    }
+    updateEdmReportPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeEdmClickMap(id) {
+  const d = loadEdmReportData();
+  const e = d.entries.find(e => e.id === id);
+  if (e) { e.click_map_image = null; saveEdmReportData(d); }
+  const zone = document.getElementById('edr-clickmap-zone-' + id);
+  if (zone) zone.innerHTML = edrClickMapPrompt(id);
+  updateEdmReportPreview();
+}
+
+function edrClickMapPrompt(id) {
+  return `<input type="file" id="edr-file-${id}" accept=".png,.jpg,.jpeg,.webp" style="display:none"
+    onchange="handleEdmClickMap('${id}',this.files[0])"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;opacity:0.35"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+  <span class="edr-upload-text">Upload click map screenshot</span>
+  <span class="edr-upload-hint">.png · .jpg · .webp</span>`;
+}
+
+function edrPct(v) { return (v === '' || v == null) ? '—' : v + '%'; }
+function edrNum(v) { return (v === '' || v == null) ? '—' : Number(v).toLocaleString(); }
+function edrDate(v) {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (!isNaN(d.getTime())) return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  return v;
+}
+
+function buildEdmReportHtml(d) {
+  if (!d.entries.length && !d.monthly.avg_html_open_rate) {
+    return `<div class="edr-preview-empty">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2" style="width:38px;height:38px;opacity:0.18"><path d="M6 40V12a2 2 0 012-2h32a2 2 0 012 2v28l-8-4-8 4-8-4-8 4z"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="27" x2="26" y2="27"/></svg>
+      <div style="font-size:12.5px;color:var(--text-3);margin-top:10px;line-height:1.5">Add an eDM entry and fill in the fields —<br>the report generates here automatically.</div>
+    </div>`;
+  }
+  const monthLabel = d.month ? new Date(d.month + '-02').toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }) : '';
+  let html = `<div class="edr-report-doc">
+    <div class="edr-report-doc-title">eDM Performance Report${monthLabel ? ' · ' + monthLabel : ''}</div>`;
+
+  d.entries.forEach((e, i) => {
+    const name = e.email_name || `Email ${i + 1}`;
+    html += `<div class="edr-report-block">
+      <div class="edr-report-block-header">
+        <span class="edr-report-block-num">${String(i + 1).padStart(2, '0')}</span>
+        <div>
+          <div class="edr-report-block-name">${escapeHtml(name)}</div>
+          ${e.subject ? `<div class="edr-report-block-subject">${escapeHtml(e.subject)}</div>` : ''}
+          ${e.started_at ? `<div class="edr-report-block-date">Sent ${edrDate(e.started_at)}</div>` : ''}
+        </div>
+      </div>
+      <div class="edr-report-metric-row">
+        <div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(e.html_open_rate)}</div><div class="edr-rmetric-lbl">Open Rate</div></div>
+        <div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(e.unique_ctr)}</div><div class="edr-rmetric-lbl">Unique CTR</div></div>
+        <div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(e.click_to_open_ratio)}</div><div class="edr-rmetric-lbl">Click-to-Open</div></div>
+        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrNum(e.total_delivered)}</div><div class="edr-rmetric-lbl">Delivered</div></div>
+        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrPct(e.total_ctr)}</div><div class="edr-rmetric-lbl">Total CTR</div></div>
+        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrNum(e.unique_clicks)}</div><div class="edr-rmetric-lbl">Unique Clicks</div></div>
+        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrNum(e.total_clicks)}</div><div class="edr-rmetric-lbl">Total Clicks</div></div>
+        ${e.read_rate ? `<div class="edr-rmetric"><div class="edr-rmetric-val">${edrPct(e.read_rate)}</div><div class="edr-rmetric-lbl">Read Rate</div></div>` : ''}
+        ${e.skim_rate ? `<div class="edr-rmetric"><div class="edr-rmetric-val">${edrPct(e.skim_rate)}</div><div class="edr-rmetric-lbl">Skim Rate</div></div>` : ''}
+        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrNum(e.total_opt_outs)}</div><div class="edr-rmetric-lbl">Opt-outs</div></div>
+        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrPct(e.opt_out_rate)}</div><div class="edr-rmetric-lbl">Opt-out Rate</div></div>
+        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrNum(e.total_spam)}</div><div class="edr-rmetric-lbl">Spam</div></div>
+        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrPct(e.spam_rate)}</div><div class="edr-rmetric-lbl">Spam Rate</div></div>
+      </div>
+      ${e.click_map_image ? `<div class="edr-report-clickmap">
+        <div class="edr-report-clickmap-label">Click Map</div>
+        <img src="${e.click_map_image}" alt="Click map" class="edr-report-clickmap-img"/>
+      </div>` : ''}
+    </div>`;
+  });
+
+  const mo = d.monthly;
+  if (mo.avg_html_open_rate || mo.avg_unique_ctr || mo.avg_click_to_open) {
+    html += `<div class="edr-report-monthly">
+      <div class="edr-report-monthly-label">Monthly Averages</div>
+      <div class="edr-report-metric-row">
+        ${mo.avg_html_open_rate ? `<div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(mo.avg_html_open_rate)}</div><div class="edr-rmetric-lbl">Avg Open Rate</div></div>` : ''}
+        ${mo.avg_unique_ctr ? `<div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(mo.avg_unique_ctr)}</div><div class="edr-rmetric-lbl">Avg Unique CTR</div></div>` : ''}
+        ${mo.avg_click_to_open ? `<div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(mo.avg_click_to_open)}</div><div class="edr-rmetric-lbl">Avg Click-to-Open</div></div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateEdmReportPreview() {
+  const el = document.getElementById('edr-report-preview');
+  if (!el) return;
+  el.innerHTML = buildEdmReportHtml(loadEdmReportData());
+}
+
+function renderEdmReportEntries() {
+  const el = document.getElementById('edr-entries-list');
+  if (!el) return;
+  const d = loadEdmReportData();
+  if (!d.entries.length) {
+    el.innerHTML = `<div class="edr-empty-state">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2" style="width:34px;height:34px;opacity:0.2"><path d="M6 40V12a2 2 0 012-2h32a2 2 0 012 2v28l-8-4-8 4-8-4-8 4z"/></svg>
+      <div>No eDM entries yet — click <strong>+ Add eDM</strong> to get started</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = d.entries.map((e, i) => renderEdmEntryCard(e, i)).join('');
+  // Restore uploaded images
+  d.entries.forEach(e => {
+    if (e.click_map_image) {
+      const zone = document.getElementById('edr-clickmap-zone-' + e.id);
+      if (zone) zone.innerHTML = `<img src="${e.click_map_image}" alt="Click map" class="edr-clickmap-preview"/>
+        <button class="edr-remove-img-btn" onclick="event.stopPropagation();removeEdmClickMap('${e.id}')">Remove</button>`;
+    }
+  });
+}
+
+function renderEdmEntryCard(e, i) {
+  const name = escapeHtml(e.email_name) || `New eDM ${i + 1}`;
+  const fld = (id, label, field, placeholder, type = 'text', hint = '') =>
+    `<div class="edr-field">
+      <label class="edr-field-label">${label}${hint ? `<span class="edr-pct-hint">${hint}</span>` : ''}</label>
+      <input class="form-input" type="${type}" value="${field ? escapeHtml(String(field)) : ''}" placeholder="${placeholder}"
+        oninput="saveEdmReportField('${e.id}','${id}',this.value)"/>
+    </div>`;
+
+  return `<div class="edr-entry-card${e.open ? ' open' : ''}" id="edr-card-${e.id}">
+    <div class="edr-entry-header" onclick="toggleEdmReportEntry('${e.id}')">
+      <span class="edr-entry-num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="edr-entry-name" id="edr-name-${e.id}">${name}</span>
+      <button class="edr-entry-del" onclick="event.stopPropagation();deleteEdmReportEntry('${e.id}')" title="Remove">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+      </button>
+      <svg class="edr-entry-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4,6 8,10 12,6"/></svg>
+    </div>
+    <div class="edr-entry-body">
+
+      <div class="edr-subsection-label">Identification</div>
+      <div class="edr-field-grid">
+        <div class="edr-field edr-field-wide">
+          <label class="edr-field-label">Email Name <span class="edr-source">Salesforce email entry name</span></label>
+          <input class="form-input" type="text" value="${escapeHtml(e.email_name)}" placeholder="e.g. 260610_SMSF"
+            oninput="saveEdmReportField('${e.id}','email_name',this.value);const nl=document.getElementById('edr-name-${e.id}');if(nl)nl.textContent=this.value||'New eDM ${i + 1}'"/>
+        </div>
+        <div class="edr-field edr-field-wide">
+          <label class="edr-field-label">Subject Line <span class="edr-source">Report tab</span></label>
+          <input class="form-input" type="text" value="${escapeHtml(e.subject)}" placeholder="Exact subject line"
+            oninput="saveEdmReportField('${e.id}','subject',this.value)"/>
+        </div>
+        <div class="edr-field">
+          <label class="edr-field-label">Started At <span class="edr-source">Report tab</span></label>
+          <input class="form-input" type="text" value="${escapeHtml(e.started_at)}" placeholder="e.g. 10 Jun 2026"
+            oninput="saveEdmReportField('${e.id}','started_at',this.value)"/>
+        </div>
+      </div>
+
+      <div class="edr-subsection-label">Report Tab — Salesforce</div>
+      <div class="edr-field-grid">
+        ${fld('total_delivered',  'Total Delivered',        e.total_delivered,     '2415',  'number')}
+        ${fld('html_open_rate',   'HTML Open Rate',         e.html_open_rate,      '42.0',  'text',   '%')}
+        ${fld('total_clicks',     'Total Clicks',           e.total_clicks,        '180',   'number')}
+        ${fld('total_ctr',        'Total CTR',              e.total_ctr,           '7.45',  'text',   '%')}
+        ${fld('unique_clicks',    'Unique Clicks',          e.unique_clicks,       '140',   'number')}
+        ${fld('unique_ctr',       'Unique CTR',             e.unique_ctr,          '5.80',  'text',   '%')}
+        ${fld('click_to_open_ratio', 'Click-to-Open Ratio', e.click_to_open_ratio, '13.84', 'text',  '%')}
+        ${fld('total_opt_outs',   'Total Opt-outs',         e.total_opt_outs,      '3',     'number')}
+        ${fld('opt_out_rate',     'Opt-out Rate',           e.opt_out_rate,        '0.12',  'text',   '%')}
+        ${fld('total_spam',       'Total Spam Complaints',  e.total_spam,          '0',     'number')}
+        ${fld('spam_rate',        'Spam Complaint Rate',    e.spam_rate,           '0.00',  'text',   '%')}
+      </div>
+
+      <div class="edr-subsection-label">Interaction Tab — Salesforce</div>
+      <div class="edr-field-grid">
+        ${fld('read_rate',  'Read Rate',  e.read_rate,  '38.5', 'text', '%')}
+        ${fld('skim_rate',  'Skim Rate',  e.skim_rate,  '15.2', 'text', '%')}
+      </div>
+
+      <div class="edr-subsection-label">Click-Through Rate Report Tab — Screenshot</div>
+      <div class="edr-clickmap-zone" id="edr-clickmap-zone-${e.id}"
+           onclick="document.getElementById('edr-file-${e.id}')?.click()">
+        ${edrClickMapPrompt(e.id)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderEdmReportPage() {
+  const root = document.getElementById('edr-root');
+  if (!root) return;
+  const d = loadEdmReportData();
+
+  root.innerHTML = `
+    <div class="edr-page-header">
+      <div class="edr-page-title">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:18px;height:18px;flex-shrink:0"><rect x="2" y="2" width="12" height="12" rx="1"/><polyline points="5,6 8,9 11,5"/><line x1="5" y1="11" x2="11" y2="11"/></svg>
+        eDM Reporting
+      </div>
+      <div class="edr-page-controls">
+        <label class="edr-month-label" for="edr-month">Month</label>
+        <input type="month" id="edr-month" class="edr-month-input" value="${d.month}"
+          onchange="saveEdmReportMonth(this.value)"/>
+        <button class="btn-add" onclick="addEdmReportEntry()">+ Add eDM</button>
+        <button class="edr-clear-btn" onclick="clearEdmReport()">Clear</button>
+      </div>
+    </div>
+
+    <div class="edr-layout">
+      <div class="edr-left">
+        <div id="edr-entries-list"></div>
+
+        <div class="section-block edr-monthly-block">
+          <div class="section-block-header">
+            <div class="sh-icon" style="background:rgba(120,104,184,0.14);color:var(--lavender)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,12 6,7 9,10 13,4"/><circle cx="13" cy="4" r="1.5" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <span class="sh-title">Monthly Aggregate</span>
+            <span class="edr-monthly-hint">Average across all eDMs — enter manually</span>
+          </div>
+          <div class="edr-field-grid edr-monthly-grid">
+            <div class="edr-field">
+              <label class="edr-field-label">Avg HTML Open Rate <span class="edr-pct-hint">%</span></label>
+              <input class="form-input" value="${escapeHtml(d.monthly.avg_html_open_rate)}" placeholder="e.g. 38.5"
+                oninput="saveEdmReportField('monthly','avg_html_open_rate',this.value)"/>
+            </div>
+            <div class="edr-field">
+              <label class="edr-field-label">Avg Unique CTR <span class="edr-pct-hint">%</span></label>
+              <input class="form-input" value="${escapeHtml(d.monthly.avg_unique_ctr)}" placeholder="e.g. 5.20"
+                oninput="saveEdmReportField('monthly','avg_unique_ctr',this.value)"/>
+            </div>
+            <div class="edr-field">
+              <label class="edr-field-label">Avg Click-to-Open <span class="edr-pct-hint">%</span></label>
+              <input class="form-input" value="${escapeHtml(d.monthly.avg_click_to_open)}" placeholder="e.g. 13.5"
+                oninput="saveEdmReportField('monthly','avg_click_to_open',this.value)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="edr-right">
+        <div class="edr-preview-header">
+          <span class="edr-preview-title">Generated Report</span>
+          <button class="edr-print-btn" onclick="window.print()" title="Print report">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><path d="M4 6V2h8v4M4 11H2V7h12v4h-2M4 11v3h8v-3H4z"/></svg>
+            Print
+          </button>
+        </div>
+        <div id="edr-report-preview"></div>
+      </div>
+    </div>`;
+
+  renderEdmReportEntries();
+  updateEdmReportPreview();
+}
