@@ -5282,8 +5282,11 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   .edr-report-body { align-items: start; grid-template-columns: 42% 1fr; gap: 18px; }
   .edr-report-img-col { max-height: 8.5in; overflow: hidden; }
   .edr-report-img { max-height: 8.5in; width: 100%; object-fit: contain; object-position: top center; }
-  .edr-report-iframe-wrapper { max-height: 8.5in; border: none; }
-  .edr-report-iframe { zoom: 0.42; }
+  .edr-report-iframe-wrapper { max-height: 8.5in; border: none; overflow: hidden; }
+  .edr-report-iframe { display: none !important; }
+  .edr-print-clone { display: block; zoom: 0.42; width: 700px; pointer-events: none; }
   .edr-stats-group { margin-bottom: 10px; }
   .edr-stat-val { font-size: 24px; }
 }
+
+.edr-print-clone { display: none; }
