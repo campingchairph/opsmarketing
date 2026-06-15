@@ -4841,7 +4841,7 @@ function addEdmReportEntry() {
     total_opt_outs: '', opt_out_rate: '',
     total_spam: '', spam_rate: '',
     read_rate: '', skim_rate: '',
-    click_map_image: null, open: true,
+    click_map_image: null, click_map_html: null, click_map_tab: 'image', open: true,
   });
   saveEdmReportData(d);
   renderEdmReportEntries();
@@ -4914,6 +4914,29 @@ function removeEdmClickMap(id) {
   const zone = document.getElementById('edr-clickmap-zone-' + id);
   if (zone) zone.innerHTML = edrClickMapPrompt(id);
   updateEdmReportPreview();
+}
+
+function saveEdmClickMapHtml(id, html) {
+  const d = loadEdmReportData();
+  const e = d.entries.find(e => e.id === id);
+  if (!e) return;
+  e.click_map_html = html.trim() || null;
+  saveEdmReportData(d);
+  const badge = document.getElementById('edr-html-badge-' + id);
+  if (badge) badge.style.display = e.click_map_html ? 'block' : 'none';
+  updateEdmReportPreview();
+}
+
+function switchEdmClickMapTab(id, tab) {
+  const imgPanel = document.getElementById('edr-cmap-img-' + id);
+  const htmlPanel = document.getElementById('edr-cmap-html-' + id);
+  if (imgPanel)  imgPanel.style.display  = tab === 'image' ? 'flex' : 'none';
+  if (htmlPanel) htmlPanel.style.display = tab === 'html'  ? 'block' : 'none';
+  document.querySelectorAll(`[data-cmap-for="${id}"]`).forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.cmapTab === tab));
+  const d = loadEdmReportData();
+  const e = d.entries.find(e => e.id === id);
+  if (e) { e.click_map_tab = tab; saveEdmReportData(d); }
 }
 
 function edrClickMapPrompt(id) {
@@ -5031,8 +5054,10 @@ function buildEdmReportHtml(d) {
 
       <div class="edr-report-body">
         ${e.click_map_image
-          ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click map" class="edr-report-img"/></div>`
-          : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map</span></div>`}
+          ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
+          : e.click_map_html
+          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';f.parentElement.style.height=Math.round(h*0.52)+'px'}catch(e){}})(this)"></iframe></div></div>`
+          : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map provided</span></div>`}
         <div class="edr-report-stats-col">
           <div class="edr-stats-group" style="--sg-color:#E4572E">
             <div class="edr-stats-group-label">Key Metrics</div>
@@ -5215,14 +5240,31 @@ function renderEdmEntryCard(e, i) {
         </div>
       </div>
 
-      <!-- Step 4: Click map -->
+      <!-- Step 4: Click-Through Rate Map -->
       <div class="edr-subsection-label" style="margin-top:14px">
-        <span class="edr-step-badge">4</span> Click-Through Rate Report Tab — Screenshot
-        <span class="edr-source">Switch to that tab, screenshot the full email with click overlay</span>
+        <span class="edr-step-badge">4</span> Click-Through Rate Report Tab
+        <span class="edr-source">Upload a screenshot or paste the email outerHTML from DevTools Console</span>
       </div>
-      <div class="edr-clickmap-zone" id="edr-clickmap-zone-${e.id}"
-           onclick="document.getElementById('edr-file-${e.id}')?.click()">
-        ${edrClickMapPrompt(e.id)}
+      <div class="edr-cmap-tabs">
+        <button class="edr-cmap-tab${(e.click_map_tab||'image')==='image'?' active':''}"
+          data-cmap-tab="image" data-cmap-for="${e.id}"
+          onclick="switchEdmClickMapTab('${e.id}','image')">Upload Image</button>
+        <button class="edr-cmap-tab${(e.click_map_tab||'image')==='html'?' active':''}"
+          data-cmap-tab="html" data-cmap-for="${e.id}"
+          onclick="switchEdmClickMapTab('${e.id}','html')">Paste HTML</button>
+      </div>
+      <div id="edr-cmap-img-${e.id}" style="display:${(e.click_map_tab||'image')==='image'?'flex':'none'};flex-direction:column">
+        <div class="edr-clickmap-zone" id="edr-clickmap-zone-${e.id}"
+             onclick="document.getElementById('edr-file-${e.id}')?.click()">
+          ${edrClickMapPrompt(e.id)}
+        </div>
+      </div>
+      <div id="edr-cmap-html-${e.id}" style="display:${(e.click_map_tab||'image')==='html'?'block':'none'}">
+        <textarea class="edr-paste-area edr-html-paste" id="edr-html-paste-${e.id}"
+          placeholder="Paste outerHTML from browser Console here…"
+          oninput="saveEdmClickMapHtml('${e.id}',this.value)">${escapeHtml(e.click_map_html||'')}</textarea>
+        <div id="edr-html-badge-${e.id}" class="edr-parsed-badge" style="display:${e.click_map_html?'block':'none'}">✓ HTML pasted — renders in report</div>
+        <div class="edr-html-hint">Run in DevTools Console: <code>console.log(document.querySelector('.EMAIL_DIV').outerHTML)</code></div>
       </div>
     </div>
   </div>`;
