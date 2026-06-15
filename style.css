@@ -5162,13 +5162,14 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   align-items: center;
 }
 .edr-report-img {
-  width: 100%;
+  max-width: 100%;
   max-height: 600px;
-  border-radius: 5px;
-  border: 1px solid var(--border);
+  height: auto;
+  border-radius: 4px;
   object-fit: contain;
   object-position: top center;
   display: block;
+  margin: 0 auto;
 }
 .edr-report-img-empty {
   border: 1.5px dashed var(--border);
