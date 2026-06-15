@@ -4786,7 +4786,21 @@ function loadEdmReportData() {
     const d = JSON.parse(localStorage.getItem(EDM_REPORT_KEY));
     if (d && d.entries) return d;
   } catch {}
-  return { month: new Date().toISOString().slice(0, 7), entries: [], monthly: { avg_html_open_rate: '', avg_unique_ctr: '', avg_click_to_open: '' } };
+  return { month: new Date().toISOString().slice(0, 7), entries: [] };
+}
+
+function computeEdmMonthlyAverages(entries) {
+  const fields = [
+    { src: 'html_open_rate',      dst: 'avg_html_open_rate' },
+    { src: 'unique_ctr',          dst: 'avg_unique_ctr' },
+    { src: 'click_to_open_ratio', dst: 'avg_click_to_open' },
+  ];
+  const result = {};
+  fields.forEach(({ src, dst }) => {
+    const vals = entries.map(e => parseFloat(e[src])).filter(v => !isNaN(v));
+    result[dst] = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) : '';
+  });
+  return result;
 }
 
 function saveEdmReportData(d) {
@@ -4828,15 +4842,11 @@ function toggleEdmReportEntry(id) {
 }
 
 function saveEdmReportField(id, field, value) {
-  const pctFields = ['html_open_rate','click_to_open_ratio','total_ctr','unique_ctr','opt_out_rate','spam_rate','read_rate','skim_rate','avg_html_open_rate','avg_unique_ctr','avg_click_to_open'];
+  const pctFields = ['html_open_rate','click_to_open_ratio','total_ctr','unique_ctr','opt_out_rate','spam_rate','read_rate','skim_rate'];
   if (pctFields.includes(field)) value = value.replace(/%/g, '').trim();
   const d = loadEdmReportData();
-  if (id === 'monthly') {
-    d.monthly[field] = value;
-  } else {
-    const e = d.entries.find(e => e.id === id);
-    if (e) e[field] = value;
-  }
+  const e = d.entries.find(e => e.id === id);
+  if (e) e[field] = value;
   saveEdmReportData(d);
   updateEdmReportPreview();
 }
@@ -5043,7 +5053,7 @@ function buildEdmReportHtml(d) {
     </div>`;
   });
 
-  const mo = d.monthly;
+  const mo = computeEdmMonthlyAverages(d.entries);
   if (mo.avg_html_open_rate || mo.avg_unique_ctr || mo.avg_click_to_open) {
     html += `<div class="edr-report-monthly">
       <div class="edr-report-monthly-label">Monthly Averages</div>
@@ -5059,10 +5069,39 @@ function buildEdmReportHtml(d) {
   return html;
 }
 
+function updateEdmMonthlyDisplay() {
+  const el = document.getElementById('edr-monthly-display');
+  if (!el) return;
+  const d = loadEdmReportData();
+  const mo = computeEdmMonthlyAverages(d.entries);
+  const count = d.entries.filter(e => parseFloat(e.html_open_rate) >= 0).length;
+  if (!count) {
+    el.innerHTML = `<div class="edr-monthly-empty">Add and parse eDM entries — averages appear here automatically</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="edr-monthly-stats">
+      <div class="edr-monthly-stat">
+        <div class="edr-monthly-val">${mo.avg_html_open_rate ? mo.avg_html_open_rate + '%' : '—'}</div>
+        <div class="edr-monthly-lbl">Avg HTML Open Rate</div>
+      </div>
+      <div class="edr-monthly-stat">
+        <div class="edr-monthly-val">${mo.avg_unique_ctr ? mo.avg_unique_ctr + '%' : '—'}</div>
+        <div class="edr-monthly-lbl">Avg Unique CTR</div>
+      </div>
+      <div class="edr-monthly-stat">
+        <div class="edr-monthly-val">${mo.avg_click_to_open ? mo.avg_click_to_open + '%' : '—'}</div>
+        <div class="edr-monthly-lbl">Avg Click-to-Open</div>
+      </div>
+    </div>
+    <div class="edr-monthly-count">Based on ${count} eDM${count !== 1 ? 's' : ''} this month</div>`;
+}
+
 function updateEdmReportPreview() {
   const el = document.getElementById('edr-report-preview');
   if (!el) return;
   el.innerHTML = buildEdmReportHtml(loadEdmReportData());
+  updateEdmMonthlyDisplay();
 }
 
 function renderEdmReportEntries() {
@@ -5188,25 +5227,9 @@ function renderEdmReportPage() {
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,12 6,7 9,10 13,4"/><circle cx="13" cy="4" r="1.5" fill="currentColor" stroke="none"/></svg>
             </div>
             <span class="sh-title">Monthly Aggregate</span>
-            <span class="edr-monthly-hint">Average across all eDMs — enter manually</span>
+            <span class="edr-monthly-hint">Auto-calculated from parsed entries</span>
           </div>
-          <div class="edr-field-grid edr-monthly-grid">
-            <div class="edr-field">
-              <label class="edr-field-label">Avg HTML Open Rate <span class="edr-pct-hint">%</span></label>
-              <input class="form-input" value="${escapeHtml(d.monthly.avg_html_open_rate)}" placeholder="e.g. 38.5"
-                oninput="saveEdmReportField('monthly','avg_html_open_rate',this.value)"/>
-            </div>
-            <div class="edr-field">
-              <label class="edr-field-label">Avg Unique CTR <span class="edr-pct-hint">%</span></label>
-              <input class="form-input" value="${escapeHtml(d.monthly.avg_unique_ctr)}" placeholder="e.g. 5.20"
-                oninput="saveEdmReportField('monthly','avg_unique_ctr',this.value)"/>
-            </div>
-            <div class="edr-field">
-              <label class="edr-field-label">Avg Click-to-Open <span class="edr-pct-hint">%</span></label>
-              <input class="form-input" value="${escapeHtml(d.monthly.avg_click_to_open)}" placeholder="e.g. 13.5"
-                oninput="saveEdmReportField('monthly','avg_click_to_open',this.value)"/>
-            </div>
-          </div>
+          <div id="edr-monthly-display"></div>
         </div>
       </div>
 

@@ -19,7 +19,9 @@
       "Bash(git commit *)",
       "mcp__Claude_Preview__preview_start",
       "Bash(grep -v \"//\\\\|entry-cat\\\\|addedToTimesheet: false\")",
-      "Bash(grep -n \"^\\\\/\\\\* ══\\\\|^\\\\.wgl-filter-bar\" \"C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css\")"
+      "Bash(grep -n \"^\\\\/\\\\* ══\\\\|^\\\\.wgl-filter-bar\" \"C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css\")",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget"
     ]
   }
 }
