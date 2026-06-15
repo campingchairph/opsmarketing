@@ -4945,6 +4945,150 @@ function openEdmHtmlPreview(id) {
   w.document.close();
 }
 
+function printEdmReport() {
+  const d = loadEdmReportData();
+  if (!d.entries.length) return;
+
+  const monthLabel = d.month_label || '';
+  const mo = computeEdmMonthlyAverages(d.entries);
+
+  function statVal(v) { return v ? escapeHtml(String(v)) : '—'; }
+
+  function statGroup(color, label, stats) {
+    const cells = stats.filter(s => s[1]).map(([lbl, val]) =>
+      `<div class="stat"><div class="stat-val" style="color:${color}">${escapeHtml(String(val))}</div><div class="stat-lbl">${lbl}</div></div>`
+    ).join('');
+    if (!cells) return '';
+    return `<div class="stat-group" style="--gc:${color}">
+      <div class="stat-group-label">${label}</div>
+      <div class="stats-grid">${cells}</div>
+    </div>`;
+  }
+
+  const pages = d.entries.map((e, i) => {
+    const name = e.email_name || `Email ${i + 1}`;
+    const hasInteraction = e.total_clicks || e.unique_clicks || e.total_ctr || e.read_rate || e.skim_rate;
+
+    const imgCol = e.click_map_image
+      ? `<img src="${e.click_map_image}" style="width:100%;height:auto;max-height:9in;object-fit:contain;object-position:top left;display:block;">`
+      : e.click_map_html
+      ? `<div style="width:700px;zoom:0.42;transform-origin:top left;background:#fff;">${e.click_map_html}</div>`
+      : `<div style="border:1.5px dashed #ddd;border-radius:5px;height:200px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;">No click map</div>`;
+
+    const statsCol = [
+      statGroup('#E4572E', 'Key Metrics', [
+        ['HTML Open Rate', e.html_open_rate ? e.html_open_rate + '%' : ''],
+        ['Unique CTR', e.unique_ctr ? e.unique_ctr + '%' : ''],
+        ['Click-to-Open', e.click_to_open_ratio ? e.click_to_open_ratio + '%' : ''],
+      ]),
+      statGroup('#191919', 'Volume', [
+        ['Total Sent', e.total_sent],
+        ['Delivered', e.total_delivered],
+        ['Total Opens', e.total_opens],
+        ['Unique Opens', e.unique_opens],
+      ]),
+      hasInteraction ? statGroup('#404040', 'Interaction', [
+        ['Total Clicks', e.total_clicks],
+        ['Unique Clicks', e.unique_clicks],
+        ['Total CTR', e.total_ctr ? e.total_ctr + '%' : ''],
+        ['Read Rate', e.read_rate ? e.read_rate + '%' : ''],
+        ['Skim Rate', e.skim_rate ? e.skim_rate + '%' : ''],
+      ]) : '',
+      statGroup('#292929', 'Opt-outs & Spam', [
+        ['Opt-outs', e.total_opt_outs],
+        ['Opt-out Rate', e.opt_out_rate ? e.opt_out_rate + '%' : ''],
+        ['Spam', e.total_spam],
+        ['Spam Rate', e.spam_rate ? e.spam_rate + '%' : ''],
+      ]),
+      statGroup('#8c8a85', 'Delivery', [
+        ['Bounced', e.total_bounced],
+      ]),
+    ].filter(Boolean).join('');
+
+    return `<div class="page">
+      <div class="page-header">
+        <div class="page-meta">
+          <span class="page-num">${String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <div class="page-name">${escapeHtml(name)}</div>
+            ${e.subject ? `<div class="page-sub">${escapeHtml(e.subject)}</div>` : ''}
+          </div>
+        </div>
+        ${e.started_at ? `<div class="page-date">${edrDate(e.started_at)}</div>` : ''}
+      </div>
+      <div class="page-body">
+        <div class="img-col">${imgCol}</div>
+        <div class="stats-col">${statsCol}</div>
+      </div>
+    </div>`;
+  });
+
+  // Monthly averages as final page
+  const moPage = `<div class="page page-monthly">
+    <div class="page-header">
+      <div class="page-meta">
+        <span class="page-num mo-badge">AVG</span>
+        <div class="page-name">Monthly Averages${monthLabel ? ' — ' + escapeHtml(monthLabel) : ''}</div>
+      </div>
+    </div>
+    <div class="mo-grid">
+      <div class="mo-stat"><div class="mo-val">${mo.avg_html_open_rate ? mo.avg_html_open_rate + '%' : '—'}</div><div class="mo-lbl">Avg HTML Open Rate</div></div>
+      <div class="mo-stat"><div class="mo-val">${mo.avg_unique_ctr ? mo.avg_unique_ctr + '%' : '—'}</div><div class="mo-lbl">Avg Unique CTR</div></div>
+      <div class="mo-stat"><div class="mo-val">${mo.avg_click_to_open ? mo.avg_click_to_open + '%' : '—'}</div><div class="mo-lbl">Avg Click-to-Open</div></div>
+    </div>
+    <div class="mo-count">Based on ${d.entries.length} eDM${d.entries.length !== 1 ? 's' : ''}</div>
+  </div>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>eDM Report${monthLabel ? ' — ' + monthLabel : ''}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+@page { size: A4 portrait; margin: 0.5in; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
+.page{min-height:calc(297mm - 1in);page-break-after:always;display:flex;flex-direction:column;gap:14px}
+.page:last-child{page-break-after:avoid}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid #e8e8e4;margin-bottom:4px}
+.page-meta{display:flex;align-items:flex-start;gap:10px}
+.page-num{font-size:11px;font-weight:700;color:#fff;background:#191919;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:2px;letter-spacing:0.04em}
+.page-name{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:#191919;line-height:1.2}
+.page-sub{font-size:10px;color:#888;margin-top:2px}
+.page-date{font-size:10px;color:#aaa;white-space:nowrap}
+.page-body{display:grid;grid-template-columns:42% 1fr;gap:18px;align-items:start;flex:1}
+.img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
+.stats-col{display:flex;flex-direction:column;gap:12px}
+.stat-group{display:flex;flex-direction:column;gap:6px}
+.stat-group-label{font-size:7.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat-val{font-size:22px;font-weight:700;letter-spacing:-0.03em;line-height:1}
+.stat-lbl{font-size:8px;color:#888}
+.page-monthly{min-height:auto}
+.mo-badge{background:#E4572E}
+.mo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:24px 0}
+.mo-stat{display:flex;flex-direction:column;gap:4px;border-left:3px solid #E4572E;padding-left:12px}
+.mo-val{font-size:32px;font-weight:700;color:#E4572E;letter-spacing:-0.04em}
+.mo-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.08em}
+.mo-count{font-size:10px;color:#aaa}
+</style>
+</head>
+<body>
+${pages.join('\n')}
+${moPage}
+<script>window.onload=function(){window.print();}<\/script>
+</body>
+</html>`;
+
+  const w = window.open('', '_blank');
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
 function switchEdmClickMapTab(id, tab) {
   const imgPanel = document.getElementById('edr-cmap-img-' + id);
   const htmlPanel = document.getElementById('edr-cmap-html-' + id);
@@ -5347,7 +5491,7 @@ function renderEdmReportPage() {
       <div class="edr-right">
         <div class="edr-preview-header">
           <span class="edr-preview-title">Generated Report</span>
-          <button class="edr-print-btn" onclick="window.print()" title="Print report">
+          <button class="edr-print-btn" onclick="printEdmReport()" title="Print report">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><path d="M4 6V2h8v4M4 11H2V7h12v4h-2M4 11v3h8v-3H4z"/></svg>
             Print
           </button>
