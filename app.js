@@ -4923,9 +4923,26 @@ function saveEdmClickMapHtml(id, html) {
   if (!e) return;
   e.click_map_html = html.trim() || null;
   saveEdmReportData(d);
+  const has = !!e.click_map_html;
   const badge = document.getElementById('edr-html-badge-' + id);
-  if (badge) badge.style.display = e.click_map_html ? 'block' : 'none';
+  if (badge) badge.style.display = has ? 'inline-flex' : 'none';
+  const btn = document.getElementById('edr-preview-btn-' + id);
+  if (btn) btn.disabled = !has;
+  const previewBox = document.getElementById('edr-html-preview-box-' + id);
+  if (previewBox) previewBox.style.display = has ? 'block' : 'none';
+  const previewIframe = document.getElementById('edr-html-preview-iframe-' + id);
+  if (previewIframe && e.click_map_html) previewIframe.srcdoc = e.click_map_html;
   updateEdmReportPreview();
+}
+
+function openEdmHtmlPreview(id) {
+  const d = loadEdmReportData();
+  const e = d.entries.find(e => e.id === id);
+  if (!e || !e.click_map_html) return;
+  const w = window.open('', '_blank', 'width=800,height=900');
+  w.document.open();
+  w.document.write(e.click_map_html);
+  w.document.close();
 }
 
 function switchEdmClickMapTab(id, tab) {
@@ -5057,7 +5074,7 @@ function buildEdmReportHtml(d) {
         ${e.click_map_image
           ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
           : e.click_map_html
-          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.52,600/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(e){}})(this)"></iframe></div><div class="edr-print-clone" data-entry-id="${e.id}"></div></div>`
+          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.52,600/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(e){}})(this)"></iframe></div></div>`
           : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map provided</span></div>`}
         <div class="edr-report-stats-col">
           <div class="edr-stats-group" style="--sg-color:#E4572E">
@@ -5157,13 +5174,7 @@ function updateEdmMonthlyDisplay() {
 function updateEdmReportPreview() {
   const el = document.getElementById('edr-report-preview');
   if (!el) return;
-  const d = loadEdmReportData();
-  el.innerHTML = buildEdmReportHtml(d);
-  // Populate print-clone divs via JS so raw HTML doesn't break the report's string structure
-  el.querySelectorAll('.edr-print-clone[data-entry-id]').forEach(clone => {
-    const entry = d.entries.find(e => e.id === clone.dataset.entryId);
-    if (entry && entry.click_map_html) clone.innerHTML = entry.click_map_html;
-  });
+  el.innerHTML = buildEdmReportHtml(loadEdmReportData());
   updateEdmMonthlyDisplay();
 }
 
@@ -5270,8 +5281,17 @@ function renderEdmEntryCard(e, i) {
         <textarea class="edr-paste-area edr-html-paste" id="edr-html-paste-${e.id}"
           placeholder="Paste outerHTML from browser Console here…"
           oninput="saveEdmClickMapHtml('${e.id}',this.value)">${escapeHtml(e.click_map_html||'')}</textarea>
-        <div id="edr-html-badge-${e.id}" class="edr-parsed-badge" style="display:${e.click_map_html?'block':'none'}">✓ HTML pasted — renders in report</div>
-        <div class="edr-html-hint">Run in DevTools Console: <code>console.log(document.querySelector('.EMAIL_DIV').outerHTML)</code></div>
+        <div class="edr-html-actions">
+          <div id="edr-html-badge-${e.id}" class="edr-parsed-badge" style="display:${e.click_map_html?'inline-flex':'none'}">✓ HTML saved</div>
+          <button class="edr-open-preview-btn" onclick="openEdmHtmlPreview('${e.id}')" ${e.click_map_html?'':'disabled'} id="edr-preview-btn-${e.id}">↗ Open Full Preview</button>
+        </div>
+        <div id="edr-html-preview-box-${e.id}" class="edr-html-preview-box" style="display:${e.click_map_html?'block':'none'}">
+          <iframe id="edr-html-preview-iframe-${e.id}" class="edr-html-preview-iframe"
+            srcdoc="${escapeHtml(e.click_map_html||'')}"
+            scrolling="no" sandbox="allow-same-origin"
+            onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.48,560/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(err){}})(this)"></iframe>
+        </div>
+        <div class="edr-html-hint">In DevTools Console — select the element that wraps the email <strong>AND</strong> comment bubbles, then run: <code>copy($0.outerHTML)</code><br>To include comment lines: go one level up from the email div until comment bubbles appear in the highlight.</div>
       </div>
     </div>
   </div>`;
