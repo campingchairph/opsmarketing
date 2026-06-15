@@ -4861,7 +4861,7 @@ function addEdmReportEntry() {
     total_opt_outs: '', opt_out_rate: '',
     total_spam: '', spam_rate: '',
     read_rate: '', skim_rate: '',
-    click_map_image: null, click_map_html: null, click_map_rendered_image: null, click_map_tab: 'image', open: true,
+    click_map_image: null, click_map_html: null, click_map_tab: 'image', open: true,
   });
   saveEdmReportData(d);
   renderEdmReportEntries();
@@ -4941,74 +4941,10 @@ function saveEdmClickMapHtml(id, html) {
   const e = d.entries.find(e => e.id === id);
   if (!e) return;
   e.click_map_html = html.trim() || null;
-  e.click_map_rendered_image = null;
   saveEdmReportData(d);
   const badge = document.getElementById('edr-html-badge-' + id);
   if (badge) badge.style.display = e.click_map_html ? 'block' : 'none';
   updateEdmReportPreview();
-  if (e.click_map_html) renderEdmHtmlToImage(id, e.click_map_html);
-}
-
-async function inlineContainerImages(container) {
-  // Pre-fetch all external images as data URLs so html2canvas has no CORS restrictions
-  const imgs = Array.from(container.querySelectorAll('img[src]'));
-  await Promise.allSettled(imgs.map(async img => {
-    const src = img.getAttribute('src');
-    if (!src || src.startsWith('data:') || src.startsWith('blob:')) return;
-    try {
-      const absUrl = new URL(src, location.href).href;
-      const resp = await fetch(absUrl, { mode: 'cors', credentials: 'omit' });
-      if (!resp.ok) return;
-      const blob = await resp.blob();
-      img.src = await new Promise(res => {
-        const r = new FileReader();
-        r.onload = () => res(r.result);
-        r.readAsDataURL(blob);
-      });
-    } catch {
-      // CORS blocked — leave src intact; html2canvas will skip it
-    }
-  }));
-  // Wait for all images to finish loading after src swap
-  await Promise.allSettled(Array.from(container.querySelectorAll('img')).map(img =>
-    new Promise(res => {
-      if (img.complete && img.naturalHeight !== 0) { res(); return; }
-      img.onload = res;
-      img.onerror = res;
-    })
-  ));
-}
-
-async function renderEdmHtmlToImage(id, html) {
-  // Rasterize pasted HTML to JPEG so print doesn't revert iframe to native pixel size
-  const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:700px;background:#fff;overflow:hidden;';
-  container.innerHTML = html;
-  document.body.appendChild(container);
-  try {
-    await inlineContainerImages(container);
-    const canvas = await html2canvas(container, {
-      useCORS: true,
-      allowTaint: false,
-      scale: 1,
-      width: 700,
-      backgroundColor: '#ffffff',
-      logging: false,
-      imageTimeout: 20000,
-    });
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-    const d = loadEdmReportData();
-    const e = d.entries.find(e => e.id === id);
-    if (e && e.click_map_html) {
-      e.click_map_rendered_image = dataUrl;
-      saveEdmReportData(d);
-      updateEdmReportPreview();
-    }
-  } catch (err) {
-    console.warn('html2canvas render failed:', err);
-  } finally {
-    document.body.removeChild(container);
-  }
 }
 
 function switchEdmClickMapTab(id, tab) {
@@ -5139,8 +5075,6 @@ function buildEdmReportHtml(d) {
       <div class="edr-report-body">
         ${e.click_map_image
           ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
-          : e.click_map_rendered_image
-          ? `<div class="edr-report-img-col"><img src="${e.click_map_rendered_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
           : e.click_map_html
           ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" data-entry-id="${e.id}" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.52,600/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(e){}})(this)"></iframe></div></div>`
           : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map provided</span></div>`}
