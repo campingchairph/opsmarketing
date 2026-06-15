@@ -4929,14 +4929,53 @@ function saveEdmClickMapHtml(id, html) {
   if (e.click_map_html) renderEdmHtmlToImage(id, e.click_map_html);
 }
 
+async function inlineContainerImages(container) {
+  // Pre-fetch all external images as data URLs so html2canvas has no CORS restrictions
+  const imgs = Array.from(container.querySelectorAll('img[src]'));
+  await Promise.allSettled(imgs.map(async img => {
+    const src = img.getAttribute('src');
+    if (!src || src.startsWith('data:') || src.startsWith('blob:')) return;
+    try {
+      const absUrl = new URL(src, location.href).href;
+      const resp = await fetch(absUrl, { mode: 'cors', credentials: 'omit' });
+      if (!resp.ok) return;
+      const blob = await resp.blob();
+      img.src = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.readAsDataURL(blob);
+      });
+    } catch {
+      // CORS blocked — leave src intact; html2canvas will skip it
+    }
+  }));
+  // Wait for all images to finish loading after src swap
+  await Promise.allSettled(Array.from(container.querySelectorAll('img')).map(img =>
+    new Promise(res => {
+      if (img.complete && img.naturalHeight !== 0) { res(); return; }
+      img.onload = res;
+      img.onerror = res;
+    })
+  ));
+}
+
 async function renderEdmHtmlToImage(id, html) {
   // Rasterize pasted HTML to JPEG so print doesn't revert iframe to native pixel size
   const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:700px;background:#fff;';
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:700px;background:#fff;overflow:hidden;';
   container.innerHTML = html;
   document.body.appendChild(container);
   try {
-    const canvas = await html2canvas(container, { useCORS: true, scale: 1, width: 700, backgroundColor: '#ffffff' });
+    await inlineContainerImages(container);
+    const canvas = await html2canvas(container, {
+      useCORS: true,
+      allowTaint: false,
+      scale: 1,
+      width: 700,
+      backgroundColor: '#ffffff',
+      logging: false,
+      imageTimeout: 20000,
+    });
     const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
     const d = loadEdmReportData();
     const e = d.entries.find(e => e.id === id);
