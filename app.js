@@ -4779,25 +4779,6 @@ function toggleNotesDrawer() {
   }
 }
 
-// ── PRINT: swap iframes for native divs so zoom works and CORS-blocked images render ──
-window.addEventListener('beforeprint', () => {
-  document.querySelectorAll('.edr-report-iframe[data-entry-id]').forEach(iframe => {
-    const wrapper = iframe.closest('.edr-report-iframe-wrapper');
-    if (!wrapper) return;
-    const id = iframe.dataset.entryId;
-    const d = loadEdmReportData();
-    const entry = d.entries.find(e => e.id === id);
-    if (!entry || !entry.click_map_html) return;
-    const clone = document.createElement('div');
-    clone.className = 'edr-print-clone';
-    clone.innerHTML = entry.click_map_html;
-    wrapper.appendChild(clone);
-  });
-});
-
-window.addEventListener('afterprint', () => {
-  document.querySelectorAll('.edr-print-clone').forEach(el => el.remove());
-});
 
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -5076,7 +5057,7 @@ function buildEdmReportHtml(d) {
         ${e.click_map_image
           ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
           : e.click_map_html
-          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" data-entry-id="${e.id}" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.52,600/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(e){}})(this)"></iframe></div></div>`
+          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';var z=Math.min(0.52,600/h);f.style.zoom=z;f.parentElement.style.height=Math.ceil(h*z)+'px'}catch(e){}})(this)"></iframe></div><div class="edr-print-clone" data-entry-id="${e.id}"></div></div>`
           : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map provided</span></div>`}
         <div class="edr-report-stats-col">
           <div class="edr-stats-group" style="--sg-color:#E4572E">
@@ -5176,7 +5157,13 @@ function updateEdmMonthlyDisplay() {
 function updateEdmReportPreview() {
   const el = document.getElementById('edr-report-preview');
   if (!el) return;
-  el.innerHTML = buildEdmReportHtml(loadEdmReportData());
+  const d = loadEdmReportData();
+  el.innerHTML = buildEdmReportHtml(d);
+  // Populate print-clone divs via JS so raw HTML doesn't break the report's string structure
+  el.querySelectorAll('.edr-print-clone[data-entry-id]').forEach(clone => {
+    const entry = d.entries.find(e => e.id === clone.dataset.entryId);
+    if (entry && entry.click_map_html) clone.innerHTML = entry.click_map_html;
+  });
   updateEdmMonthlyDisplay();
 }
 

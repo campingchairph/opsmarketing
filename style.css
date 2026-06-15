@@ -5280,11 +5280,10 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   .edr-report-doc { padding: 0.5in; }
   .edr-report-block { page-break-inside: avoid; break-inside: avoid; }
   .edr-report-body { align-items: start; grid-template-columns: 42% 1fr; gap: 18px; }
-  .edr-report-img-col { max-height: 8.5in; overflow: hidden; }
-  .edr-report-img { max-height: 8.5in; width: 100%; object-fit: contain; object-position: top center; }
-  .edr-report-iframe-wrapper { max-height: 8.5in; border: none; overflow: hidden; }
-  .edr-report-iframe { display: none !important; }
-  .edr-print-clone { display: block; zoom: 0.42; width: 700px; pointer-events: none; }
+  .edr-report-img-col { overflow: visible; }
+  .edr-report-img { max-height: 8.5in; width: 100%; object-fit: contain; object-position: top left; }
+  .edr-report-iframe-wrapper { display: none !important; }
+  .edr-print-clone { display: block !important; zoom: 0.42; width: 700px; pointer-events: none; overflow: hidden; max-height: 8.5in; }
   .edr-stats-group { margin-bottom: 10px; }
   .edr-stat-val { font-size: 24px; }
 }
