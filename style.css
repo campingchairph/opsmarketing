@@ -5166,7 +5166,7 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   max-height: 600px;
   border-radius: 4px;
   object-fit: contain;
-  object-position: top center;
+  object-position: top left;
   display: block;
 }
 .edr-report-img-empty {
