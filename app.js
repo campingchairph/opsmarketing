@@ -5056,7 +5056,7 @@ function buildEdmReportHtml(d) {
         ${e.click_map_image
           ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click-Through Rate Map" class="edr-report-img"/></div>`
           : e.click_map_html
-          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{var h=f.contentDocument.body.scrollHeight;f.style.height=h+'px';f.parentElement.style.height=Math.round(h*0.52)+'px'}catch(e){}})(this)"></iframe></div></div>`
+          ? `<div class="edr-report-img-col"><div class="edr-report-iframe-wrapper"><iframe class="edr-report-iframe" srcdoc="${escapeHtml(e.click_map_html)}" scrolling="no" sandbox="allow-same-origin" onload="(function(f){try{f.style.height=f.contentDocument.body.scrollHeight+'px'}catch(e){}})(this)"></iframe></div></div>`
           : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map provided</span></div>`}
         <div class="edr-report-stats-col">
           <div class="edr-stats-group" style="--sg-color:#E4572E">

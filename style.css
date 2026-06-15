@@ -4937,17 +4937,14 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   overflow: hidden;
   border: 1px solid #e8e8e4;
   border-radius: 4px;
+  max-height: 560px;
 }
 .edr-report-iframe {
   width: 700px;
   border: none;
   pointer-events: none;
   display: block;
-  transform-origin: top left;
-  transform: scale(0.52);
-}
-@media print {
-  .edr-report-iframe { transform: scale(0.35); }
+  zoom: 0.52;
 }
 
 /* Preview panel */
@@ -5280,5 +5277,11 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   #edr-report-preview { border: none; max-height: none; overflow: visible; }
   .edr-report-doc { padding: 0.5in; }
   .edr-report-block { page-break-inside: avoid; break-inside: avoid; }
-  .edr-stat-val { font-size: 18px; }
+  .edr-report-body { align-items: start; grid-template-columns: 42% 1fr; gap: 18px; }
+  .edr-report-img-col { max-height: 8.5in; overflow: hidden; }
+  .edr-report-img { max-height: 8.5in; width: 100%; object-fit: contain; object-position: top center; }
+  .edr-report-iframe-wrapper { max-height: 8.5in; border: none; }
+  .edr-report-iframe { zoom: 0.42; }
+  .edr-stats-group { margin-bottom: 10px; }
+  .edr-stat-val { font-size: 24px; }
 }
