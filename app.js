@@ -3230,6 +3230,7 @@ async function generateCoverNote() {
 // ── Feature 4: EOD / EOW Summary Writer ──────────────────────────
 async function generateEODSummary() {
   const type       = document.getElementById('eod-type')?.value;
+  const recipient  = document.getElementById('eod-recipient')?.value?.trim() || 'my manager';
   const completed  = document.getElementById('eod-completed')?.value?.trim();
   const inprogress = document.getElementById('eod-inprogress')?.value?.trim();
   const blockers   = document.getElementById('eod-blockers')?.value?.trim();
@@ -3237,8 +3238,30 @@ async function generateEODSummary() {
   if (!getAiKey()) { aiNoKey(); return; }
   aiSetBtn('eod-btn', true, 'Write summary →', 'Writing…');
   try {
-    const system = `You are a marketing coordinator at Assetline Capital — a broker-first non-bank lender. Write a concise ${type} update for your manager. Write exactly 5 sentences. Structure: 1–2 sentences on what was completed, 1 sentence on what is in progress, 1 sentence on any blockers or needs, 1 closing sentence. Tone: professional, direct, commercial — no fluff. Australian English. Do not use bullet points — write in flowing prose.`;
-    const prompt = `Write my ${type} manager update:\nCompleted: ${completed}\nIn progress: ${inprogress || 'Nothing new to add.'}\nBlockers / needs: ${blockers || 'None at this stage.'}`;
+    const system = `You are Seph Albino, a marketing coordinator at Assetline Capital. Write a casual, human ${type} sign-off message to your manager.
+
+TONE & VOICE:
+- Casual but professional — friendly, not stiff. Write like a real person talking to a colleague, not a corporate report.
+- First-person, conversational — use "I've", "I'm", "I'll". Never "I was able to" or "I have completed" or "I have commenced".
+- Direct and brief. No filler, no over-explanation. Contractions encouraged.
+- Minor grammar imperfections are fine. Do not over-polish.
+
+STRUCTURE:
+1. Open with exactly: "Hey ${recipient}, I'm now signing off."
+2. Body: 2–3 short paragraphs. One topic per paragraph. Lead with what was completed, then what's remaining or next.
+3. For incomplete tasks, end with what happens next — "will continue tomorrow", "picking this up tomorrow", etc.
+4. Only mention blockers if they actually exist. If no blockers, do not mention them at all — omitting is cleaner.
+5. No closing statement. End on the last task update.
+
+BANNED PHRASES — never use these:
+"I was able to", "I have commenced", "at this stage", "I do not have any blockers", "I look forward to providing a further update", "with all necessary tools and resources available", "including creating necessary folders"
+
+LENGTH: 60–120 words. Never exceed 150 words. Australian English.`;
+
+    const promptParts = [`Write my ${type} sign-off message.`, `Completed: ${completed}`];
+    if (inprogress) promptParts.push(`In progress: ${inprogress}`);
+    if (blockers)   promptParts.push(`Blockers: ${blockers}`);
+    const prompt = promptParts.join('\n');
     const result = await callClaude(system, prompt);
     const out = document.getElementById('eod-output');
     document.getElementById('eod-result').value = result;
