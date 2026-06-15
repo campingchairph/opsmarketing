@@ -4900,11 +4900,81 @@ function edrDate(v) {
   return v;
 }
 
+// ── Paste parser ────────────────────────────────────────────────
+const EDR_FIELD_MAP = {
+  'Subject':                    { key: 'subject',           type: 'text' },
+  'Campaign':                   { key: 'campaign',          type: 'text' },
+  'Started At':                 { key: 'started_at',        type: 'date' },
+  'Sent To':                    { key: 'sent_to',           type: 'text' },
+  'Total Sent':                 { key: 'total_sent',        type: 'num'  },
+  'Total Delivered':            { key: 'total_delivered',   type: 'num'  },
+  'Total Bounced':              { key: 'total_bounced',     type: 'text' },
+  'Delivery Rate':              { key: 'delivery_rate',     type: 'pct'  },
+  'Total HTML Opens':           { key: 'total_html_opens',  type: 'num'  },
+  'Unique HTML Opens':          { key: 'unique_html_opens', type: 'num'  },
+  'HTML Open Rate':             { key: 'html_open_rate',    type: 'pct'  },
+  'Total Clicks':               { key: 'total_clicks',      type: 'num'  },
+  'Total Click Through Rate':   { key: 'total_ctr',         type: 'pct'  },
+  'Unique Clicks':              { key: 'unique_clicks',     type: 'num'  },
+  'Unique Click Through Rate':  { key: 'unique_ctr',        type: 'pct'  },
+  'Click to Open Ratio':        { key: 'click_to_open_ratio', type: 'pct' },
+  'Total Opt Outs':             { key: 'total_opt_outs',    type: 'num'  },
+  'Opt Out Rate':               { key: 'opt_out_rate',      type: 'pct'  },
+  'Total Spam Complaints':      { key: 'total_spam',        type: 'num'  },
+  'Spam Complaint Rate':        { key: 'spam_rate',         type: 'pct'  },
+};
+
+function parseEdmPaste(text) {
+  const result = {};
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const tabIdx = line.indexOf('\t');
+    if (tabIdx === -1) continue;
+    const label = line.slice(0, tabIdx).trim();
+    let value   = line.slice(tabIdx + 1).trim();
+    const def   = EDR_FIELD_MAP[label];
+    if (!def || !value) continue;
+    if (def.type === 'pct') value = value.replace(/%/g, '').trim();
+    if (def.type === 'num') value = value.replace(/,/g, '').trim();
+    if (def.type === 'date') {
+      // e.g. "Jun 11, 2026 8:30 AM" → "11 Jun 2026"
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) value = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    result[def.key] = value;
+  }
+  return result;
+}
+
+function applyEdmParse(entryId) {
+  const ta = document.getElementById('edr-paste-' + entryId);
+  if (!ta) return;
+  const parsed = parseEdmPaste(ta.value);
+  const d = loadEdmReportData();
+  const entry = d.entries.find(e => e.id === entryId);
+  if (!entry) return;
+  Object.assign(entry, parsed);
+  entry.raw_paste = ta.value;
+  saveEdmReportData(d);
+  renderEdmReportEntries();
+  updateEdmReportPreview();
+  showAiToast('✓ Parsed — ' + Object.keys(parsed).length + ' fields extracted');
+}
+
+function edrStat(val, label, accent) {
+  return `<div class="edr-stat${accent ? ' edr-stat-accent' : ''}">
+    <div class="edr-stat-val">${val}</div>
+    <hr class="edr-stat-sep"/>
+    <div class="edr-stat-lbl">${label}</div>
+  </div>`;
+}
+
 function buildEdmReportHtml(d) {
   if (!d.entries.length && !d.monthly.avg_html_open_rate) {
     return `<div class="edr-preview-empty">
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2" style="width:38px;height:38px;opacity:0.18"><path d="M6 40V12a2 2 0 012-2h32a2 2 0 012 2v28l-8-4-8 4-8-4-8 4z"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="27" x2="26" y2="27"/></svg>
-      <div style="font-size:12.5px;color:var(--text-3);margin-top:10px;line-height:1.5">Add an eDM entry and fill in the fields —<br>the report generates here automatically.</div>
+      <div style="font-size:12.5px;color:var(--text-3);margin-top:10px;line-height:1.5">Paste Salesforce data and click Parse —<br>the report generates here automatically.</div>
     </div>`;
   }
   const monthLabel = d.month ? new Date(d.month + '-02').toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }) : '';
@@ -4915,32 +4985,61 @@ function buildEdmReportHtml(d) {
     const name = e.email_name || `Email ${i + 1}`;
     html += `<div class="edr-report-block">
       <div class="edr-report-block-header">
-        <span class="edr-report-block-num">${String(i + 1).padStart(2, '0')}</span>
-        <div>
-          <div class="edr-report-block-name">${escapeHtml(name)}</div>
-          ${e.subject ? `<div class="edr-report-block-subject">${escapeHtml(e.subject)}</div>` : ''}
-          ${e.started_at ? `<div class="edr-report-block-date">Sent ${edrDate(e.started_at)}</div>` : ''}
+        <div class="edr-report-block-meta">
+          <span class="edr-report-block-num">${String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <div class="edr-report-block-name">${escapeHtml(name)}</div>
+            ${e.subject   ? `<div class="edr-report-block-subject">${escapeHtml(e.subject)}</div>` : ''}
+            ${e.campaign  ? `<div class="edr-report-block-campaign">Campaign: ${escapeHtml(e.campaign)}</div>` : ''}
+          </div>
+        </div>
+        ${e.started_at ? `<div class="edr-report-block-date">${edrDate(e.started_at)}</div>` : ''}
+      </div>
+
+      <div class="edr-report-body">
+        ${e.click_map_image
+          ? `<div class="edr-report-img-col"><img src="${e.click_map_image}" alt="Click map" class="edr-report-img"/></div>`
+          : `<div class="edr-report-img-col edr-report-img-empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;opacity:0.2"><rect x="2" y="5" width="28" height="22" rx="2"/><circle cx="10" cy="13" r="3"/><polyline points="2,27 10,18 16,24 22,16 30,27"/></svg><span style="font-size:10px;color:var(--text-3)">No click map</span></div>`}
+        <div class="edr-report-stats-col">
+          <div class="edr-stats-group">
+            <div class="edr-stats-group-label">Key Metrics</div>
+            <div class="edr-stats-grid">
+              ${edrStat(edrPct(e.html_open_rate),       'HTML Open Rate',     true)}
+              ${edrStat(edrPct(e.unique_ctr),            'Unique CTR',         true)}
+              ${edrStat(edrPct(e.click_to_open_ratio),   'Click-to-Open',      true)}
+            </div>
+          </div>
+          <div class="edr-stats-group">
+            <div class="edr-stats-group-label">Volume</div>
+            <div class="edr-stats-grid">
+              ${edrStat(edrNum(e.total_delivered),  'Delivered',     false)}
+              ${edrStat(edrNum(e.unique_html_opens || ''), 'Unique Opens', false)}
+              ${edrStat(edrNum(e.unique_clicks),    'Unique Clicks', false)}
+              ${edrStat(edrPct(e.total_ctr),        'Total CTR',     false)}
+              ${edrStat(edrNum(e.total_clicks),     'Total Clicks',  false)}
+              ${e.read_rate  ? edrStat(edrPct(e.read_rate),  'Read Rate',  false) : ''}
+              ${e.skim_rate  ? edrStat(edrPct(e.skim_rate),  'Skim Rate',  false) : ''}
+            </div>
+          </div>
+          <div class="edr-stats-group">
+            <div class="edr-stats-group-label">Opt-outs &amp; Spam</div>
+            <div class="edr-stats-grid">
+              ${edrStat(edrNum(e.total_opt_outs), 'Opt-outs',      false)}
+              ${edrStat(edrPct(e.opt_out_rate),   'Opt-out Rate',  false)}
+              ${edrStat(edrNum(e.total_spam),     'Spam',          false)}
+              ${edrStat(edrPct(e.spam_rate),      'Spam Rate',     false)}
+            </div>
+          </div>
+          ${e.delivery_rate || e.total_sent ? `<div class="edr-stats-group">
+            <div class="edr-stats-group-label">Delivery</div>
+            <div class="edr-stats-grid">
+              ${e.delivery_rate ? edrStat(edrPct(e.delivery_rate), 'Delivery Rate', false) : ''}
+              ${e.total_sent    ? edrStat(edrNum(e.total_sent),    'Total Sent',    false) : ''}
+              ${e.total_bounced ? edrStat(escapeHtml(e.total_bounced), 'Bounced', false) : ''}
+            </div>
+          </div>` : ''}
         </div>
       </div>
-      <div class="edr-report-metric-row">
-        <div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(e.html_open_rate)}</div><div class="edr-rmetric-lbl">Open Rate</div></div>
-        <div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(e.unique_ctr)}</div><div class="edr-rmetric-lbl">Unique CTR</div></div>
-        <div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(e.click_to_open_ratio)}</div><div class="edr-rmetric-lbl">Click-to-Open</div></div>
-        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrNum(e.total_delivered)}</div><div class="edr-rmetric-lbl">Delivered</div></div>
-        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrPct(e.total_ctr)}</div><div class="edr-rmetric-lbl">Total CTR</div></div>
-        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrNum(e.unique_clicks)}</div><div class="edr-rmetric-lbl">Unique Clicks</div></div>
-        <div class="edr-rmetric"><div class="edr-rmetric-val">${edrNum(e.total_clicks)}</div><div class="edr-rmetric-lbl">Total Clicks</div></div>
-        ${e.read_rate ? `<div class="edr-rmetric"><div class="edr-rmetric-val">${edrPct(e.read_rate)}</div><div class="edr-rmetric-lbl">Read Rate</div></div>` : ''}
-        ${e.skim_rate ? `<div class="edr-rmetric"><div class="edr-rmetric-val">${edrPct(e.skim_rate)}</div><div class="edr-rmetric-lbl">Skim Rate</div></div>` : ''}
-        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrNum(e.total_opt_outs)}</div><div class="edr-rmetric-lbl">Opt-outs</div></div>
-        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrPct(e.opt_out_rate)}</div><div class="edr-rmetric-lbl">Opt-out Rate</div></div>
-        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrNum(e.total_spam)}</div><div class="edr-rmetric-lbl">Spam</div></div>
-        <div class="edr-rmetric warn"><div class="edr-rmetric-val">${edrPct(e.spam_rate)}</div><div class="edr-rmetric-lbl">Spam Rate</div></div>
-      </div>
-      ${e.click_map_image ? `<div class="edr-report-clickmap">
-        <div class="edr-report-clickmap-label">Click Map</div>
-        <img src="${e.click_map_image}" alt="Click map" class="edr-report-clickmap-img"/>
-      </div>` : ''}
     </div>`;
   });
 
@@ -4948,10 +5047,10 @@ function buildEdmReportHtml(d) {
   if (mo.avg_html_open_rate || mo.avg_unique_ctr || mo.avg_click_to_open) {
     html += `<div class="edr-report-monthly">
       <div class="edr-report-monthly-label">Monthly Averages</div>
-      <div class="edr-report-metric-row">
-        ${mo.avg_html_open_rate ? `<div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(mo.avg_html_open_rate)}</div><div class="edr-rmetric-lbl">Avg Open Rate</div></div>` : ''}
-        ${mo.avg_unique_ctr ? `<div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(mo.avg_unique_ctr)}</div><div class="edr-rmetric-lbl">Avg Unique CTR</div></div>` : ''}
-        ${mo.avg_click_to_open ? `<div class="edr-rmetric accent"><div class="edr-rmetric-val">${edrPct(mo.avg_click_to_open)}</div><div class="edr-rmetric-lbl">Avg Click-to-Open</div></div>` : ''}
+      <div class="edr-stats-grid edr-stats-monthly">
+        ${mo.avg_html_open_rate ? edrStat(edrPct(mo.avg_html_open_rate), 'Avg HTML Open Rate', true) : ''}
+        ${mo.avg_unique_ctr     ? edrStat(edrPct(mo.avg_unique_ctr),     'Avg Unique CTR',     true) : ''}
+        ${mo.avg_click_to_open  ? edrStat(edrPct(mo.avg_click_to_open),  'Avg Click-to-Open',  true) : ''}
       </div>
     </div>`;
   }
@@ -4990,17 +5089,17 @@ function renderEdmReportEntries() {
 
 function renderEdmEntryCard(e, i) {
   const name = escapeHtml(e.email_name) || `New eDM ${i + 1}`;
-  const fld = (id, label, field, placeholder, type = 'text', hint = '') =>
-    `<div class="edr-field">
-      <label class="edr-field-label">${label}${hint ? `<span class="edr-pct-hint">${hint}</span>` : ''}</label>
-      <input class="form-input" type="${type}" value="${field ? escapeHtml(String(field)) : ''}" placeholder="${placeholder}"
-        oninput="saveEdmReportField('${e.id}','${id}',this.value)"/>
-    </div>`;
+  const parsedSummary = e.subject || e.started_at
+    ? `<span class="edr-entry-parsed">${[e.subject ? escapeHtml(e.subject.slice(0,40)) + (e.subject.length > 40 ? '…' : '') : '', e.started_at ? escapeHtml(e.started_at) : ''].filter(Boolean).join(' · ')}</span>`
+    : '';
 
   return `<div class="edr-entry-card${e.open ? ' open' : ''}" id="edr-card-${e.id}">
     <div class="edr-entry-header" onclick="toggleEdmReportEntry('${e.id}')">
       <span class="edr-entry-num">${String(i + 1).padStart(2, '0')}</span>
-      <span class="edr-entry-name" id="edr-name-${e.id}">${name}</span>
+      <div class="edr-entry-title-col">
+        <span class="edr-entry-name" id="edr-name-${e.id}">${name}</span>
+        ${parsedSummary}
+      </div>
       <button class="edr-entry-del" onclick="event.stopPropagation();deleteEdmReportEntry('${e.id}')" title="Remove">
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
       </button>
@@ -5008,47 +5107,49 @@ function renderEdmEntryCard(e, i) {
     </div>
     <div class="edr-entry-body">
 
-      <div class="edr-subsection-label">Identification</div>
+      <!-- Step 1: Email Name -->
+      <div class="edr-subsection-label">
+        <span class="edr-step-badge">1</span> Email Name
+        <span class="edr-source">Copy from the top of the Salesforce record — not in the paste block</span>
+      </div>
+      <input class="form-input" type="text" value="${escapeHtml(e.email_name || '')}" placeholder="e.g. 260610_SMSF"
+        oninput="saveEdmReportField('${e.id}','email_name',this.value);const nl=document.getElementById('edr-name-${e.id}');if(nl)nl.textContent=this.value||'New eDM ${i + 1}'"/>
+
+      <!-- Step 2: Raw paste -->
+      <div class="edr-subsection-label" style="margin-top:14px">
+        <span class="edr-step-badge">2</span> Salesforce Report Tab — Paste Raw Data
+        <span class="edr-source">Select All on the Report tab page, copy, paste below</span>
+      </div>
+      <textarea class="edr-paste-area" id="edr-paste-${e.id}" placeholder="Paste the full text from Salesforce Report tab here…">${escapeHtml(e.raw_paste || '')}</textarea>
+      <button class="edr-parse-btn" onclick="applyEdmParse('${e.id}')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><polyline points="4,8 7,11 12,5"/><circle cx="8" cy="8" r="6"/></svg>
+        Parse Data
+      </button>
+      ${e.subject || e.html_open_rate ? `<div class="edr-parsed-badge">✓ Parsed — ${e.subject ? escapeHtml(e.subject.slice(0,50)) : ''}</div>` : ''}
+
+      <!-- Step 3: Interaction tab -->
+      <div class="edr-subsection-label" style="margin-top:14px">
+        <span class="edr-step-badge">3</span> Interaction Tab — Manual Entry
+        <span class="edr-source">Switch to Interaction tab in Salesforce and enter values below</span>
+      </div>
       <div class="edr-field-grid">
-        <div class="edr-field edr-field-wide">
-          <label class="edr-field-label">Email Name <span class="edr-source">Salesforce email entry name</span></label>
-          <input class="form-input" type="text" value="${escapeHtml(e.email_name)}" placeholder="e.g. 260610_SMSF"
-            oninput="saveEdmReportField('${e.id}','email_name',this.value);const nl=document.getElementById('edr-name-${e.id}');if(nl)nl.textContent=this.value||'New eDM ${i + 1}'"/>
-        </div>
-        <div class="edr-field edr-field-wide">
-          <label class="edr-field-label">Subject Line <span class="edr-source">Report tab</span></label>
-          <input class="form-input" type="text" value="${escapeHtml(e.subject)}" placeholder="Exact subject line"
-            oninput="saveEdmReportField('${e.id}','subject',this.value)"/>
+        <div class="edr-field">
+          <label class="edr-field-label">Read Rate <span class="edr-pct-hint">%</span></label>
+          <input class="form-input" value="${escapeHtml(String(e.read_rate || ''))}" placeholder="e.g. 38.5"
+            oninput="saveEdmReportField('${e.id}','read_rate',this.value)"/>
         </div>
         <div class="edr-field">
-          <label class="edr-field-label">Started At <span class="edr-source">Report tab</span></label>
-          <input class="form-input" type="text" value="${escapeHtml(e.started_at)}" placeholder="e.g. 10 Jun 2026"
-            oninput="saveEdmReportField('${e.id}','started_at',this.value)"/>
+          <label class="edr-field-label">Skim Rate <span class="edr-pct-hint">%</span></label>
+          <input class="form-input" value="${escapeHtml(String(e.skim_rate || ''))}" placeholder="e.g. 15.2"
+            oninput="saveEdmReportField('${e.id}','skim_rate',this.value)"/>
         </div>
       </div>
 
-      <div class="edr-subsection-label">Report Tab — Salesforce</div>
-      <div class="edr-field-grid">
-        ${fld('total_delivered',  'Total Delivered',        e.total_delivered,     '2415',  'number')}
-        ${fld('html_open_rate',   'HTML Open Rate',         e.html_open_rate,      '42.0',  'text',   '%')}
-        ${fld('total_clicks',     'Total Clicks',           e.total_clicks,        '180',   'number')}
-        ${fld('total_ctr',        'Total CTR',              e.total_ctr,           '7.45',  'text',   '%')}
-        ${fld('unique_clicks',    'Unique Clicks',          e.unique_clicks,       '140',   'number')}
-        ${fld('unique_ctr',       'Unique CTR',             e.unique_ctr,          '5.80',  'text',   '%')}
-        ${fld('click_to_open_ratio', 'Click-to-Open Ratio', e.click_to_open_ratio, '13.84', 'text',  '%')}
-        ${fld('total_opt_outs',   'Total Opt-outs',         e.total_opt_outs,      '3',     'number')}
-        ${fld('opt_out_rate',     'Opt-out Rate',           e.opt_out_rate,        '0.12',  'text',   '%')}
-        ${fld('total_spam',       'Total Spam Complaints',  e.total_spam,          '0',     'number')}
-        ${fld('spam_rate',        'Spam Complaint Rate',    e.spam_rate,           '0.00',  'text',   '%')}
+      <!-- Step 4: Click map -->
+      <div class="edr-subsection-label" style="margin-top:14px">
+        <span class="edr-step-badge">4</span> Click-Through Rate Report Tab — Screenshot
+        <span class="edr-source">Switch to that tab, screenshot the full email with click overlay</span>
       </div>
-
-      <div class="edr-subsection-label">Interaction Tab — Salesforce</div>
-      <div class="edr-field-grid">
-        ${fld('read_rate',  'Read Rate',  e.read_rate,  '38.5', 'text', '%')}
-        ${fld('skim_rate',  'Skim Rate',  e.skim_rate,  '15.2', 'text', '%')}
-      </div>
-
-      <div class="edr-subsection-label">Click-Through Rate Report Tab — Screenshot</div>
       <div class="edr-clickmap-zone" id="edr-clickmap-zone-${e.id}"
            onclick="document.getElementById('edr-file-${e.id}')?.click()">
         ${edrClickMapPrompt(e.id)}
