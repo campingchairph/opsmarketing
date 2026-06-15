@@ -4937,7 +4937,6 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   overflow: hidden;
   border: 1px solid #e8e8e4;
   border-radius: 4px;
-  max-height: 560px;
 }
 .edr-report-iframe {
   width: 700px;
@@ -5164,9 +5163,12 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 }
 .edr-report-img {
   width: 100%;
+  max-height: 600px;
   border-radius: 5px;
   border: 1px solid var(--border);
   object-fit: contain;
+  object-position: top center;
+  display: block;
 }
 .edr-report-img-empty {
   border: 1.5px dashed var(--border);
@@ -5272,7 +5274,8 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 
 /* Print — show only the report, A4 page breaks */
 @media print {
-  .sidebar, .topbar, .edr-left, .edr-page-header, .edr-preview-header { display: none !important; }
+  .sidebar, .topbar, .edr-left, .edr-page-header, .edr-preview-header,
+  .right-tabs-stack, .side-drawer, .notes-drawer, #edm-sidebar-reopen-tab { display: none !important; }
   .edr-right  { position: static; }
   #edr-report-preview { border: none; max-height: none; overflow: visible; }
   .edr-report-doc { padding: 0.5in; }
