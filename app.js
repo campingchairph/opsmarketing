@@ -4988,40 +4988,31 @@ function printEdmReport() {
       ? `<div style="width:700px;zoom:0.42;transform-origin:top left;background:#fff;">${e.click_map_html}</div>`
       : `<div style="border:1.5px dashed #ddd;border-radius:5px;height:200px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;">No click map</div>`;
 
-    const hasClicks = e.total_clicks || e.unique_clicks || e.total_ctr || e.read_rate || e.skim_rate;
+    const hasClicks = e.total_clicks || e.unique_clicks || e.total_ctr || e.unique_ctr || e.read_rate || e.skim_rate;
 
     const statsCol = [
       statGroup('#E4572E', 'Key Metrics', [
         ['HTML Open Rate', e.html_open_rate ? e.html_open_rate + '%' : ''],
-        ['Unique CTR', e.unique_ctr ? e.unique_ctr + '%' : ''],
-        ['Click-to-Open', e.click_to_open_ratio ? e.click_to_open_ratio + '%' : ''],
+        ['Click-to-Open Ratio', e.click_to_open_ratio ? e.click_to_open_ratio + '%' : ''],
       ]),
       statGroup('#191919', 'Volume', [
-        ['Total Sent', e.total_sent],
-        ['Delivered', e.total_delivered],
-        ['Total Opens', e.total_opens],
+        ['Total Delivered', e.total_delivered],
         ['Unique Opens', e.unique_opens],
       ]),
       hasClicks ? statGroup('#404040', 'Clicks', [
         ['Total Clicks', e.total_clicks],
-        ['Unique Clicks', e.unique_clicks],
         ['Total CTR', e.total_ctr ? e.total_ctr + '%' : ''],
+        ['Unique Clicks', e.unique_clicks],
+        ['Unique CTR', e.unique_ctr ? e.unique_ctr + '%' : ''],
         ['Read Rate', e.read_rate ? e.read_rate + '%' : ''],
         ['Skim Rate', e.skim_rate ? e.skim_rate + '%' : ''],
       ]) : '',
       statGroup('#292929', 'Opt-outs & Spam', [
-        ['Opt-outs', e.total_opt_outs],
+        ['Total Opt-outs', e.total_opt_outs],
         ['Opt-out Rate', e.opt_out_rate ? e.opt_out_rate + '%' : ''],
-        ['Spam', e.total_spam],
+        ['Total Spam', e.total_spam],
         ['Spam Rate', e.spam_rate ? e.spam_rate + '%' : ''],
       ]),
-      e.total_bounced ? `<div class="stat-group" style="--gc:#8c8a85">
-        <div class="stat-group-label">Delivery</div>
-        <div class="stats-grid delivery-grid">
-          <div class="stat bounced-stat"><div class="stat-val" style="color:#8c8a85;white-space:nowrap">${escapeHtml(String(e.total_bounced))}</div><div class="stat-lbl">Bounced</div></div>
-          ${e.delivery_rate ? `<div class="stat"><div class="stat-val" style="color:#8c8a85">${escapeHtml(String(e.delivery_rate))}%</div><div class="stat-lbl">Delivery Rate</div></div>` : ''}
-        </div>
-      </div>` : '',
     ].filter(Boolean).join('');
 
     return `<div class="page">
