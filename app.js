@@ -273,6 +273,7 @@ function navigate(pageId) {
   if (pageId === 'salesforce')  { setEdmSidebarVisible(true);  renderEdmCampaignCard(); renderEdmPhases(); renderEdmQA(); }
   else                          { setEdmSidebarVisible(false); }
   if (pageId === 'edmreport')   { renderEdmReportPage(); }
+  if (pageId === 'plaintext')   { renderPlainTextPage(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
   if (pageId === 'goodlooks')   { renderGoodLooks(); }
@@ -4965,15 +4966,29 @@ function printEdmReport() {
     </div>`;
   }
 
+  // Title page
+  const now = new Date();
+  const titleDate = now.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  const titlePage = `<div class="page page-title">
+    <div class="title-pg-inner">
+      <div class="title-pg-label">eDM Performance Report</div>
+      <div class="title-pg-month">${escapeHtml(monthLabel || titleDate)}</div>
+      <div class="title-pg-date">Generated ${escapeHtml(titleDate)}</div>
+      <div class="title-pg-rule"></div>
+      <div class="title-pg-count">${d.entries.length} eDM${d.entries.length !== 1 ? 's' : ''} reviewed</div>
+    </div>
+  </div>`;
+
   const pages = d.entries.map((e, i) => {
     const name = e.email_name || `Email ${i + 1}`;
-    const hasInteraction = e.total_clicks || e.unique_clicks || e.total_ctr || e.read_rate || e.skim_rate;
 
     const imgCol = e.click_map_image
       ? `<img src="${e.click_map_image}" style="width:100%;height:auto;max-height:9in;object-fit:contain;object-position:top left;display:block;">`
       : e.click_map_html
       ? `<div style="width:700px;zoom:0.42;transform-origin:top left;background:#fff;">${e.click_map_html}</div>`
       : `<div style="border:1.5px dashed #ddd;border-radius:5px;height:200px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;">No click map</div>`;
+
+    const hasClicks = e.total_clicks || e.unique_clicks || e.total_ctr || e.read_rate || e.skim_rate;
 
     const statsCol = [
       statGroup('#E4572E', 'Key Metrics', [
@@ -4987,7 +5002,7 @@ function printEdmReport() {
         ['Total Opens', e.total_opens],
         ['Unique Opens', e.unique_opens],
       ]),
-      hasInteraction ? statGroup('#404040', 'Interaction', [
+      hasClicks ? statGroup('#404040', 'Clicks', [
         ['Total Clicks', e.total_clicks],
         ['Unique Clicks', e.unique_clicks],
         ['Total CTR', e.total_ctr ? e.total_ctr + '%' : ''],
@@ -5000,9 +5015,13 @@ function printEdmReport() {
         ['Spam', e.total_spam],
         ['Spam Rate', e.spam_rate ? e.spam_rate + '%' : ''],
       ]),
-      statGroup('#8c8a85', 'Delivery', [
-        ['Bounced', e.total_bounced],
-      ]),
+      e.total_bounced ? `<div class="stat-group" style="--gc:#8c8a85">
+        <div class="stat-group-label">Delivery</div>
+        <div class="stats-grid delivery-grid">
+          <div class="stat bounced-stat"><div class="stat-val" style="color:#8c8a85;white-space:nowrap">${escapeHtml(String(e.total_bounced))}</div><div class="stat-lbl">Bounced</div></div>
+          ${e.delivery_rate ? `<div class="stat"><div class="stat-val" style="color:#8c8a85">${escapeHtml(String(e.delivery_rate))}%</div><div class="stat-lbl">Delivery Rate</div></div>` : ''}
+        </div>
+      </div>` : '',
     ].filter(Boolean).join('');
 
     return `<div class="page">
@@ -5054,7 +5073,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .page:last-child{page-break-after:avoid}
 .page-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid #e8e8e4;margin-bottom:4px}
 .page-meta{display:flex;align-items:flex-start;gap:10px}
-.page-num{font-size:11px;font-weight:700;color:#fff;background:#191919;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:2px;letter-spacing:0.04em}
+.page-num{font-size:11px;font-weight:700;color:#fff;background:#E4572E;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:2px;letter-spacing:0.04em}
 .page-name{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:#191919;line-height:1.2}
 .page-sub{font-size:10px;color:#888;margin-top:2px}
 .page-date{font-size:10px;color:#aaa;white-space:nowrap}
@@ -5074,9 +5093,18 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .mo-val{font-size:32px;font-weight:700;color:#E4572E;letter-spacing:-0.04em}
 .mo-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.08em}
 .mo-count{font-size:10px;color:#aaa}
+.page-title{display:flex;align-items:center;justify-content:center;min-height:calc(297mm - 1in)}
+.title-pg-inner{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.title-pg-label{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E4572E}
+.title-pg-month{font-family:'Playfair Display',Georgia,serif;font-size:42px;font-weight:700;color:#191919;line-height:1.1;margin-top:4px}
+.title-pg-date{font-size:11px;color:#aaa;margin-top:2px}
+.title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
+.title-pg-count{font-size:12px;color:#666}
+.delivery-grid{grid-template-columns:repeat(2,1fr)}
 </style>
 </head>
 <body>
+${titlePage}
 ${pages.join('\n')}
 ${moPage}
 <script>window.onload=function(){window.print();}<\/script>
@@ -5448,6 +5476,148 @@ function renderEdmEntryCard(e, i) {
         </div>
         <div class="edr-html-hint">In DevTools Console — select the element that wraps the email <strong>AND</strong> comment bubbles, then run: <code>copy($0.outerHTML)</code><br>To include comment lines: go one level up from the email div until comment bubbles appear in the highlight.</div>
       </div>
+    </div>
+  </div>`;
+}
+
+function renderPlainTextPage() {
+  const root = document.getElementById('pt-root');
+  if (!root || root.dataset.rendered) return;
+  root.dataset.rendered = '1';
+
+  function step(num, title, badge, body) {
+    const badgeHtml = badge ? `<span class="pt-badge pt-badge-${badge.type}">${badge.label}</span>` : '';
+    return `<div class="pt-step">
+      <div class="pt-step-num">${num}</div>
+      <div class="pt-step-body">
+        <div class="pt-step-title">${title}${badgeHtml}</div>
+        <div class="pt-step-desc">${body}</div>
+      </div>
+    </div>`;
+  }
+
+  function section(title, content) {
+    return `<div class="pt-section"><div class="pt-section-title">${title}</div>${content}</div>`;
+  }
+
+  function pill(text) { return `<span class="pt-pill">${text}</span>`; }
+  function code(text) { return `<code class="edm-code">${text}</code>`; }
+  function note(text) { return `<div class="pt-note">${text}</div>`; }
+
+  root.innerHTML = `
+  <div class="page-header-block">
+    <div class="page-title-row">
+      <h1 class="page-h1">Plain Text Email</h1>
+      <span class="page-subtitle">Salesforce Account Engagement (Pardot) — Workflow Guide</span>
+    </div>
+  </div>
+
+  <div class="pt-layout">
+    <div class="pt-main">
+
+      ${section('Overview', `
+        <p class="pt-para">Plain text emails are sent through <strong>Email Content</strong> (not Account Engagement Email). They are used for <strong>broker outreach</strong> and appear as if they are coming directly from a specific person (e.g. Laura Stanley, National Director – Private Lending). They are simpler than designed emails — no HTML blocks, no formatting — just body copy and a signature populated via merge fields.</p>
+        <p class="pt-para">The customer only receives the HTML version. The plain text body is for <strong>internal Salesforce records only</strong> — it shows up on contact records so you can quickly see what was sent without loading the full HTML.</p>
+      `)}
+
+      ${section('Step-by-Step Workflow', `
+        <div class="pt-phase-label">Phase 1 — Clone</div>
+        ${step(1, 'Clone the Previous Email', null, `
+          Go to <strong>Account Engagement → Content → Email Content</strong>.<br>
+          Find the most recent email for the same product. Click the <strong>dropdown arrow</strong> next to it → select <strong>Clone</strong>.<br>
+          Enter the new name following the naming convention, then click <strong>Save</strong>.
+        `)}
+
+        <div class="pt-phase-label">Phase 2 — Edit</div>
+        ${step(2, 'Update the Subject Line', null, `
+          Open the cloned email → click <strong>Edit</strong> → select <strong>New Email Experience</strong> (pre-selected — just click through).<br>
+          Click the edit icon on the subject line field — it will scroll you to the subject field at the bottom.<br>
+          Copy the subject line from the Word document provided → paste it in → click <strong>Save</strong>.
+        `)}
+        ${step(3, 'Update the Email Body', {type:'warn', label:'body only'}, `
+          Edit <strong>only the first block</strong> — the body copy. Everything below (sender name, title, email, phone) is pre-coded with merge fields — <strong>do not touch these</strong>.<br>
+          Delete the old body copy → paste the new body copy from the Word document → fix spacing as needed.<br>
+          The email typically ends at <em>"chat soon"</em> or similar — don't duplicate if it's already in the template. Click <strong>Save</strong>.
+        `)}
+        ${step(4, 'Sync the Plain Text Body', {type:'key', label:'required'}, `
+          In the email view, find the <strong>Text Body</strong> section → click the <strong>pencil icon</strong>.<br>
+          Click <strong>Sync from HTML</strong> → Confirm the sync → click <strong>Save</strong>.<br>
+          This makes the internal plain text record match the email body. The customer never sees this — it's for internal contact record viewing only.
+        `)}
+
+        <div class="pt-phase-label">Phase 3 — Notify</div>
+        ${step(5, 'Notify for Sending', null, `
+          Copy the link to the email record and let the sender know the email is ready to send.<br>
+          You do not send the email yourself — the sender (e.g. Laura) handles activation and sending.
+        `)}
+      `)}
+
+      ${section('How Sending Works (For Reference)', `
+        <p class="pt-para" style="color:var(--text-3);font-style:italic;font-size:12px;">You don't need to do this yet — context only.</p>
+        <ol class="pt-list pt-list-ol">
+          <li><strong>Activate for Automation</strong> — sets the primary sender and links the campaign</li>
+          <li><strong>Set Primary Sender</strong> — find the person's record, set as primary sender and reply-to user</li>
+          <li><strong>Activate</strong></li>
+          <li><strong>Go to Send</strong> — set campaign, tracker domain (always ${code('assetline')}), select recipient lists: All Brokers (leads and contacts) + any additional specific lists</li>
+          <li><strong>Send Test first</strong> — send to internal test list to verify before full send</li>
+        </ol>
+      `)}
+
+    </div>
+
+    <div class="pt-sidebar">
+
+      ${section('When to Use This', `
+        <div class="pt-use-row">
+          <div class="pt-use-type">Use <strong>Email Content</strong> (plain text) for:</div>
+          <ul class="pt-list">
+            <li>Broker outreach emails that look like they come from a real person</li>
+            <li>Emails that don't require designed HTML layout</li>
+          </ul>
+        </div>
+        <div class="pt-use-row" style="margin-top:10px">
+          <div class="pt-use-type">Use <strong>Account Engagement Email</strong> for:</div>
+          <ul class="pt-list">
+            <li>Designed HTML emails with blocks, images, and branding</li>
+          </ul>
+        </div>
+      `)}
+
+      ${section('Naming Convention', `
+        <div class="pt-formula">[Product] [Subject Line]</div>
+        <div class="pt-formula-example">e.g. ${code('Private Lending Let\'s have a private chat')}</div>
+        ${note('No date needed in the name.')}
+      `)}
+
+      ${section('Campaign Convention', `
+        <div class="pt-formula">[Product] Push</div>
+        <div class="pt-formula-example">e.g. ${code('Private Lending Push')}</div>
+        ${note('This groups all emails per product in Salesforce reporting.')}
+      `)}
+
+      ${section('The 4 Core Products', `
+        <div class="pt-products">
+          ${pill('Horizon Mortgages')}
+          ${pill('Private Lending')}
+          ${pill('Development Finance')}
+          ${pill('Bridging')}
+        </div>
+        <p class="pt-para" style="margin-top:10px;font-size:12px">Always lead with the product name — it drives reporting, dashboards, and Salesforce automation.</p>
+        <p class="pt-para" style="font-size:12px;color:var(--text-3)">To identify the product: look for "private" → <em>Private Lending</em>. Check who the email is from (Laura Stanley = Private Lending). Ask if unsure.</p>
+      `)}
+
+      ${section('Key Reminders', `
+        <ul class="pt-list pt-reminders">
+          <li><strong>Email Content</strong> = plain text — broker emails from a person</li>
+          <li><strong>Account Engagement Email</strong> = designed HTML — branded campaigns</li>
+          <li>Always <strong>clone</strong> the previous email — never build from scratch</li>
+          <li>Only edit the <strong>body copy</strong> — leave merge fields and signature blocks untouched</li>
+          <li>Always <strong>sync plain text from HTML</strong> after editing</li>
+          <li>Naming: <code class="edm-code">[Product] [Subject Line]</code> — no date</li>
+          <li>Campaign: <code class="edm-code">[Product] Push</code></li>
+        </ul>
+      `)}
+
     </div>
   </div>`;
 }
