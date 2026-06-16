@@ -4804,14 +4804,91 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── EDM REPORTING ────────────────────────────────────────────────
-const EDM_REPORT_KEY = 'msc_edm_report_v1';
+const EDM_REPORT_KEY   = 'msc_edm_report_v1';
+const EDM_SAVES_KEY    = 'msc_edm_report_saves';
 
 function loadEdmReportData() {
   try {
     const d = JSON.parse(localStorage.getItem(EDM_REPORT_KEY));
-    if (d && d.entries) return d;
+    if (d && d.entries) {
+      if (!d.start_month) d.start_month = d.month || new Date().toISOString().slice(0, 7);
+      if (!d.end_month)   d.end_month   = '';
+      return d;
+    }
   } catch {}
-  return { month: new Date().toISOString().slice(0, 7), entries: [] };
+  return { start_month: new Date().toISOString().slice(0, 7), end_month: '', entries: [] };
+}
+
+function computeMonthLabel(d) {
+  function fmt(ym) {
+    if (!ym) return '';
+    const [y, m] = ym.split('-');
+    return new Date(+y, +m - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  }
+  if (d.end_month && d.end_month !== d.start_month) {
+    return fmt(d.start_month) + ' – ' + fmt(d.end_month);
+  }
+  return fmt(d.start_month);
+}
+
+// ── Snapshots ────────────────────────────────────────────────────
+function listEdmSnapshots() {
+  try { return JSON.parse(localStorage.getItem(EDM_SAVES_KEY)) || []; } catch { return []; }
+}
+
+function saveEdmSnapshot() {
+  const name = prompt('Save report as:');
+  if (!name || !name.trim()) return;
+  const d    = loadEdmReportData();
+  const id   = 'snap_' + Date.now();
+  const list = listEdmSnapshots();
+  list.push({ id, name: name.trim(), savedAt: new Date().toISOString() });
+  localStorage.setItem(EDM_SAVES_KEY, JSON.stringify(list));
+  localStorage.setItem('msc_edm_report_save_' + id, JSON.stringify(d));
+  renderEdmSnapshotPanel();
+  showAiToast('✓ Report saved as "' + name.trim() + '"');
+}
+
+function loadEdmSnapshot(id) {
+  if (!confirm('Load this save? Unsaved changes to the current report will be replaced.')) return;
+  try {
+    const d = JSON.parse(localStorage.getItem('msc_edm_report_save_' + id));
+    if (d && d.entries) {
+      saveEdmReportData(d);
+      renderEdmReportPage();
+    }
+  } catch { showAiToast('Could not load save.'); }
+}
+
+function deleteEdmSnapshot(id) {
+  if (!confirm('Delete this saved report?')) return;
+  const list = listEdmSnapshots().filter(s => s.id !== id);
+  localStorage.setItem(EDM_SAVES_KEY, JSON.stringify(list));
+  localStorage.removeItem('msc_edm_report_save_' + id);
+  renderEdmSnapshotPanel();
+}
+
+function renderEdmSnapshotPanel() {
+  const el = document.getElementById('edr-snapshot-panel');
+  if (!el) return;
+  const list = listEdmSnapshots();
+  if (!list.length) {
+    el.innerHTML = '<span class="edr-snap-empty">No saved reports</span>';
+    return;
+  }
+  el.innerHTML = list.slice().reverse().map(s => {
+    const dt = new Date(s.savedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `<div class="edr-snap-row">
+      <div class="edr-snap-info">
+        <span class="edr-snap-name">${escapeHtml(s.name)}</span>
+        <span class="edr-snap-date">${dt}</span>
+      </div>
+      <div class="edr-snap-actions">
+        <button class="edr-snap-load-btn" onclick="loadEdmSnapshot('${s.id}')">Load</button>
+        <button class="edr-snap-del-btn" onclick="deleteEdmSnapshot('${s.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function computeEdmMonthlyAverages(entries) {
@@ -4876,16 +4953,40 @@ function saveEdmReportField(id, field, value) {
   updateEdmReportPreview();
 }
 
-function saveEdmReportMonth(value) {
+function saveEdmReportStartMonth(value) {
   const d = loadEdmReportData();
-  d.month = value;
+  d.start_month = value;
+  if (d.end_month && d.end_month < value) d.end_month = '';
+  saveEdmReportData(d);
+  const em = document.getElementById('edr-end-month');
+  if (em) { em.min = value; if (d.end_month === '') em.value = ''; }
+  updateEdmReportPreview();
+}
+
+function saveEdmReportEndMonth(value) {
+  const d = loadEdmReportData();
+  d.end_month = value;
   saveEdmReportData(d);
   updateEdmReportPreview();
 }
 
+function toggleEdmSpan(checked) {
+  const endRow = document.getElementById('edr-end-month-row');
+  if (endRow) endRow.style.display = checked ? 'flex' : 'none';
+  if (!checked) {
+    const d = loadEdmReportData();
+    d.end_month = '';
+    saveEdmReportData(d);
+    const em = document.getElementById('edr-end-month');
+    if (em) em.value = '';
+    updateEdmReportPreview();
+  }
+}
+
+
 function clearEdmReport() {
-  if (!confirm('Clear all eDM report data for this month?')) return;
-  saveEdmReportData({ month: new Date().toISOString().slice(0, 7), entries: [], monthly: { avg_html_open_rate: '', avg_unique_ctr: '', avg_click_to_open: '' } });
+  if (!confirm('Clear all eDM report data? This cannot be undone — save first if needed.')) return;
+  saveEdmReportData({ start_month: new Date().toISOString().slice(0, 7), end_month: '', entries: [] });
   renderEdmReportPage();
 }
 
@@ -4950,7 +5051,7 @@ function printEdmReport() {
   const d = loadEdmReportData();
   if (!d.entries.length) return;
 
-  const monthLabel = d.month_label || '';
+  const monthLabel = computeMonthLabel(d);
   const mo = computeEdmMonthlyAverages(d.entries);
 
   function statVal(v) { return v ? escapeHtml(String(v)) : '—'; }
@@ -4974,7 +5075,7 @@ function printEdmReport() {
     </div>`;
   }
 
-  // Title page
+  // Title page (with monthly averages)
   const now = new Date();
   const titleDate = now.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
   const titlePage = `<div class="page page-title">
@@ -4984,6 +5085,11 @@ function printEdmReport() {
       <div class="title-pg-date">Generated ${escapeHtml(titleDate)}</div>
       <div class="title-pg-rule"></div>
       <div class="title-pg-count">${d.entries.length} eDM${d.entries.length !== 1 ? 's' : ''} reviewed</div>
+      <div class="cover-avgs">
+        <div class="cover-avg"><div class="cover-avg-val">${mo.avg_html_open_rate ? mo.avg_html_open_rate + '%' : '—'}</div><div class="cover-avg-lbl">Avg HTML Open Rate</div></div>
+        <div class="cover-avg"><div class="cover-avg-val">${mo.avg_unique_ctr ? mo.avg_unique_ctr + '%' : '—'}</div><div class="cover-avg-lbl">Avg Unique CTR</div></div>
+        <div class="cover-avg"><div class="cover-avg-val">${mo.avg_click_to_open ? mo.avg_click_to_open + '%' : '—'}</div><div class="cover-avg-lbl">Avg Click-to-Open</div></div>
+      </div>
     </div>
   </div>`;
 
@@ -5041,21 +5147,6 @@ function printEdmReport() {
     </div>`;
   });
 
-  // Monthly averages as final page
-  const moPage = `<div class="page page-monthly">
-    <div class="page-header">
-      <div class="page-meta">
-        <span class="page-num mo-badge">AVG</span>
-        <div class="page-name">Monthly Averages${monthLabel ? ' — ' + escapeHtml(monthLabel) : ''}</div>
-      </div>
-    </div>
-    <div class="mo-grid">
-      <div class="mo-stat"><div class="mo-val">${mo.avg_html_open_rate ? mo.avg_html_open_rate + '%' : '—'}</div><div class="mo-lbl">Avg HTML Open Rate</div></div>
-      <div class="mo-stat"><div class="mo-val">${mo.avg_unique_ctr ? mo.avg_unique_ctr + '%' : '—'}</div><div class="mo-lbl">Avg Unique CTR</div></div>
-      <div class="mo-stat"><div class="mo-val">${mo.avg_click_to_open ? mo.avg_click_to_open + '%' : '—'}</div><div class="mo-lbl">Avg Click-to-Open</div></div>
-    </div>
-    <div class="mo-count">Based on ${d.entries.length} eDM${d.entries.length !== 1 ? 's' : ''}</div>
-  </div>`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -5080,11 +5171,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
 .stats-col{display:flex;flex-direction:column;gap:22px}
 .stat-group{display:flex;flex-direction:column;gap:6px}
-.stat-group-label{font-size:7.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
+.stat-group-label{font-size:10pt;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{display:flex;flex-direction:column;gap:2px}
-.stat-val{font-size:22px;font-weight:700;letter-spacing:-0.03em;line-height:1}
-.stat-lbl{font-size:8px;color:#888}
+.stat-val{font-size:25pt;font-weight:700;letter-spacing:-0.03em;line-height:1}
+.stat-lbl{font-size:8pt;color:#888}
 .page-monthly{min-height:auto}
 .mo-badge{background:#E4572E}
 .mo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:24px 0}
@@ -5100,12 +5191,15 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
+.cover-avgs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:28px;padding-top:24px;border-top:1px solid #e8e8e4}
+.cover-avg{display:flex;flex-direction:column;gap:5px;border-left:3px solid #E4572E;padding-left:14px}
+.cover-avg-val{font-size:36pt;font-weight:700;color:#E4572E;letter-spacing:-0.04em;line-height:1}
+.cover-avg-lbl{font-size:9pt;color:#888;text-transform:uppercase;letter-spacing:0.08em}
 </style>
 </head>
 <body>
 ${titlePage}
 ${pages.join('\n')}
-${moPage}
 <script>window.onload=function(){window.print();}<\/script>
 </body>
 </html>`;
@@ -5216,13 +5310,13 @@ function edrStat(val, label) {
 }
 
 function buildEdmReportHtml(d) {
-  if (!d.entries.length && !d.monthly.avg_html_open_rate) {
+  if (!d.entries.length) {
     return `<div class="edr-preview-empty">
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2" style="width:38px;height:38px;opacity:0.18"><path d="M6 40V12a2 2 0 012-2h32a2 2 0 012 2v28l-8-4-8 4-8-4-8 4z"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="27" x2="26" y2="27"/></svg>
       <div style="font-size:12.5px;color:var(--text-3);margin-top:10px;line-height:1.5">Paste Salesforce data and click Parse —<br>the report generates here automatically.</div>
     </div>`;
   }
-  const monthLabel = d.month ? new Date(d.month + '-02').toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }) : '';
+  const monthLabel = computeMonthLabel(d);
   let html = `<div class="edr-report-doc">
     <div class="edr-report-doc-title">eDM Performance Report${monthLabel ? ' · ' + monthLabel : ''}</div>`;
 
@@ -5628,6 +5722,8 @@ function renderEdmReportPage() {
   if (!root) return;
   const d = loadEdmReportData();
 
+  const hasSpan = !!(d.end_month && d.end_month !== d.start_month);
+
   root.innerHTML = `
     <div class="edr-page-header">
       <div class="edr-page-title">
@@ -5635,12 +5731,28 @@ function renderEdmReportPage() {
         eDM Reporting
       </div>
       <div class="edr-page-controls">
-        <label class="edr-month-label" for="edr-month">Month</label>
-        <input type="month" id="edr-month" class="edr-month-input" value="${d.month}"
-          onchange="saveEdmReportMonth(this.value)"/>
+        <div class="edr-month-group">
+          <label class="edr-month-label">Month</label>
+          <input type="month" id="edr-start-month" class="edr-month-input" value="${d.start_month || ''}"
+            onchange="saveEdmReportStartMonth(this.value)"/>
+          <label class="edr-span-toggle" title="Select a date range">
+            <input type="checkbox" ${hasSpan ? 'checked' : ''} onchange="toggleEdmSpan(this.checked)"/>
+            <span>to</span>
+          </label>
+          <div id="edr-end-month-row" style="display:${hasSpan ? 'flex' : 'none'};align-items:center;gap:6px">
+            <input type="month" id="edr-end-month" class="edr-month-input" value="${d.end_month || ''}"
+              min="${d.start_month || ''}" onchange="saveEdmReportEndMonth(this.value)"/>
+          </div>
+        </div>
         <button class="btn-add" onclick="addEdmReportEntry()">+ Add eDM</button>
+        <button class="edr-save-snap-btn" onclick="saveEdmSnapshot()" title="Save report">↓ Save</button>
         <button class="edr-clear-btn" onclick="clearEdmReport()">Clear</button>
       </div>
+    </div>
+
+    <div class="edr-saves-bar">
+      <span class="edr-saves-label">Saved reports</span>
+      <div id="edr-snapshot-panel" class="edr-snapshot-panel"></div>
     </div>
 
     <div class="edr-layout">
@@ -5673,4 +5785,5 @@ function renderEdmReportPage() {
 
   renderEdmReportEntries();
   updateEdmReportPreview();
+  renderEdmSnapshotPanel();
 }
