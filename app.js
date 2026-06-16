@@ -5058,18 +5058,20 @@ function printEdmReport() {
 
   function fmtStatValHtml(val) {
     let str = String(val);
-    // Apply thousands comma to numeric part
     const numPart = str.replace(/%$/, '');
     const n = Number(numPart.replace(/,/g, ''));
     if (!isNaN(n) && str.indexOf('/') === -1) {
       str = n.toLocaleString('en-AU') + (str.endsWith('%') ? '%' : '');
     }
-    // Split on decimal point — fractional part rendered at 3/4 size
+    const S = `style="font-size:19pt"`;
+    // Has decimal — everything from the dot onwards is small (covers ".78%" case)
     const dotIdx = str.indexOf('.');
     if (dotIdx !== -1) {
-      const whole = escapeHtml(str.slice(0, dotIdx));
-      const frac  = escapeHtml(str.slice(dotIdx)); // includes "." e.g. ".78%"
-      return `${whole}<span style="font-size:19pt">${frac}</span>`;
+      return escapeHtml(str.slice(0, dotIdx)) + `<span ${S}>${escapeHtml(str.slice(dotIdx))}</span>`;
+    }
+    // No decimal but ends with % — reduce % sign only
+    if (str.endsWith('%')) {
+      return escapeHtml(str.slice(0, -1)) + `<span ${S}>%</span>`;
     }
     return escapeHtml(str);
   }
@@ -5122,11 +5124,11 @@ function printEdmReport() {
         ['HTML Open Rate', e.html_open_rate ? e.html_open_rate + '%' : ''],
         ['Click-to-Open Ratio', e.click_to_open_ratio ? e.click_to_open_ratio + '%' : ''],
       ]),
-      statGroup('#191919', 'Volume', [
+      statGroup('#404040', 'Volume', [
         ['Total Delivered', e.total_delivered],
         ['Unique Opens', e.unique_opens],
       ]),
-      hasClicks ? statGroup('#404040', 'Clicks', [
+      hasClicks ? statGroup('#333333', 'Clicks', [
         ['Total Clicks', e.total_clicks],
         ['Total CTR', e.total_ctr ? e.total_ctr + '%' : ''],
         ['Unique Clicks', e.unique_clicks],
@@ -5148,10 +5150,10 @@ function printEdmReport() {
           <span class="page-num">${String(i + 1).padStart(2, '0')}</span>
           <div>
             <div class="page-name">${e.report_link ? `<a href="${escapeHtml(e.report_link)}" style="color:inherit;text-decoration:underline;text-decoration-color:#E4572E;text-underline-offset:3px">${escapeHtml(name)}</a>` : escapeHtml(name)}</div>
-            ${e.subject ? `<div class="page-sub">${escapeHtml(e.subject)}</div>` : ''}
+            ${e.subject ? `<div class="page-sub"><span class="page-field-lbl">Subject:</span> ${escapeHtml(e.subject)}</div>` : ''}
+            ${e.started_at ? `<div class="page-sub" style="margin-top:3px"><span class="page-field-lbl">Started date:</span> ${edrDate(e.started_at)}</div>` : ''}
           </div>
         </div>
-        ${e.started_at ? `<div class="page-date"><span style="font-weight:600;color:#888">Started date:</span> ${edrDate(e.started_at)}</div>` : ''}
       </div>
       <div class="page-body">
         <div class="img-col">${imgCol}</div>
@@ -5169,17 +5171,17 @@ function printEdmReport() {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-@page { size: A4 portrait; margin: 0.5in; }
+@page { size: A4 portrait; margin: 1in 0.5in 0.5in 0.5in; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
-.page{min-height:calc(297mm - 1in);page-break-after:always;display:flex;flex-direction:column;gap:14px}
+.page{min-height:calc(297mm - 1.5in);page-break-after:always;display:flex;flex-direction:column;gap:42px}
 .page:last-child{page-break-after:avoid}
-.page-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid #e8e8e4;margin-bottom:4px}
+.page-header{display:flex;align-items:flex-start;justify-content:flex-start;padding-bottom:10px;border-bottom:1px solid #e8e8e4}
 .page-meta{display:flex;align-items:flex-start;gap:10px}
-.page-num{font-size:11px;font-weight:700;color:#fff;background:#E4572E;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:2px;letter-spacing:0.04em}
-.page-name{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:#191919;line-height:1.2;margin-bottom:2mm}
-.page-sub{font-size:12px;color:#888;margin-top:0}
-.page-date{font-size:10px;color:#aaa;white-space:nowrap}
+.page-num{font-size:11px;font-weight:700;color:#fff;background:#E4572E;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:3px;letter-spacing:0.04em}
+.page-name{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:700;color:#191919;line-height:1.2;margin-bottom:2mm}
+.page-sub{font-size:12px;color:#888;margin-top:0;line-height:1.5}
+.page-field-lbl{font-weight:600;color:#555}
 .page-body{display:grid;grid-template-columns:42% 1fr;gap:36px;align-items:start;flex:1}
 .img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
 .stats-col{display:flex;flex-direction:column;gap:44px}
