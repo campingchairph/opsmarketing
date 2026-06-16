@@ -5056,17 +5056,27 @@ function printEdmReport() {
 
   function statVal(v) { return v ? escapeHtml(String(v)) : '—'; }
 
-  function fmtStatVal(val) {
-    const n = Number(String(val).replace(/,/g, ''));
-    if (!isNaN(n) && String(val).indexOf('%') === -1 && String(val).indexOf('/') === -1) {
-      return n.toLocaleString('en-AU');
+  function fmtStatValHtml(val) {
+    let str = String(val);
+    // Apply thousands comma to numeric part
+    const numPart = str.replace(/%$/, '');
+    const n = Number(numPart.replace(/,/g, ''));
+    if (!isNaN(n) && str.indexOf('/') === -1) {
+      str = n.toLocaleString('en-AU') + (str.endsWith('%') ? '%' : '');
     }
-    return String(val);
+    // Split on decimal point — fractional part rendered at 3/4 size
+    const dotIdx = str.indexOf('.');
+    if (dotIdx !== -1) {
+      const whole = escapeHtml(str.slice(0, dotIdx));
+      const frac  = escapeHtml(str.slice(dotIdx)); // includes "." e.g. ".78%"
+      return `${whole}<span style="font-size:19pt">${frac}</span>`;
+    }
+    return escapeHtml(str);
   }
 
   function statGroup(color, label, stats) {
     const cells = stats.filter(s => s[1]).map(([lbl, val]) =>
-      `<div class="stat"><div class="stat-val" style="color:${color}">${escapeHtml(fmtStatVal(val))}</div><div class="stat-lbl">${lbl}</div></div>`
+      `<div class="stat"><div class="stat-val" style="color:${color}">${fmtStatValHtml(val)}</div><div class="stat-lbl">${lbl}</div></div>`
     ).join('');
     if (!cells) return '';
     return `<div class="stat-group" style="--gc:${color}">
@@ -5086,9 +5096,12 @@ function printEdmReport() {
       <div class="title-pg-rule"></div>
       <div class="title-pg-count">${d.entries.length} eDM${d.entries.length !== 1 ? 's' : ''} reviewed</div>
       <div class="cover-avgs">
-        <div class="cover-avg"><div class="cover-avg-val">${mo.avg_html_open_rate ? mo.avg_html_open_rate + '%' : '—'}</div><div class="cover-avg-lbl">Avg HTML Open Rate</div></div>
-        <div class="cover-avg"><div class="cover-avg-val">${mo.avg_unique_ctr ? mo.avg_unique_ctr + '%' : '—'}</div><div class="cover-avg-lbl">Avg Unique CTR</div></div>
-        <div class="cover-avg"><div class="cover-avg-val">${mo.avg_click_to_open ? mo.avg_click_to_open + '%' : '—'}</div><div class="cover-avg-lbl">Avg Click-to-Open</div></div>
+        <div class="cover-avgs-title">Monthly Averages${monthLabel ? ' — ' + escapeHtml(monthLabel) : ''}</div>
+        <div class="cover-avgs-grid">
+          <div class="cover-avg"><div class="cover-avg-val">${mo.avg_html_open_rate ? mo.avg_html_open_rate + '%' : '—'}</div><div class="cover-avg-lbl">Avg HTML Open Rate</div></div>
+          <div class="cover-avg"><div class="cover-avg-val">${mo.avg_unique_ctr ? mo.avg_unique_ctr + '%' : '—'}</div><div class="cover-avg-lbl">Avg Unique CTR</div></div>
+          <div class="cover-avg"><div class="cover-avg-val">${mo.avg_click_to_open ? mo.avg_click_to_open + '%' : '—'}</div><div class="cover-avg-lbl">Avg Click-to-Open</div></div>
+        </div>
       </div>
     </div>
   </div>`;
@@ -5167,9 +5180,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .page-name{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:#191919;line-height:1.2;margin-bottom:2mm}
 .page-sub{font-size:12px;color:#888;margin-top:0}
 .page-date{font-size:10px;color:#aaa;white-space:nowrap}
-.page-body{display:grid;grid-template-columns:42% 1fr;gap:18px;align-items:start;flex:1}
+.page-body{display:grid;grid-template-columns:42% 1fr;gap:36px;align-items:start;flex:1}
 .img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
-.stats-col{display:flex;flex-direction:column;gap:22px}
+.stats-col{display:flex;flex-direction:column;gap:44px}
 .stat-group{display:flex;flex-direction:column;gap:6px}
 .stat-group-label{font-size:10pt;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -5183,18 +5196,20 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .mo-val{font-size:32px;font-weight:700;color:#E4572E;letter-spacing:-0.04em}
 .mo-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.08em}
 .mo-count{font-size:10px;color:#aaa}
-.page-title{display:flex;align-items:center;justify-content:center;min-height:calc(297mm - 1in)}
-.title-pg-inner{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-.title-pg-label{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E4572E}
-.title-pg-month{font-family:'Playfair Display',Georgia,serif;font-size:42px;font-weight:700;color:#191919;line-height:1.1;margin-top:4px}
+.page-title{display:flex;align-items:flex-start;justify-content:flex-start;min-height:calc(297mm - 1in);padding-top:1.4in;position:relative}
+.title-pg-inner{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%}
+.title-pg-label{font-size:22px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E4572E}
+.title-pg-month{font-family:'Playfair Display',Georgia,serif;font-size:64px;font-weight:700;color:#191919;line-height:1.05;margin-top:6px}
 .title-pg-date{font-size:11px;color:#aaa;margin-top:2px}
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
-.cover-avgs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:28px;padding-top:24px;border-top:1px solid #e8e8e4}
+.cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #e8e8e4;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
+.cover-avgs-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:14px}
+.cover-avgs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .cover-avg{display:flex;flex-direction:column;gap:5px;border-left:3px solid #E4572E;padding-left:14px}
-.cover-avg-val{font-size:36pt;font-weight:700;color:#E4572E;letter-spacing:-0.04em;line-height:1}
-.cover-avg-lbl{font-size:9pt;color:#888;text-transform:uppercase;letter-spacing:0.08em}
+.cover-avg-val{font-size:26pt;font-weight:700;color:#E4572E;letter-spacing:-0.04em;line-height:1}
+.cover-avg-lbl{font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em}
 </style>
 </head>
 <body>
