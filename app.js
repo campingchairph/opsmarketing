@@ -5171,7 +5171,7 @@ function printEdmReport() {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-@page { size: A4 portrait; margin: 1in 0.5in 0.5in 0.5in; }
+@page { size: A4 portrait; margin: 0.75in 0.5in 0.6in 0.5in; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
 .page{min-height:calc(297mm - 1.5in);page-break-after:always;display:flex;flex-direction:column;gap:42px}
@@ -5206,6 +5206,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
+.page-footer{position:fixed;bottom:0.15in;left:0.5in;right:0.5in;font-size:8pt;color:#bbb;border-top:1px solid #e8e8e4;padding-top:5px;letter-spacing:0.03em}
 .cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #e8e8e4;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
 .cover-avgs-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:14px}
 .cover-avgs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -5215,6 +5216,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 </style>
 </head>
 <body>
+<div class="page-footer">eDM Performance Report${monthLabel ? ' | ' + escapeHtml(monthLabel) : ''}</div>
 ${titlePage}
 ${pages.join('\n')}
 <script>window.onload=function(){window.print();}<\/script>
