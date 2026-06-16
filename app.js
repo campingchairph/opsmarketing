@@ -4955,9 +4955,17 @@ function printEdmReport() {
 
   function statVal(v) { return v ? escapeHtml(String(v)) : '—'; }
 
+  function fmtStatVal(val) {
+    const n = Number(String(val).replace(/,/g, ''));
+    if (!isNaN(n) && String(val).indexOf('%') === -1 && String(val).indexOf('/') === -1) {
+      return n.toLocaleString('en-AU');
+    }
+    return String(val);
+  }
+
   function statGroup(color, label, stats) {
     const cells = stats.filter(s => s[1]).map(([lbl, val]) =>
-      `<div class="stat"><div class="stat-val" style="color:${color}">${escapeHtml(String(val))}</div><div class="stat-lbl">${lbl}</div></div>`
+      `<div class="stat"><div class="stat-val" style="color:${color}">${escapeHtml(fmtStatVal(val))}</div><div class="stat-lbl">${lbl}</div></div>`
     ).join('');
     if (!cells) return '';
     return `<div class="stat-group" style="--gc:${color}">
@@ -5024,7 +5032,7 @@ function printEdmReport() {
             ${e.subject ? `<div class="page-sub">${escapeHtml(e.subject)}</div>` : ''}
           </div>
         </div>
-        ${e.started_at ? `<div class="page-date">${edrDate(e.started_at)}</div>` : ''}
+        ${e.started_at ? `<div class="page-date"><span style="font-weight:600;color:#888">Started date:</span> ${edrDate(e.started_at)}</div>` : ''}
       </div>
       <div class="page-body">
         <div class="img-col">${imgCol}</div>
@@ -5065,12 +5073,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .page-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid #e8e8e4;margin-bottom:4px}
 .page-meta{display:flex;align-items:flex-start;gap:10px}
 .page-num{font-size:11px;font-weight:700;color:#fff;background:#E4572E;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:2px;letter-spacing:0.04em}
-.page-name{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:#191919;line-height:1.2}
-.page-sub{font-size:10px;color:#888;margin-top:2px}
+.page-name{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:#191919;line-height:1.2;margin-bottom:2mm}
+.page-sub{font-size:12px;color:#888;margin-top:0}
 .page-date{font-size:10px;color:#aaa;white-space:nowrap}
 .page-body{display:grid;grid-template-columns:42% 1fr;gap:18px;align-items:start;flex:1}
 .img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
-.stats-col{display:flex;flex-direction:column;gap:12px}
+.stats-col{display:flex;flex-direction:column;gap:22px}
 .stat-group{display:flex;flex-direction:column;gap:6px}
 .stat-group-label{font-size:7.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
