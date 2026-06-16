@@ -5151,9 +5151,9 @@ function printEdmReport() {
           <div>
             <div class="page-name">${e.report_link ? `<a href="${escapeHtml(e.report_link)}" style="color:inherit;text-decoration:underline;text-decoration-color:#E4572E;text-underline-offset:3px">${escapeHtml(name)}</a>` : escapeHtml(name)}</div>
             ${e.subject ? `<div class="page-sub"><span class="page-field-lbl">Subject:</span> ${escapeHtml(e.subject)}</div>` : ''}
-            ${e.started_at ? `<div class="page-sub" style="margin-top:3px"><span class="page-field-lbl">Started date:</span> ${edrDate(e.started_at)}</div>` : ''}
           </div>
         </div>
+        ${e.started_at ? `<div class="page-date-block"><div class="page-date-lbl">Started date</div><div class="page-date-val">${edrDate(e.started_at)}</div></div>` : ''}
       </div>
       <div class="page-body">
         <div class="img-col">${imgCol}</div>
@@ -5171,17 +5171,20 @@ function printEdmReport() {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-@page { size: A4 portrait; margin: 0.75in 0.5in 0.6in 0.5in; }
+@page { size: A4 portrait; margin: 0.75in 0.5in 0.35in 0.5in; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
-.page{min-height:calc(297mm - 1.5in);page-break-after:always;display:flex;flex-direction:column;gap:42px}
+.page{min-height:calc(297mm - 1.1in);page-break-after:always;display:flex;flex-direction:column;gap:32px}
 .page:last-child{page-break-after:avoid}
-.page-header{display:flex;align-items:flex-start;justify-content:flex-start;padding-bottom:10px;border-bottom:1px solid #e8e8e4}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid #e8e8e4}
 .page-meta{display:flex;align-items:flex-start;gap:10px}
 .page-num{font-size:11px;font-weight:700;color:#fff;background:#E4572E;border-radius:4px;padding:2px 7px;flex-shrink:0;margin-top:3px;letter-spacing:0.04em}
 .page-name{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:700;color:#191919;line-height:1.2;margin-bottom:2mm}
 .page-sub{font-size:12px;color:#888;margin-top:0;line-height:1.5}
 .page-field-lbl{font-weight:600;color:#555}
+.page-date-block{text-align:right;flex-shrink:0}
+.page-date-lbl{font-size:8pt;font-weight:600;color:#888;letter-spacing:0.04em;text-transform:uppercase;line-height:1.3}
+.page-date-val{font-size:11px;color:#aaa;line-height:1.4}
 .page-body{display:grid;grid-template-columns:42% 1fr;gap:36px;align-items:start;flex:1}
 .img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
 .stats-col{display:flex;flex-direction:column;gap:44px}
@@ -5206,7 +5209,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
-.page-footer{position:fixed;bottom:0.15in;left:0.5in;right:0.5in;font-size:8pt;color:#bbb;border-top:1px solid #e8e8e4;padding-top:5px;letter-spacing:0.03em}
+.page-footer{position:fixed;bottom:0.25in;left:0.5in;right:0.5in;font-size:8pt;color:#bbb;border-top:1px solid #e8e8e4;padding-top:5px;letter-spacing:0.03em}
 .cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #e8e8e4;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
 .cover-avgs-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:14px}
 .cover-avgs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
