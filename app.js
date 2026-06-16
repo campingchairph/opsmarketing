@@ -4836,7 +4836,7 @@ function addEdmReportEntry() {
   const d = loadEdmReportData();
   d.entries.push({
     id: 'edr_' + Date.now(),
-    email_name: '', subject: '', started_at: '',
+    email_name: '', report_link: '', subject: '', started_at: '',
     html_open_rate: '', click_to_open_ratio: '',
     total_delivered: '', total_clicks: '', total_ctr: '',
     unique_clicks: '', unique_ctr: '',
@@ -5020,7 +5020,7 @@ function printEdmReport() {
         <div class="page-meta">
           <span class="page-num">${String(i + 1).padStart(2, '0')}</span>
           <div>
-            <div class="page-name">${escapeHtml(name)}</div>
+            <div class="page-name">${e.report_link ? `<a href="${escapeHtml(e.report_link)}" style="color:inherit;text-decoration:underline;text-decoration-color:#E4572E;text-underline-offset:3px">${escapeHtml(name)}</a>` : escapeHtml(name)}</div>
             ${e.subject ? `<div class="page-sub">${escapeHtml(e.subject)}</div>` : ''}
           </div>
         </div>
@@ -5225,7 +5225,7 @@ function buildEdmReportHtml(d) {
         <div class="edr-report-block-meta">
           <span class="edr-report-block-num">${String(i + 1).padStart(2, '0')}</span>
           <div>
-            <div class="edr-report-block-name">${escapeHtml(name)}</div>
+            <div class="edr-report-block-name">${e.report_link ? `<a href="${escapeHtml(e.report_link)}" target="_blank" class="edr-report-block-link">${escapeHtml(name)}</a>` : escapeHtml(name)}</div>
             ${e.subject   ? `<div class="edr-report-block-subject">${escapeHtml(e.subject)}</div>` : ''}
             ${e.campaign  ? `<div class="edr-report-block-campaign">Campaign: ${escapeHtml(e.campaign)}</div>` : ''}
           </div>
@@ -5401,6 +5401,8 @@ function renderEdmEntryCard(e, i) {
       </div>
       <input class="form-input" type="text" value="${escapeHtml(e.email_name || '')}" placeholder="e.g. 260610_SMSF"
         oninput="saveEdmReportField('${e.id}','email_name',this.value);const nl=document.getElementById('edr-name-${e.id}');if(nl)nl.textContent=this.value||'New eDM ${i + 1}'"/>
+      <input class="form-input edr-link-input" type="url" value="${escapeHtml(e.report_link || '')}" placeholder="Salesforce record link (makes email name clickable)"
+        oninput="saveEdmReportField('${e.id}','report_link',this.value)" style="margin-top:6px"/>
 
       <!-- Step 2: Raw paste -->
       <div class="edr-subsection-label" style="margin-top:14px">
