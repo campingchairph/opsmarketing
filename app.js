@@ -5209,7 +5209,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
-.page-footer{position:fixed;bottom:0.25in;left:0.5in;right:0.5in;font-size:8pt;color:#bbb;border-top:1px solid #e8e8e4;padding-top:5px;letter-spacing:0.03em}
+.page-footer{position:fixed;bottom:0.12in;left:0;right:0;border-top:1px solid #e8e8e4}
+.page-footer-inner{padding:5px 0.5in 0;font-size:8pt;color:#bbb;letter-spacing:0.03em}
 .cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #e8e8e4;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
 .cover-avgs-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:14px}
 .cover-avgs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -5219,7 +5220,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 </style>
 </head>
 <body>
-<div class="page-footer">eDM Performance Report${monthLabel ? ' | ' + escapeHtml(monthLabel) : ''}</div>
+<div class="page-footer"><div class="page-footer-inner">eDM Performance Report${monthLabel ? ' | ' + escapeHtml(monthLabel) : ''}</div></div>
 ${titlePage}
 ${pages.join('\n')}
 <script>window.onload=function(){window.print();}<\/script>
