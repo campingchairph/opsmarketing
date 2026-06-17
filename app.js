@@ -3325,9 +3325,14 @@ Extract exactly 3 components from the email content:
 
 1. HEADLINE PHRASE — the short lead-in from the main banner/heading text (before any colon or dollar figure). Take only 2–4 descriptive words. Drop numbers, currency symbols, punctuation.
 
-2. PRODUCT CATEGORY — must be exactly one of: "Horizon Mortgages", "Private Lending", "Development Finance", "Bridging". Identify from: sender job title in signature, explicit product mentions in body, or campaign context. If genuinely uncertain, set confidence to "low" and note it.
+2. PRODUCT CATEGORY — read it from the email content. Must be exactly one of these four options:
+   - "Horizon Mortgages" — for residential/owner-occupier or long-term mortgage products
+   - "Private Lending" — for private credit, short-term property-secured loans, or where the sender is a Private Lending team member
+   - "Development Finance" — for construction, land development, or property development funding
+   - "Bridging" — for bridging loans, short-term gap finance between property transactions
+   Identify from: explicit product name in the email body or subject, sender's role/team in the signature, or the loan type described. Do NOT default to Private Lending — read the content carefully. If genuinely uncertain, set confidence to "low" and describe what you found in notes.
 
-3. TOPIC KEYWORD — the most repeated subject/theme in the body copy (appears 2+ times). 1–3 words only. Examples: "ATO Debt", "Cashflow Relief", "Bridging Finance".
+3. TOPIC KEYWORD — the most repeated subject/theme in the body copy (appears 2+ times). 1–3 words only. Examples: "ATO Debt", "Cashflow Relief", "Bridging Finance", "Land Subdivision".
 
 FORMATTING RULES:
 - Title Case each word
@@ -3335,12 +3340,12 @@ FORMATTING RULES:
 - Strip all punctuation and numbers
 - Order: Headline_Product_Topic
 
-Return ONLY valid JSON, no other text:
+Return ONLY valid JSON, no other text. Example format (values are illustrative only — always derive from the actual email):
 {
-  "headline": "Recently Settled",
-  "product": "Private Lending",
-  "topic": "ATO Debt",
-  "filename": "Recently_Settled_Private_Lending_ATO_Debt",
+  "headline": "New Rates Available",
+  "product": "Development Finance",
+  "topic": "Land Subdivision",
+  "filename": "New_Rates_Available_Development_Finance_Land_Subdivision",
   "confidence": "high",
   "notes": ""
 }`;
