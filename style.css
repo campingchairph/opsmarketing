@@ -2176,6 +2176,49 @@ body {
 .ai-copy-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 .ai-copy-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
+/* ── EDM Filename Generator output ── */
+.fn-filename {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+.fn-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.fn-part {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+.fn-part-headline { background: rgba(228,87,46,0.15); color: var(--accent); }
+.fn-part-product  { background: rgba(100,160,255,0.12); color: #7eb8f7; }
+.fn-part-topic    { background: rgba(120,220,140,0.12); color: #7dd89a; }
+.fn-sep { font-size: 11px; color: var(--fg-dim); }
+.fn-notes {
+  font-size: 11px;
+  color: var(--fg-dim);
+  font-style: italic;
+  margin-bottom: 6px;
+}
+.fn-confidence { font-size: 11px; color: var(--fg-dim); }
+.fn-conf-high   { color: #7dd89a; }
+.fn-conf-medium { color: #f5c842; }
+.fn-conf-low    { color: var(--accent); }
+
 /* ── Pre-send QC checklist ── */
 .qc-list {
   list-style: none;

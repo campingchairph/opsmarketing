@@ -508,6 +508,39 @@
           </ul>
         </div>
 
+        <!-- ── EDM Filename Generator ── -->
+        <div class="section-block" style="margin-top:8px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
+            </div>
+            <span class="sh-title">EDM Filename Generator</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste the full email content (HTML or plain text). The AI extracts the headline phrase, product category, and topic keyword to build the filename.</p>
+            <div class="ai-controls">
+              <div class="ai-field-row">
+                <label class="ai-label">Date prefix <span style="color:var(--text-3);font-weight:400">(YYMMDD)</span></label>
+                <input id="fn-date" class="form-input" type="text" placeholder="e.g. 260617" maxlength="6" style="max-width:160px"/>
+              </div>
+              <div class="ai-field-row">
+                <label class="ai-label">Email content — paste full HTML or plain text</label>
+                <textarea id="fn-content" class="form-textarea" rows="8" style="height:160px;font-family:var(--font-mono);font-size:11px;resize:vertical" placeholder="Paste the full email HTML or body text here…"></textarea>
+              </div>
+              <button id="fn-btn" class="btn-add" onclick="generateEdmFilename()">Generate filename →</button>
+            </div>
+            <div class="ai-output" id="fn-output" hidden>
+              <div class="ai-output-label">Generated filename</div>
+              <div id="fn-result"></div>
+              <button class="ai-copy-btn" onclick="copyFnResult()">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                Copy filename
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /page-salesforce -->
 
       <!-- ── EDM REPORTING ── -->
@@ -1492,6 +1525,46 @@
           </div>
 
         </div><!-- /section-grid AI row -->
+
+        <!-- ── Message Reply Writer (full width) ── -->
+        <div class="ai-feature-block" id="msg-reply-writer" style="margin-top:16px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M14 2H2a1 1 0 00-1 1v8a1 1 0 001 1h3l3 3 3-3h3a1 1 0 001-1V3a1 1 0 00-1-1z"/></svg>
+            </div>
+            <span class="sh-title">Message Reply Writer</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste a message you received — the AI writes a natural, casual reply. No stiff corporate tone, just you talking like a normal person.</p>
+            <div class="ai-controls">
+              <div class="ai-field-row">
+                <label class="ai-label">Message received</label>
+                <textarea id="reply-msg" class="form-textarea" rows="5" style="height:110px" placeholder="Paste the message you want to reply to…"></textarea>
+              </div>
+              <div class="ai-two-col">
+                <div class="ai-field-row">
+                  <label class="ai-label">Your intent / key points <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+                  <textarea id="reply-intent" class="form-textarea" rows="3" style="height:72px" placeholder="e.g. I want to confirm the meeting but push it to Thursday, still waiting on the file"></textarea>
+                </div>
+                <div class="ai-field-row">
+                  <label class="ai-label">Who sent it</label>
+                  <input id="reply-sender" class="form-input" type="text" placeholder="e.g. Petro (my manager)"/>
+                </div>
+              </div>
+              <button id="reply-btn" class="btn-add" onclick="generateMessageReply()">Write reply →</button>
+            </div>
+            <div class="ai-output" id="reply-output" hidden>
+              <div class="ai-output-label">Your reply</div>
+              <textarea id="reply-result" class="ai-result-text" rows="6" readonly></textarea>
+              <button class="ai-copy-btn" onclick="copyAiOutput('reply-result')">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                Copy to clipboard
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div id="page-timer" class="page">

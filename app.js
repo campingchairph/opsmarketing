@@ -3274,6 +3274,110 @@ LENGTH: 60–120 words. Never exceed 150 words. Australian English.`;
   aiSetBtn('eod-btn', false, 'Write summary →', 'Writing…');
 }
 
+// ── Feature 5: Message Reply Writer ──────────────────────────────
+async function generateMessageReply() {
+  const msg    = document.getElementById('reply-msg')?.value?.trim();
+  const intent = document.getElementById('reply-intent')?.value?.trim();
+  const sender = document.getElementById('reply-sender')?.value?.trim() || 'someone';
+  if (!msg) { alert('Paste the message you want to reply to first.'); return; }
+  const key = getAiKey();
+  if (!key) { aiNoKey('Message Reply Writer'); return; }
+  aiSetBtn('reply-btn', true, 'Write reply →', 'Writing…');
+  const system = `You write casual, natural message replies for a marketing coordinator at a financial company.
+
+VOICE:
+- Conversational and warm — like texting or messaging a colleague you're comfortable with
+- Not stiff, not corporate — no "I hope this finds you well", no "Please do not hesitate"
+- Direct, get to the point fast
+- Match the energy of the original message — if it's short and casual, keep it short and casual
+- First person, written as the user
+- Short is almost always better — don't pad it out
+
+RULES:
+- Output ONLY the reply text — no labels, no "Here is your reply:", no quotes around it
+- No sign-off unless the original message had one
+- If intent/key points are provided, cover those naturally within the reply`;
+
+  const userMsg = `Message from ${sender}:\n${msg}${intent ? `\n\nWhat I want to say / key points:\n${intent}` : ''}`;
+  try {
+    const result = await callClaude(system, userMsg);
+    document.getElementById('reply-output').hidden = false;
+    document.getElementById('reply-result').value  = result.trim();
+  } catch (e) {
+    if (e.message === 'NO_KEY') aiNoKey('Message Reply Writer');
+    else alert('Error: ' + e.message);
+  }
+  aiSetBtn('reply-btn', false, 'Write reply →', 'Writing…');
+}
+
+// ── Feature 6: EDM Filename Generator ────────────────────────────
+async function generateEdmFilename() {
+  const content = document.getElementById('fn-content')?.value?.trim();
+  const datePrefix = document.getElementById('fn-date')?.value?.trim();
+  if (!content) { alert('Paste the email content first.'); return; }
+  const key = getAiKey();
+  if (!key) { aiNoKey('EDM Filename Generator'); return; }
+  aiSetBtn('fn-btn', true, 'Generate filename →', 'Analysing…');
+
+  const system = `You generate filenames for email marketing files following strict rules.
+
+Extract exactly 3 components from the email content:
+
+1. HEADLINE PHRASE — the short lead-in from the main banner/heading text (before any colon or dollar figure). Take only 2–4 descriptive words. Drop numbers, currency symbols, punctuation.
+
+2. PRODUCT CATEGORY — must be exactly one of: "Horizon Mortgages", "Private Lending", "Development Finance", "Bridging". Identify from: sender job title in signature, explicit product mentions in body, or campaign context. If genuinely uncertain, set confidence to "low" and note it.
+
+3. TOPIC KEYWORD — the most repeated subject/theme in the body copy (appears 2+ times). 1–3 words only. Examples: "ATO Debt", "Cashflow Relief", "Bridging Finance".
+
+FORMATTING RULES:
+- Title Case each word
+- Underscores only — no spaces, no hyphens
+- Strip all punctuation and numbers
+- Order: Headline_Product_Topic
+
+Return ONLY valid JSON, no other text:
+{
+  "headline": "Recently Settled",
+  "product": "Private Lending",
+  "topic": "ATO Debt",
+  "filename": "Recently_Settled_Private_Lending_ATO_Debt",
+  "confidence": "high",
+  "notes": ""
+}`;
+
+  try {
+    const raw = await callClaude(system, content);
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Could not parse AI response — try again.');
+    const r = JSON.parse(match[0]);
+    const prefix = datePrefix ? datePrefix + '_' : '';
+    const full   = prefix + r.filename;
+    window._fnCurrentFilename = full;
+
+    document.getElementById('fn-output').hidden = false;
+    document.getElementById('fn-result').innerHTML = `
+      <div class="fn-filename">${escapeHtml(full)}</div>
+      <div class="fn-breakdown">
+        <span class="fn-part fn-part-headline" title="Headline phrase">${escapeHtml(r.headline)}</span>
+        <span class="fn-sep">+</span>
+        <span class="fn-part fn-part-product" title="Product category">${escapeHtml(r.product)}</span>
+        <span class="fn-sep">+</span>
+        <span class="fn-part fn-part-topic" title="Topic keyword">${escapeHtml(r.topic)}</span>
+      </div>
+      ${r.notes ? `<div class="fn-notes">${escapeHtml(r.notes)}</div>` : ''}
+      <div class="fn-confidence">Confidence: <strong class="fn-conf-${escapeHtml(r.confidence)}">${escapeHtml(r.confidence)}</strong></div>`;
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+  aiSetBtn('fn-btn', false, 'Generate filename →', 'Analysing…');
+}
+
+function copyFnResult() {
+  if (!window._fnCurrentFilename) return;
+  navigator.clipboard.writeText(window._fnCurrentFilename)
+    .then(() => showAiToast('✓ Filename copied'));
+}
+
 // ══════════════════════════════════════════════════════════════════
 // QUICK NOTES DRAWER
 // ══════════════════════════════════════════════════════════════════
