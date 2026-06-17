@@ -542,19 +542,95 @@ function updateThemeBtn(theme) {
 }
 
 // ── DATE / DUAL CLOCK ────────────────────────────────────────────
+let clockHourOffset  = 0;
+let clockManualMode  = false;
+let clockManualTimer = null;
+
 function updateDateTime() {
-  const now = new Date();
+  const real = new Date();
+  const now  = clockManualMode ? new Date(real.getTime() + clockHourOffset * 3600000) : real;
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-  const dateStr = now.toLocaleDateString('en-AU', opts);
-  document.querySelectorAll('.live-date').forEach(el => el.textContent = dateStr);
+  document.querySelectorAll('.live-date').forEach(el => el.textContent = real.toLocaleDateString('en-AU', opts));
 
-  // Manila — Asia/Manila (UTC+8)
   const manilaTime = now.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Manila' });
-  // Sydney — Australia/Sydney (UTC+10/11)
-  const sydTime = now.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit', timeZone:'Australia/Sydney' });
+  const sydTime    = now.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit', timeZone:'Australia/Sydney' });
 
-  document.querySelectorAll('.clock-manila').forEach(el => el.textContent = manilaTime);
-  document.querySelectorAll('.clock-sydney').forEach(el => el.textContent = sydTime);
+  document.querySelectorAll('.clock-manila').forEach(el => {
+    el.textContent = manilaTime;
+    el.style.color = clockManualMode ? '#0078D4' : '';
+  });
+  document.querySelectorAll('.clock-sydney').forEach(el => {
+    el.textContent = sydTime;
+    el.style.color = clockManualMode ? '#0078D4' : '';
+  });
+}
+
+function adjustClockOffset(delta) {
+  clockHourOffset += delta;
+  clockManualMode  = true;
+  resetClockManualTimer();
+  updateDateTime();
+}
+
+function resetClockManualTimer() {
+  if (clockManualTimer) clearTimeout(clockManualTimer);
+  clockManualTimer = setTimeout(() => {
+    clockHourOffset = 0;
+    clockManualMode = false;
+    clockManualTimer = null;
+    updateDateTime();
+  }, 5000);
+}
+
+function clockStartEdit(tz) {
+  const disp  = document.getElementById('clock-' + tz + '-disp');
+  const input = document.getElementById('clock-' + tz + '-input');
+  if (!disp || !input) return;
+  if (clockManualTimer) { clearTimeout(clockManualTimer); clockManualTimer = null; }
+  clockManualMode = true;
+
+  const tzStr = tz === 'mnl' ? 'Asia/Manila' : 'Australia/Sydney';
+  const base  = clockManualMode ? new Date(Date.now() + clockHourOffset * 3600000) : new Date();
+  const h     = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: tzStr }).format(base), 10) % 24;
+
+  disp.style.display  = 'none';
+  input.style.display = 'block';
+  input.value         = String(h).padStart(2, '0');
+  input.select();
+  input.focus();
+}
+
+function clockInputKey(e, tz) {
+  if (e.key === 'Enter')      { e.preventDefault(); clockInputCommit(tz); }
+  if (e.key === 'Escape')     { clockInputAbort(tz); }
+  if (e.key === 'ArrowUp')    { e.preventDefault(); adjustClockOffset(1);  }
+  if (e.key === 'ArrowDown')  { e.preventDefault(); adjustClockOffset(-1); }
+}
+
+function clockInputAbort(tz) {
+  const disp  = document.getElementById('clock-' + tz + '-disp');
+  const input = document.getElementById('clock-' + tz + '-input');
+  if (input) input.style.display = 'none';
+  if (disp)  disp.style.display  = '';
+  resetClockManualTimer();
+}
+
+function clockInputCommit(tz) {
+  const disp  = document.getElementById('clock-' + tz + '-disp');
+  const input = document.getElementById('clock-' + tz + '-input');
+  if (!input) return;
+  const val = parseInt(input.value, 10);
+  input.style.display = 'none';
+  if (disp) disp.style.display = '';
+
+  if (!isNaN(val) && val >= 0 && val <= 23) {
+    const tzStr = tz === 'mnl' ? 'Asia/Manila' : 'Australia/Sydney';
+    const realH = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: tzStr }).format(new Date()), 10) % 24;
+    clockHourOffset = val - realH;
+  }
+  clockManualMode = true;
+  resetClockManualTimer();
+  updateDateTime();
 }
 
 // ── TIMESHEET STORAGE ───────────────────────────────────────────

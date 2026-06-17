@@ -1091,15 +1091,60 @@ body {
   color: var(--text-3);
   text-transform: uppercase;
 }
+.clock-tw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
 .clock-time {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  cursor: pointer;
+  line-height: 1.2;
 }
 .clock-manila { color: #E8821A; }
 .clock-sydney { color: var(--accent); }
 .clock-divider { width: 1px; height: 20px; background: var(--border-md); }
+.clock-arr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 10px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 7px;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, color 0.1s;
+  line-height: 1;
+}
+.clock-item:hover .clock-arr {
+  opacity: 1;
+  pointer-events: auto;
+}
+.clock-arr:hover { color: #0078D4; }
+.clock-hr-input {
+  display: none;
+  width: 38px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #0078D4;
+  color: #0078D4;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  padding: 1px 0;
+  line-height: 1.2;
+}
 
 /* ══════════════════════════════════════
    THEME TOGGLE

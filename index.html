@@ -340,14 +340,26 @@
           <span class="ttc-time" id="topbar-timer-display">25:00</span>
         </div>
         <div class="dual-clock">
-          <div class="clock-item">
+          <div class="clock-item" id="clock-item-mnl">
             <span class="clock-city">MNL</span>
-            <span class="clock-time clock-manila"></span>
+            <div class="clock-tw">
+              <button class="clock-arr clock-arr-up" onclick="adjustClockOffset(1)" tabindex="-1" title="Hour +1">▲</button>
+              <span class="clock-time clock-manila" id="clock-mnl-disp" onclick="clockStartEdit('mnl')" title="Click to set hour"></span>
+              <input class="clock-hr-input" id="clock-mnl-input" type="text" inputmode="numeric" maxlength="2" placeholder="0–23"
+                     onkeydown="clockInputKey(event,'mnl')" oninput="this.value=this.value.replace(/\D/g,'')" onblur="clockInputCommit('mnl')"/>
+              <button class="clock-arr clock-arr-dn" onclick="adjustClockOffset(-1)" tabindex="-1" title="Hour -1">▼</button>
+            </div>
           </div>
           <div class="clock-divider"></div>
-          <div class="clock-item">
+          <div class="clock-item" id="clock-item-syd">
             <span class="clock-city">SYD</span>
-            <span class="clock-time clock-sydney"></span>
+            <div class="clock-tw">
+              <button class="clock-arr clock-arr-up" onclick="adjustClockOffset(1)" tabindex="-1" title="Hour +1">▲</button>
+              <span class="clock-time clock-sydney" id="clock-syd-disp" onclick="clockStartEdit('syd')" title="Click to set hour"></span>
+              <input class="clock-hr-input" id="clock-syd-input" type="text" inputmode="numeric" maxlength="2" placeholder="0–23"
+                     onkeydown="clockInputKey(event,'syd')" oninput="this.value=this.value.replace(/\D/g,'')" onblur="clockInputCommit('syd')"/>
+              <button class="clock-arr clock-arr-dn" onclick="adjustClockOffset(-1)" tabindex="-1" title="Hour -1">▼</button>
+            </div>
           </div>
         </div>
         <div class="topbar-date live-date"></div>
