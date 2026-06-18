@@ -5001,9 +5001,83 @@ document.addEventListener('DOMContentLoaded', () => {
     if (link) link.textContent = 'AI Settings ✓';
   }
   renderAiMeter();
+  initNavDrag();
 
   navigate('daily');
 });
+
+// ── NAV DRAG-AND-DROP (per category) ────────────────────────────
+const NAV_ORDER_KEY = 'msc_nav_order_v1';
+
+function loadNavOrder() { try { return JSON.parse(localStorage.getItem(NAV_ORDER_KEY)) || {}; } catch { return {}; } }
+function saveNavOrder(o) { localStorage.setItem(NAV_ORDER_KEY, JSON.stringify(o)); }
+
+function initNavDrag() {
+  applyNavOrder();
+  document.querySelectorAll('.nav-category-group').forEach(group => {
+    const cat = group.dataset.category;
+    // Add drag handle to each visible nav item
+    group.querySelectorAll('.nav-item[data-page]').forEach(item => {
+      if (item.style.display === 'none') return;
+      const handle = document.createElement('span');
+      handle.className = 'nav-drag-handle';
+      handle.innerHTML = '<svg viewBox="0 0 10 14" fill="currentColor" style="width:8px;height:11px"><rect y="0" width="4" height="2" rx="1"/><rect y="6" width="4" height="2" rx="1"/><rect y="12" width="4" height="2" rx="1"/><rect x="6" y="0" width="4" height="2" rx="1"/><rect x="6" y="6" width="4" height="2" rx="1"/><rect x="6" y="12" width="4" height="2" rx="1"/></svg>';
+      handle.title = 'Drag to reorder';
+      item.appendChild(handle);
+      item.draggable = true;
+
+      handle.addEventListener('mousedown', e => e.stopPropagation());
+
+      item.addEventListener('dragstart', e => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.dataset.page + '|' + cat);
+        item.classList.add('nav-dragging');
+        setTimeout(() => item.classList.add('nav-drag-ghost'), 0);
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('nav-dragging', 'nav-drag-ghost');
+        group.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-drag-over'));
+        saveCurrentNavOrder(group, cat);
+      });
+      item.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const dragging = group.querySelector('.nav-dragging');
+        if (dragging && dragging !== item) {
+          const rect = item.getBoundingClientRect();
+          const mid  = rect.top + rect.height / 2;
+          item.classList.add('nav-drag-over');
+          if (e.clientY < mid) group.insertBefore(dragging, item);
+          else item.after(dragging);
+        }
+      });
+      item.addEventListener('dragleave', () => item.classList.remove('nav-drag-over'));
+      item.addEventListener('drop', e => { e.preventDefault(); item.classList.remove('nav-drag-over'); });
+    });
+  });
+}
+
+function saveCurrentNavOrder(group, cat) {
+  const order = loadNavOrder();
+  order[cat] = Array.from(group.querySelectorAll('.nav-item[data-page]'))
+    .map(i => i.dataset.page);
+  saveNavOrder(order);
+}
+
+function applyNavOrder() {
+  const order = loadNavOrder();
+  document.querySelectorAll('.nav-category-group').forEach(group => {
+    const cat = group.dataset.category;
+    const pages = order[cat];
+    if (!pages || !pages.length) return;
+    const label = group.querySelector('.sidebar-section-label');
+    pages.forEach(page => {
+      const item = group.querySelector(`.nav-item[data-page="${page}"]`);
+      if (item) group.appendChild(item);
+    });
+    if (label) group.prepend(label);
+  });
+}
 
 // ── EDM REPORTING ────────────────────────────────────────────────
 const EDM_REPORT_KEY   = 'msc_edm_report_v1';
@@ -5052,14 +5126,13 @@ function saveEdmSnapshot() {
 }
 
 function loadEdmSnapshot(id) {
-  if (!confirm('Load this save? Unsaved changes to the current report will be replaced.')) return;
   let d;
   try { d = JSON.parse(localStorage.getItem('msc_edm_report_save_' + id)); } catch { showAiToast('Could not read saved report.'); return; }
   if (!d) { showAiToast('Save not found.'); return; }
   if (!d.entries) d.entries = [];
   saveEdmReportData(d);
   renderEdmReportPage();
-  showAiToast('✓ Report loaded.');
+  showAiToast('✓ Report loaded successfully.');
 }
 
 function deleteEdmSnapshot(id) {
@@ -5947,13 +6020,83 @@ function renderPlainTextPage() {
 // ══════════════════════════════════════════════════════════════════
 let skillsChatHistory = [];
 
+// ── Skill Library storage ────────────────────────────────────────
+const SKILL_LIB_KEY = 'msc_skill_library_v1';
+function loadSkillLibrary()    { try { return JSON.parse(localStorage.getItem(SKILL_LIB_KEY)) || []; } catch { return []; } }
+function saveSkillLibrary(arr) { localStorage.setItem(SKILL_LIB_KEY, JSON.stringify(arr)); }
+
+function addSkillEntry() {
+  const titleEl   = document.getElementById('sl-title');
+  const contentEl = document.getElementById('sl-content');
+  const title   = titleEl?.value?.trim();
+  const content = contentEl?.value?.trim();
+  if (!title || !content) { showAiToast('Please enter a title and content.'); return; }
+  const lib = loadSkillLibrary();
+  lib.push({ id: 'sl_' + Date.now(), title, content, addedAt: new Date().toISOString() });
+  saveSkillLibrary(lib);
+  titleEl.value   = '';
+  contentEl.value = '';
+  renderSkillLibraryList();
+  showAiToast('✓ Skill saved to library.');
+}
+
+function deleteSkillEntry(id) {
+  saveSkillLibrary(loadSkillLibrary().filter(e => e.id !== id));
+  renderSkillLibraryList();
+}
+
+function renderSkillLibraryList() {
+  const el = document.getElementById('sl-list');
+  if (!el) return;
+  const lib = loadSkillLibrary();
+  if (!lib.length) { el.innerHTML = '<div class="sl-empty">No skills saved yet.</div>'; return; }
+  el.innerHTML = lib.slice().reverse().map(e => `
+    <div class="sl-entry">
+      <div class="sl-entry-header">
+        <span class="sl-entry-title">${escapeHtml(e.title)}</span>
+        <button class="sl-del-btn" onclick="deleteSkillEntry('${e.id}')" title="Delete">✕</button>
+      </div>
+      <div class="sl-entry-preview">${escapeHtml(e.content.slice(0, 120))}${e.content.length > 120 ? '…' : ''}</div>
+    </div>`).join('');
+}
+
 function buildSkillsSystemPrompt() {
   const sfSteps = EDM_PHASES.flatMap(ph =>
     ph.steps.map(s => {
       const plain = s.desc.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-      return `  Step ${s.num} (${s.title}): ${plain}`;
+      const note  = loadEdmStepNotes()[s.id];
+      return `  Step ${s.num} (${s.title}): ${plain}${note ? ` [My note: ${note}]` : ''}`;
     })
   ).join('\n');
+
+  // Brand & Compliance checklists
+  const brandItems = [
+    ...CHECKLISTS.qc_brand,
+    ...CHECKLISTS.qc_copy,
+    ...CHECKLISTS.qc_layout,
+    ...CHECKLISTS.qc_preflight,
+    ...CHECKLISTS.compliance_qc,
+  ].map(i => `  - ${i.label}${i.sub ? ': ' + i.sub : ''}${i.badge === 'critical' ? ' [CRITICAL]' : ''}`).join('\n');
+
+  // Quick notes from the floating notes widget
+  const floatingNotes = localStorage.getItem(EDM_NOTES_KEY) || '';
+
+  // Skill library entries
+  const libEntries = loadSkillLibrary();
+  const libSection = libEntries.length
+    ? '\n\n=== MY SKILL LIBRARY (user-added) ===\n' +
+      libEntries.map(e => `--- ${e.title} ---\n${e.content}`).join('\n\n')
+    : '';
+
+  // Timesheet summary (current week's logged data)
+  let timesheetSummary = '';
+  try {
+    const ts = JSON.parse(localStorage.getItem('msc_timesheet_v1') || '{}');
+    const entries = Object.entries(ts).slice(-14).map(([date, mins]) =>
+      `  ${date}: ${Math.floor(mins/60)}h ${mins%60}m`
+    ).join('\n');
+    if (entries) timesheetSummary = `\n\n=== RECENT TIMESHEET ENTRIES ===\n${entries}`;
+  } catch {}
 
   return `You are the internal workflow assistant for the Assetline Capital Marketing team. Answer questions about internal tools and processes. Be concise — bullet points where helpful, plain sentences for short answers. Never make up steps or policies you're not sure about; say "I'm not sure about that one."
 
@@ -5985,16 +6128,20 @@ The 4 core products: Horizon Mortgages, Private Lending, Development Finance, Br
 - Always clone — never build from scratch
 - Only edit the body copy — leave merge fields and signature blocks untouched
 
+=== BRAND & COMPLIANCE CHECKLIST ===
+These are the QC standards applied to all Assetline Capital marketing materials:
+${brandItems}
+
 === ASSETLINE CAPITAL CONTEXT ===
 Assetline Capital is a broker-first non-bank lender backed by AltX Financial Group. It specialises in short-term, property-secured lending.
 The Marketing team supports campaigns across the 4 product lines. Petro is the manager/lead who assigns work and approves sends.
-The app (this tool) helps the team track daily ops, EDM sends, timesheets, brand compliance, and AI-assisted writing.`;
+The app (this tool) helps the team track daily ops, EDM sends, timesheets, brand compliance, and AI-assisted writing.${floatingNotes ? `\n\n=== MY QUICK NOTES ===\n${floatingNotes}` : ''}${timesheetSummary}${libSection}`;
 }
 
 function renderSkillsPage() {
   const root = document.getElementById('skills-root');
   if (!root) return;
-  if (root.dataset.rendered) { renderSkillsChatMessages(); return; }
+  if (root.dataset.rendered) { renderSkillsChatMessages(); renderSkillLibraryList(); return; }
   root.dataset.rendered = '1';
 
   root.innerHTML = `
@@ -6026,7 +6173,24 @@ function renderSkillsPage() {
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/></svg>
         </button>
       </div>
+
+      <div class="sl-panel">
+        <div class="sl-panel-header">
+          <div class="sl-panel-title">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><path d="M2 2h8l4 4v8H2z"/><polyline points="10,2 10,6 14,6"/></svg>
+            Skill Library
+          </div>
+          <span class="sl-panel-sub">Paste in any skill guide — it gets added to the AI's knowledge.</span>
+        </div>
+        <div class="sl-add-form">
+          <input id="sl-title" class="sl-title-input" type="text" placeholder="Skill title (e.g. Brand Typography Rules)"/>
+          <textarea id="sl-content" class="sl-content-input" rows="4" placeholder="Paste the skill guide or markdown here…"></textarea>
+          <button class="btn-add" style="align-self:flex-start" onclick="addSkillEntry()">+ Add to library</button>
+        </div>
+        <div id="sl-list" class="sl-list"></div>
+      </div>
     </div>`;
+  renderSkillLibraryList();
 }
 
 function renderSkillsChatMessages() {
