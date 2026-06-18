@@ -21,7 +21,8 @@
       "Bash(grep -v \"//\\\\|entry-cat\\\\|addedToTimesheet: false\")",
       "Bash(grep -n \"^\\\\/\\\\* ══\\\\|^\\\\.wgl-filter-bar\" \"C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\style.css\")",
       "mcp__visualize__read_me",
-      "mcp__visualize__show_widget"
+      "mcp__visualize__show_widget",
+      "PowerShell(node --check \"C:\\\\Users\\\\Josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\opsMarketing\\\\app.js\" 2>&1)"
     ]
   }
 }

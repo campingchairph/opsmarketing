@@ -274,6 +274,7 @@ function navigate(pageId) {
   else                          { setEdmSidebarVisible(false); }
   if (pageId === 'edmreport')   { renderEdmReportPage(); }
   if (pageId === 'plaintext')   { renderPlainTextPage(); }
+  if (pageId === 'skills')      { renderSkillsPage(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
   if (pageId === 'goodlooks')   { renderGoodLooks(); }
@@ -4032,6 +4033,10 @@ const EDM_STEPS_KEY = 'msc_edm_steps_v1';
 function loadEdmSteps()  { try { return JSON.parse(localStorage.getItem(EDM_STEPS_KEY)) || {}; } catch { return {}; } }
 function saveEdmSteps(d) { localStorage.setItem(EDM_STEPS_KEY, JSON.stringify(d)); }
 
+const EDM_STEP_NOTES_KEY = 'msc_edm_step_notes_v1';
+function loadEdmStepNotes()             { try { return JSON.parse(localStorage.getItem(EDM_STEP_NOTES_KEY)) || {}; } catch { return {}; } }
+function saveEdmStepNote(stepId, text)  { const n = loadEdmStepNotes(); n[stepId] = text; localStorage.setItem(EDM_STEP_NOTES_KEY, JSON.stringify(n)); }
+
 // ── Phases checklist state ───────────────────────────────────────
 let edmSelectedStep = null;
 let edmDoneOpen     = false;
@@ -4178,6 +4183,17 @@ function edmDetailCard() {
   }
   const summaryBlock = summaryRows.length ? `<div class="edm-detail-summary">${summaryRows.join('')}</div>` : '';
 
+  const existingNote = loadEdmStepNotes()[foundStep.id] || '';
+  const noteBlock = `
+    <div class="edm-step-note-block">
+      <div class="edm-step-note-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:11px;height:11px;opacity:.6"><path d="M2 2h8l4 4v8H2z"/><polyline points="10,2 10,6 14,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg>
+        My notes for this step
+      </div>
+      <textarea class="edm-step-note-input" placeholder="Jot down changes, reminders, or anything that differs from the default instructions…"
+        oninput="saveEdmStepNote('${foundStep.id}', this.value)">${escapeHtml(existingNote)}</textarea>
+    </div>`;
+
   return `
     <div class="edm-detail-header">
       <div class="edm-detail-phase-tag">Phase ${foundPhase.num} — ${foundPhase.title}</div>
@@ -4187,6 +4203,7 @@ function edmDetailCard() {
       <div class="edm-detail-desc">${foundStep.desc}</div>
       ${petroWidget}
       ${summaryBlock}
+      ${noteBlock}
     </div>`;
 }
 
@@ -5036,13 +5053,13 @@ function saveEdmSnapshot() {
 
 function loadEdmSnapshot(id) {
   if (!confirm('Load this save? Unsaved changes to the current report will be replaced.')) return;
-  try {
-    const d = JSON.parse(localStorage.getItem('msc_edm_report_save_' + id));
-    if (d && d.entries) {
-      saveEdmReportData(d);
-      renderEdmReportPage();
-    }
-  } catch { showAiToast('Could not load save.'); }
+  let d;
+  try { d = JSON.parse(localStorage.getItem('msc_edm_report_save_' + id)); } catch { showAiToast('Could not read saved report.'); return; }
+  if (!d) { showAiToast('Save not found.'); return; }
+  if (!d.entries) d.entries = [];
+  saveEdmReportData(d);
+  renderEdmReportPage();
+  showAiToast('✓ Report loaded.');
 }
 
 function deleteEdmSnapshot(id) {
@@ -5923,6 +5940,157 @@ function renderPlainTextPage() {
 
     </div>
   </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SKILLS Q&A
+// ══════════════════════════════════════════════════════════════════
+let skillsChatHistory = [];
+
+function buildSkillsSystemPrompt() {
+  const sfSteps = EDM_PHASES.flatMap(ph =>
+    ph.steps.map(s => {
+      const plain = s.desc.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      return `  Step ${s.num} (${s.title}): ${plain}`;
+    })
+  ).join('\n');
+
+  return `You are the internal workflow assistant for the Assetline Capital Marketing team. Answer questions about internal tools and processes. Be concise — bullet points where helpful, plain sentences for short answers. Never make up steps or policies you're not sure about; say "I'm not sure about that one."
+
+=== SALESFORCE EDM — DESIGNED HTML EMAILS (16 steps) ===
+These emails are exported from Figma as HTML and uploaded to Salesforce Account Engagement.
+${sfSteps}
+
+Key reminders:
+- Always save as you go — Salesforce has no autosave
+- Merge fields won't display in test emails — use the Preview tab
+- Publishing a template does NOT send it — you still need to create a Send
+- Scheduling uses local timezone — confirm with Petro first time
+- Designed and plain text EDMs alternate week by week — Petro specifies which
+
+=== PLAIN TEXT EDM PROCESS ===
+Plain text EDMs are broker-to-broker emails sent from a person, not a brand campaign. Process:
+1. Clone the previous email for the same product in Account Engagement → Content → Email Content
+2. Update the subject line (from the Word doc Petro provides)
+3. Update the body copy (first block only — do NOT touch merge fields or signature blocks below)
+4. Sync the plain text body from HTML (required step in Salesforce)
+5. Notify Petro via Teams once done
+
+Naming convention: [Product] [Subject Line] — no date (e.g. "Private Lending Let's have a private chat")
+Campaign convention: [Product] Push (e.g. "Private Lending Push")
+
+The 4 core products: Horizon Mortgages, Private Lending, Development Finance, Bridging
+- Email Content = plain text broker emails
+- Account Engagement Email = designed HTML branded campaigns
+- Always clone — never build from scratch
+- Only edit the body copy — leave merge fields and signature blocks untouched
+
+=== ASSETLINE CAPITAL CONTEXT ===
+Assetline Capital is a broker-first non-bank lender backed by AltX Financial Group. It specialises in short-term, property-secured lending.
+The Marketing team supports campaigns across the 4 product lines. Petro is the manager/lead who assigns work and approves sends.
+The app (this tool) helps the team track daily ops, EDM sends, timesheets, brand compliance, and AI-assisted writing.`;
+}
+
+function renderSkillsPage() {
+  const root = document.getElementById('skills-root');
+  if (!root) return;
+  if (root.dataset.rendered) { renderSkillsChatMessages(); return; }
+  root.dataset.rendered = '1';
+
+  root.innerHTML = `
+    <div class="skills-layout">
+      <div class="skills-header">
+        <div class="skills-header-inner">
+          <div class="skills-title">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px;flex-shrink:0"><circle cx="8" cy="8" r="6"/><path d="M8 5v1.5a1.5 1.5 0 000 3V11"/><circle cx="8" cy="13" r=".5" fill="currentColor" stroke="none"/></svg>
+            Skills Assistant
+          </div>
+          <div class="skills-subtitle">Ask anything about Salesforce steps, plain text emails, brand guide, or app workflows.</div>
+        </div>
+        <button class="skills-clear-btn" onclick="clearSkillsChat()">Clear chat</button>
+      </div>
+
+      <div class="skills-chat-area" id="skills-chat-area">
+        <div class="skills-chat-messages" id="skills-chat-messages">
+          <div class="skills-bubble skills-bubble-bot">
+            <div class="skills-bubble-inner">Hey! Ask me anything about the Salesforce EDM process, plain text emails, naming conventions, or how things work in the app. I'll keep it short and practical.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skills-input-row">
+        <textarea class="skills-input" id="skills-input" rows="1" placeholder="e.g. What do I do after receiving the ZIP from Petro?"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSkillsMessage()}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+        <button class="skills-send-btn" id="skills-send-btn" onclick="sendSkillsMessage()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderSkillsChatMessages() {
+  const el = document.getElementById('skills-chat-messages');
+  if (!el) return;
+  const intro = `<div class="skills-bubble skills-bubble-bot"><div class="skills-bubble-inner">Hey! Ask me anything about the Salesforce EDM process, plain text emails, naming conventions, or how things work in the app. I'll keep it short and practical.</div></div>`;
+  el.innerHTML = intro + skillsChatHistory.map(m =>
+    `<div class="skills-bubble ${m.role === 'user' ? 'skills-bubble-user' : 'skills-bubble-bot'}">
+       <div class="skills-bubble-inner">${m.role === 'user' ? escapeHtml(m.content) : m.content}</div>
+     </div>`
+  ).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendSkillsMessage() {
+  const input = document.getElementById('skills-input');
+  const msg   = input?.value?.trim();
+  if (!msg) return;
+  const key = getAiKey();
+  if (!key) { aiNoKey('Skills Assistant'); return; }
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  skillsChatHistory.push({ role: 'user', content: msg });
+  renderSkillsChatMessages();
+
+  const btn = document.getElementById('skills-send-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="skills-loading">…</span>'; }
+
+  // Add typing indicator
+  const area = document.getElementById('skills-chat-messages');
+  if (area) { area.insertAdjacentHTML('beforeend', '<div class="skills-bubble skills-bubble-bot" id="skills-typing"><div class="skills-bubble-inner skills-typing-dots"><span></span><span></span><span></span></div></div>'); area.scrollTop = area.scrollHeight; }
+
+  try {
+    const apiMessages = [
+      ...skillsChatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }))
+    ];
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 512,
+        messages: [{ role: 'system', content: buildSkillsSystemPrompt() }, ...apiMessages]
+      })
+    });
+    const data = await res.json();
+    const used = data.usage?.total_tokens || 0;
+    if (used) trackAiUsage(used);
+    const reply = data.choices?.[0]?.message?.content || 'No response received.';
+    skillsChatHistory.push({ role: 'assistant', content: reply.replace(/\n/g, '<br>') });
+  } catch (e) {
+    skillsChatHistory.push({ role: 'assistant', content: 'Error: ' + e.message });
+  }
+
+  document.getElementById('skills-typing')?.remove();
+  if (btn) { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/></svg>'; }
+  renderSkillsChatMessages();
+}
+
+function clearSkillsChat() {
+  skillsChatHistory = [];
+  renderSkillsChatMessages();
 }
 
 function renderEdmReportPage() {
