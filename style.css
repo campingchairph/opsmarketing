@@ -5932,6 +5932,49 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 .sl-del-btn:hover { color: var(--accent); background: var(--accent-dim); }
 .sl-entry-preview { font-size: 11px; color: var(--text-3); line-height: 1.5; font-family: var(--font-mono); }
 
+/* ── Instruction Analyzer step cards ── */
+.ia-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ia-step-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+}
+.ia-step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.ia-step-body { flex: 1; }
+.ia-step-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 3px;
+}
+.ia-step-detail {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
 /* ── Nav drag-and-drop ── */
 .nav-drag-handle {
   display: none;

@@ -3460,6 +3460,59 @@ function copyFnResult() {
     .then(() => showAiToast('✓ Filename copied'));
 }
 
+// ── Feature 7: Instruction Analyzer ─────────────────────────────
+async function analyzeInstruction() {
+  const input = document.getElementById('ia-input')?.value?.trim();
+  if (!input) { alert('Paste an instruction first.'); return; }
+  const key = getAiKey();
+  if (!key) { aiNoKey('Instruction Analyzer'); return; }
+  aiSetBtn('ia-btn', true, 'Break it down →', 'Analyzing…');
+
+  const system = `You are an instruction analyst. Your job is to take any long, complex, or vague instruction and break it down into clear, numbered steps that are easy to follow one at a time.
+
+RULES:
+- Output ONLY a JSON array of step objects. No preamble, no explanation outside the array.
+- Each step object has exactly two fields:
+    "step": short action title (5–8 words, starts with a verb)
+    "detail": 1–2 sentences explaining what to do and any important specifics
+- Keep steps practical and in logical sequence
+- If a step has a critical warning or common mistake, include it in "detail"
+- Aim for 4–10 steps. Merge trivial sub-actions into one step where sensible
+- Never add a step that says "you're done" or "review your work" — end at the last real action
+
+Example output format:
+[
+  {"step": "Open the file in the correct tool", "detail": "Use the application specified in the brief. Do not open in a different program as formatting may change."},
+  {"step": "Update the headline copy", "detail": "Replace the placeholder text with the approved copy from the brief, word for word. Do not paraphrase."}
+]`;
+
+  try {
+    const raw   = await callClaude(system, input);
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('Could not parse response. Try again.');
+    const steps = JSON.parse(match[0]);
+
+    const stepsEl = document.getElementById('ia-steps');
+    stepsEl.innerHTML = steps.map((s, i) => `
+      <div class="ia-step-card">
+        <div class="ia-step-num">${i + 1}</div>
+        <div class="ia-step-body">
+          <div class="ia-step-title">${escapeHtml(s.step)}</div>
+          <div class="ia-step-detail">${escapeHtml(s.detail)}</div>
+        </div>
+      </div>`).join('');
+
+    // Build plain text version for copy
+    const plain = steps.map((s, i) => `${i + 1}. ${s.step}\n   ${s.detail}`).join('\n\n');
+    document.getElementById('ia-plain-text').value = plain;
+    document.getElementById('ia-output').hidden = false;
+  } catch (e) {
+    if (e.message === 'NO_KEY') aiNoKey('Instruction Analyzer');
+    else alert('Error: ' + e.message);
+  }
+  aiSetBtn('ia-btn', false, 'Break it down →', 'Analyzing…');
+}
+
 // ══════════════════════════════════════════════════════════════════
 // QUICK NOTES DRAWER
 // ══════════════════════════════════════════════════════════════════
