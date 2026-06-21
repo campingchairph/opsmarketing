@@ -3481,11 +3481,13 @@ Output ONLY valid JSON with this exact structure (no text outside the JSON):
   "key_info": [
     {"label": "short label", "value": "the extracted detail"}
   ],
-  "flags": ["array of things to watch out for — missing info, ambiguities, things that need clarification — empty array if none"]
+  "flags": ["array of things to watch out for — missing info, ambiguities, things that need clarification — empty array if none"],
+  "suggested_reply": "a short, casual acknowledgment the receiver can send back — sound like a real person, not a corporate robot. If there are flags/missing info, weave in a natural question to get that sorted. Keep it 1–3 sentences max. If the instruction needs no reply (e.g. a self-contained brief), return null."
 }
 
 For key_info: extract every concrete piece of information mentioned — campaign name, send date, file names, audience, platform, product, sender name, subject line, word count, format specs, approval contact, etc. One object per piece of info. If nothing of that type is mentioned, skip it.
-For flags: note anything that seems unclear, missing, or that the reader should double-check before starting.`;
+For flags: note anything that seems unclear, missing, or that the reader should double-check before starting.
+For suggested_reply: write how you'd actually reply in a team Slack or email — casual, direct, no "Hi [Name]," openers, no sign-offs, no "I hope this email finds you well." Just the message itself.`;
 
   try {
     const raw   = await callClaude(system, input);
@@ -3525,12 +3527,23 @@ For flags: note anything that seems unclear, missing, or that the reader should 
         ${r.flags.map(f => `<div class="ia-flag-row">⚠ ${escapeHtml(f)}</div>`).join('')}
       </div>` : '';
 
+    // Suggested reply
+    const replyHtml = r.suggested_reply ? `
+      <div class="ia-section">
+        <div class="ia-section-title">Suggested reply</div>
+        <div class="ia-reply-block">
+          <div class="ia-reply-text" id="ia-reply-text">${escapeHtml(r.suggested_reply)}</div>
+          <button class="ia-reply-copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('ia-reply-text').textContent).then(()=>showAiToast('✓ Reply copied'))">Copy</button>
+        </div>
+      </div>` : '';
+
     document.getElementById('ia-steps').innerHTML = `
       <div class="ia-summary-block">${escapeHtml(r.summary || '')}</div>
       ${metaChips ? `<div class="ia-chips-row">${metaChips}</div>` : ''}
       ${keyInfoHtml ? `<div class="ia-section"><div class="ia-section-title">Key Information</div>${keyInfoHtml}</div>` : ''}
       ${linksHtml}
-      ${flagsHtml}`;
+      ${flagsHtml}
+      ${replyHtml}`;
 
     // Plain text for copy
     let plain = `INSTRUCTION ANALYSIS\n${'─'.repeat(40)}\n`;
@@ -3547,6 +3560,9 @@ For flags: note anything that seems unclear, missing, or that the reader should 
     }
     if ((r.flags || []).length) {
       plain += `\n\nWatch Out For:\n` + r.flags.map(f => `⚠ ${f}`).join('\n');
+    }
+    if (r.suggested_reply) {
+      plain += `\n\nSuggested Reply:\n${r.suggested_reply}`;
     }
     document.getElementById('ia-plain-text').value = plain;
     document.getElementById('ia-output').hidden = false;

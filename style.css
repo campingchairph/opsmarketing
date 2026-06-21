@@ -6024,6 +6024,35 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
   line-height: 1.5;
 }
 
+.ia-reply-block {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 70px 11px 14px;
+}
+.ia-reply-text {
+  font-size: 13px;
+  color: var(--text-1);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.ia-reply-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .15s;
+}
+.ia-reply-copy-btn:hover { background: var(--accent-dim); color: var(--accent); }
+
 /* ── Nav drag-and-drop ── */
 .nav-drag-handle {
   display: none;
