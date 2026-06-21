@@ -1605,17 +1605,17 @@
             <span class="ai-badge">AI</span>
           </div>
           <div class="ai-feature-body">
-            <p class="ai-feature-desc">Paste any long or complex instruction — the AI breaks it down into clear, numbered steps you can follow one at a time.</p>
+            <p class="ai-feature-desc">Paste any instruction, email, or brief — the AI reads it and extracts the key data: job type, deadline, priority, links, important details, and a plain-English summary.</p>
             <div class="ai-controls">
               <div class="ai-field-row">
-                <label class="ai-label">Instruction or task description</label>
+                <label class="ai-label">Instruction, email, or brief</label>
                 <textarea id="ia-input" class="form-textarea" rows="6" style="height:140px;resize:vertical"
                   placeholder="Paste the full instruction, email, brief, or task description here…"></textarea>
               </div>
-              <button id="ia-btn" class="btn-add" onclick="analyzeInstruction()">Break it down →</button>
+              <button id="ia-btn" class="btn-add" onclick="analyzeInstruction()">Analyze →</button>
             </div>
             <div class="ai-output" id="ia-output" hidden>
-              <div class="ai-output-label">Step-by-step breakdown</div>
+              <div class="ai-output-label">Instruction breakdown</div>
               <div id="ia-steps" class="ia-steps-list"></div>
               <button class="ai-copy-btn" onclick="copyAiOutput('ia-plain-text')" style="margin-top:10px">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>

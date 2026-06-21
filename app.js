@@ -3466,51 +3466,95 @@ async function analyzeInstruction() {
   if (!input) { alert('Paste an instruction first.'); return; }
   const key = getAiKey();
   if (!key) { aiNoKey('Instruction Analyzer'); return; }
-  aiSetBtn('ia-btn', true, 'Break it down →', 'Analyzing…');
+  aiSetBtn('ia-btn', true, 'Analyze →', 'Analyzing…');
 
-  const system = `You are an instruction analyst. Your job is to take any long, complex, or vague instruction and break it down into clear, numbered steps that are easy to follow one at a time.
+  const system = `You are a brief and instruction analyst for a marketing team. Your job is to read any instruction, email, or task brief and extract all key information from it — NOT to create steps.
 
-RULES:
-- Output ONLY a JSON array of step objects. No preamble, no explanation outside the array.
-- Each step object has exactly two fields:
-    "step": short action title (5–8 words, starts with a verb)
-    "detail": 1–2 sentences explaining what to do and any important specifics
-- Keep steps practical and in logical sequence
-- If a step has a critical warning or common mistake, include it in "detail"
-- Aim for 4–10 steps. Merge trivial sub-actions into one step where sensible
-- Never add a step that says "you're done" or "review your work" — end at the last real action
+Output ONLY valid JSON with this exact structure (no text outside the JSON):
+{
+  "job_type": "short label for what type of job this is (e.g. Email Campaign, Design Brief, Social Post, Copy Edit, Meeting Request)",
+  "summary": "2–3 sentence plain-English summary of what is being asked",
+  "deadline": "exact deadline string if mentioned, or null",
+  "priority": "high | medium | low — infer from language (urgent, ASAP, EOD = high; when you get a chance = low)",
+  "from": "who sent or assigned this, if mentioned, or null",
+  "links": ["array of any URLs or file paths mentioned — empty array if none"],
+  "key_info": [
+    {"label": "short label", "value": "the extracted detail"}
+  ],
+  "flags": ["array of things to watch out for — missing info, ambiguities, things that need clarification — empty array if none"]
+}
 
-Example output format:
-[
-  {"step": "Open the file in the correct tool", "detail": "Use the application specified in the brief. Do not open in a different program as formatting may change."},
-  {"step": "Update the headline copy", "detail": "Replace the placeholder text with the approved copy from the brief, word for word. Do not paraphrase."}
-]`;
+For key_info: extract every concrete piece of information mentioned — campaign name, send date, file names, audience, platform, product, sender name, subject line, word count, format specs, approval contact, etc. One object per piece of info. If nothing of that type is mentioned, skip it.
+For flags: note anything that seems unclear, missing, or that the reader should double-check before starting.`;
 
   try {
     const raw   = await callClaude(system, input);
-    const match = raw.match(/\[[\s\S]*\]/);
+    const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Could not parse response. Try again.');
-    const steps = JSON.parse(match[0]);
+    const r = JSON.parse(match[0]);
 
-    const stepsEl = document.getElementById('ia-steps');
-    stepsEl.innerHTML = steps.map((s, i) => `
-      <div class="ia-step-card">
-        <div class="ia-step-num">${i + 1}</div>
-        <div class="ia-step-body">
-          <div class="ia-step-title">${escapeHtml(s.step)}</div>
-          <div class="ia-step-detail">${escapeHtml(s.detail)}</div>
-        </div>
+    const priorityColour = { high: '#E4572E', medium: '#f5c842', low: '#7dd89a' };
+    const pColour = priorityColour[r.priority] || 'var(--text-3)';
+
+    // Meta chips row
+    const metaChips = [
+      r.job_type  ? `<span class="ia-chip ia-chip-type">${escapeHtml(r.job_type)}</span>` : '',
+      r.priority  ? `<span class="ia-chip ia-chip-priority" style="color:${pColour};border-color:${pColour}">${escapeHtml(r.priority)} priority</span>` : '',
+      r.deadline  ? `<span class="ia-chip ia-chip-deadline">⏱ ${escapeHtml(r.deadline)}</span>` : '',
+      r.from      ? `<span class="ia-chip ia-chip-from">From: ${escapeHtml(r.from)}</span>` : '',
+    ].filter(Boolean).join('');
+
+    // Key info rows
+    const keyInfoHtml = (r.key_info || []).map(k => `
+      <div class="ia-info-row">
+        <span class="ia-info-label">${escapeHtml(k.label)}</span>
+        <span class="ia-info-value">${escapeHtml(k.value)}</span>
       </div>`).join('');
 
-    // Build plain text version for copy
-    const plain = steps.map((s, i) => `${i + 1}. ${s.step}\n   ${s.detail}`).join('\n\n');
+    // Links
+    const linksHtml = (r.links || []).length ? `
+      <div class="ia-section">
+        <div class="ia-section-title">Links & Files</div>
+        ${r.links.map(l => `<div class="ia-link-row"><span class="ia-link-icon">🔗</span><span class="ia-link-text">${escapeHtml(l)}</span></div>`).join('')}
+      </div>` : '';
+
+    // Flags
+    const flagsHtml = (r.flags || []).length ? `
+      <div class="ia-section ia-flags-section">
+        <div class="ia-section-title">Watch out for</div>
+        ${r.flags.map(f => `<div class="ia-flag-row">⚠ ${escapeHtml(f)}</div>`).join('')}
+      </div>` : '';
+
+    document.getElementById('ia-steps').innerHTML = `
+      <div class="ia-summary-block">${escapeHtml(r.summary || '')}</div>
+      ${metaChips ? `<div class="ia-chips-row">${metaChips}</div>` : ''}
+      ${keyInfoHtml ? `<div class="ia-section"><div class="ia-section-title">Key Information</div>${keyInfoHtml}</div>` : ''}
+      ${linksHtml}
+      ${flagsHtml}`;
+
+    // Plain text for copy
+    let plain = `INSTRUCTION ANALYSIS\n${'─'.repeat(40)}\n`;
+    if (r.job_type)  plain += `Job Type: ${r.job_type}\n`;
+    if (r.priority)  plain += `Priority: ${r.priority}\n`;
+    if (r.deadline)  plain += `Deadline: ${r.deadline}\n`;
+    if (r.from)      plain += `From: ${r.from}\n`;
+    plain += `\nSummary:\n${r.summary}\n`;
+    if ((r.key_info || []).length) {
+      plain += `\nKey Info:\n` + r.key_info.map(k => `• ${k.label}: ${k.value}`).join('\n');
+    }
+    if ((r.links || []).length) {
+      plain += `\n\nLinks:\n` + r.links.map(l => `• ${l}`).join('\n');
+    }
+    if ((r.flags || []).length) {
+      plain += `\n\nWatch Out For:\n` + r.flags.map(f => `⚠ ${f}`).join('\n');
+    }
     document.getElementById('ia-plain-text').value = plain;
     document.getElementById('ia-output').hidden = false;
   } catch (e) {
     if (e.message === 'NO_KEY') aiNoKey('Instruction Analyzer');
     else alert('Error: ' + e.message);
   }
-  aiSetBtn('ia-btn', false, 'Break it down →', 'Analyzing…');
+  aiSetBtn('ia-btn', false, 'Analyze →', 'Analyzing…');
 }
 
 // ══════════════════════════════════════════════════════════════════

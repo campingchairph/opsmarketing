@@ -5932,47 +5932,96 @@ a.edm-sb-link-val:hover { text-decoration: underline; }
 .sl-del-btn:hover { color: var(--accent); background: var(--accent-dim); }
 .sl-entry-preview { font-size: 11px; color: var(--text-3); line-height: 1.5; font-family: var(--font-mono); }
 
-/* ── Instruction Analyzer step cards ── */
-.ia-steps-list {
+/* ── Instruction Analyzer breakdown ── */
+.ia-steps-list { display: flex; flex-direction: column; gap: 12px; }
+
+.ia-summary-block {
+  font-size: 13px;
+  color: var(--text-1);
+  line-height: 1.65;
+  background: var(--bg-2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+}
+
+.ia-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.ia-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.ia-chip-type { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-dim); }
+.ia-chip-deadline { color: #f5c842; border-color: #f5c842; }
+.ia-chip-from { color: var(--text-2); }
+
+.ia-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
-.ia-step-card {
+.ia-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-3);
+}
+
+.ia-info-row {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  gap: 10px;
+  align-items: baseline;
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 11px 14px;
+  border-radius: 7px;
+  padding: 7px 12px;
 }
-.ia-step-num {
+.ia-info-label {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
+  color: var(--text-3);
+  min-width: 110px;
+}
+.ia-info-value {
+  font-size: 12.5px;
+  color: var(--text-1);
+  line-height: 1.5;
+}
+
+.ia-link-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-top: 1px;
-}
-.ia-step-body { flex: 1; }
-.ia-step-title {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-1);
-  margin-bottom: 3px;
-}
-.ia-step-detail {
+  gap: 8px;
   font-size: 12px;
-  color: var(--text-2);
-  line-height: 1.6;
+  color: var(--accent);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 12px;
+  word-break: break-all;
+}
+.ia-link-icon { flex-shrink: 0; }
+.ia-link-text { flex: 1; }
+
+.ia-flags-section .ia-flag-row {
+  font-size: 12px;
+  color: #f5c842;
+  background: rgba(245,200,66,.08);
+  border: 1px solid rgba(245,200,66,.25);
+  border-radius: 7px;
+  padding: 7px 12px;
+  line-height: 1.5;
 }
 
 /* ── Nav drag-and-drop ── */
