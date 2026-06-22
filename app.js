@@ -4721,16 +4721,105 @@ function clearAllDiff() {
 // DIFF MODE SWITCHER
 // ══════════════════════════════════════════════════════════════════
 function switchDiffMode(mode) {
-  const textSection  = document.getElementById('diff-text-section');
-  const imageSection = document.getElementById('diff-image-section');
-  const btnText      = document.getElementById('diff-mode-text');
-  const btnImage     = document.getElementById('diff-mode-image');
-  if (!textSection || !imageSection) return;
-  const isText = mode === 'text';
-  textSection.style.display  = isText ? '' : 'none';
-  imageSection.style.display = isText ? 'none' : '';
-  btnText.classList.toggle('active',  isText);
-  btnImage.classList.toggle('active', !isText);
+  const sections = { text: 'diff-text-section', doc: 'diff-doc-section', image: 'diff-image-section' };
+  const btns     = { text: 'diff-mode-text',    doc: 'diff-mode-doc',    image: 'diff-mode-image' };
+  // hide shared output when switching away from text/doc
+  if (mode === 'image') {
+    document.getElementById('diff-stats').style.display  = 'none';
+    document.getElementById('diff-output').style.display = 'none';
+  }
+  Object.keys(sections).forEach(m => {
+    const sec = document.getElementById(sections[m]);
+    const btn = document.getElementById(btns[m]);
+    if (sec) sec.style.display = m === mode ? '' : 'none';
+    if (btn) btn.classList.toggle('active', m === mode);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DOC / PDF COMPARE
+// ══════════════════════════════════════════════════════════════════
+const docState = { left: null, right: null };
+
+function docDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('img-zone-drag'); }
+function docDrop(e, side) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('img-zone-drag');
+  const file = e.dataTransfer.files[0];
+  if (file) loadDocFile(file, side);
+}
+function docFileLoad(e, side) {
+  const file = e.target.files[0];
+  if (file) loadDocFile(file, side);
+}
+
+function loadDocFile(file, side) {
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const zone = document.getElementById(`doc-zone-${side}`);
+  if (!['pdf','docx','doc'].includes(ext)) { showAiToast('Only .pdf, .docx, or .doc files are supported.'); return; }
+  docState[side] = { file, ext, text: null };
+  zone.querySelector('.img-zone-label').textContent = file.name;
+  zone.querySelector('.img-zone-sub').textContent   = 'Extracting text…';
+  zone.style.borderColor = 'var(--accent)';
+
+  extractDocText(file, ext).then(text => {
+    docState[side].text = text;
+    zone.querySelector('.img-zone-sub').textContent = `${text.split(/\s+/).length} words extracted`;
+    if (docState.left?.text != null && docState.right?.text != null) {
+      document.getElementById('doc-diff-actions').style.display = '';
+    }
+  }).catch(err => {
+    zone.querySelector('.img-zone-sub').textContent = 'Error extracting text — try a different file';
+    zone.style.borderColor = '#E4572E';
+    console.error(err);
+  });
+}
+
+async function extractDocText(file, ext) {
+  if (ext === 'docx' || ext === 'doc') {
+    const buf = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buf });
+    return result.value;
+  }
+  if (ext === 'pdf') {
+    if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js not loaded');
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page    = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(s => s.str).join(' ') + '\n';
+    }
+    return text;
+  }
+  throw new Error('Unsupported format');
+}
+
+async function runDocDiff() {
+  if (!docState.left?.text || !docState.right?.text) { showAiToast('Load both files first.'); return; }
+  const btn = document.getElementById('doc-compare-btn');
+  btn.disabled = true; btn.textContent = 'Comparing…';
+  document.getElementById('diff-left').value  = docState.left.text;
+  document.getElementById('diff-right').value = docState.right.text;
+  runDiffCheck();
+  btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 1h5l4 4v10H4V1z"/><polyline points="9,1 9,5 13,5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg> Compare Docs →';
+}
+
+function clearDocDiff() {
+  docState.left = null; docState.right = null;
+  ['left','right'].forEach(side => {
+    const zone = document.getElementById(`doc-zone-${side}`);
+    zone.querySelector('.img-zone-label').textContent = side === 'left' ? 'Original' : 'Modified';
+    zone.querySelector('.img-zone-sub').textContent   = 'Click or drag a .docx or .pdf here';
+    zone.style.borderColor = '';
+    document.getElementById(`doc-input-${side}`).value = '';
+  });
+  document.getElementById('doc-diff-actions').style.display = 'none';
+  document.getElementById('diff-stats').style.display  = 'none';
+  document.getElementById('diff-output').style.display = 'none';
 }
 
 // ══════════════════════════════════════════════════════════════════
