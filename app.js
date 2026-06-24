@@ -3574,6 +3574,191 @@ For suggested_reply: write how you'd actually reply in a team Slack or email —
 }
 
 // ══════════════════════════════════════════════════════════════════
+// ANALYZE PAGE — SUB-TAB SWITCHER
+// ══════════════════════════════════════════════════════════════════
+function switchAnalyzeMode(mode) {
+  document.getElementById('analyze-ia-section').style.display = mode === 'ia' ? '' : 'none';
+  document.getElementById('analyze-cc-section').style.display = mode === 'cc' ? '' : 'none';
+  document.getElementById('analyze-mode-ia').classList.toggle('active', mode === 'ia');
+  document.getElementById('analyze-mode-cc').classList.toggle('active', mode === 'cc');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CAMPAIGN CLASSIFIER
+// ══════════════════════════════════════════════════════════════════
+const CC_SYSTEM = `You are a campaign classification assistant for Assetline Capital, a specialist non-bank lender in Australia.
+
+Your job is to read email copy (which may have been extracted from an HTML EDM) and determine which of the four Assetline campaign pushes it belongs to, based on tone, product signals, target audience, and messaging cues.
+
+---
+
+CAMPAIGN DEFINITIONS:
+
+1. Horizon Mortgages
+   Tagline: Capital that stays as long as you do.
+   Product: Long-term property-backed lending for self-employed borrowers, trusts, SMSFs, and complex income profiles.
+   Audience: Brokers placing clients who need stable, ongoing finance for commercial or investment property (purchase, refinance, equity release).
+   Tone: Settled, reliable, flexible. Long-view language. Avoid urgency.
+   Key words: long-term, flexible, structured, secure, policy, certainty, accountant's letter, alt-doc, complex income.
+   Avoid: Speed language, urgency, same-day framing.
+
+2. Development Finance
+   Tagline: Capital that shows up. Every milestone.
+   Product: Finance for ground-up builds, development projects, construction-related refinancing. Site acquisition to completion.
+   Audience: Brokers working with property developers, builders, project sponsors who need a lender that understands construction milestones and progressive drawdowns.
+   Tone: Expertise-driven. Show construction knowledge, not just capital availability.
+   Key words: milestone, progress, structure, deliver, build, site visits, in-house property knowledge.
+   Avoid: Retail/personal borrower framing.
+
+3. Private Lending
+   Tagline: Capital, deployed. Not deliberated.
+   Product: Short-term capital from $500k to $40m secured against property. Sub-products: standard capital, no valuation, site acquisition, refurbishment, non-resident, residual stock.
+   Audience: Business borrowers and property professionals who need capital deployed quickly.
+   Tone: Momentum. Speed as capability, not desperation. Fact-forward.
+   Key words: same-day, indicative, deployed, responsive, decisive. Lead with numbers: loan sizes, LVRs, turnaround times.
+   Avoid: Emotional language. Feelings. Vagueness.
+
+4. Bridging Loans
+   Tagline: Bridging the gap. Both sides of it.
+   Sub-products:
+   - Bridging Loans (Buy before you sell): Short-term finance for clients who've found their next property but haven't sold their current one. Conditionally approved in under 24 hours. Up to 12 months. Built for homeowners, investors, mature-age downsizers.
+   - Equity Release (Capital, before the sale): Short-term finance for clients planning to sell in the future but not buying another property. Unlocks capital from existing property — for lifestyle, investment, or transition needs.
+   Audience: Individual borrowers making life decisions. Not developers running numbers.
+   Tone: Calm, confident, human. Use words: bridge, move, timing, confidence.
+   Avoid: Developer or investor-first framing unless clearly specified.
+
+---
+
+RESPONSE FORMAT (JSON only, no markdown, no preamble):
+
+{
+  "input_type": "plain_text | html_edm",
+  "email_subject": "<extracted subject line or null>",
+  "campaign": "<campaign name>",
+  "sub_product": "<sub-product name or null>",
+  "confidence": <0.0 to 1.0>,
+  "signals": ["<signal 1>", "<signal 2>", "<signal 3>"],
+  "misalignments": ["<any tone or copy elements that don't fit the campaign>"],
+  "suggested_fix": "<one sentence on how to tighten the alignment, or null if well-aligned>"
+}`;
+
+const CC_COLOURS = {
+  'Horizon Mortgages':   '#4A9EBF',
+  'Development Finance': '#E07B39',
+  'Private Lending':     '#7dd89a',
+  'Bridging Loans':      '#f5c842',
+};
+
+function isHTMLContent(str) {
+  return /<html[\s>]/i.test(str) || /<!doctype html/i.test(str);
+}
+
+function extractEDMContent(htmlString) {
+  const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+  const subject = doc.querySelector('title')?.textContent?.trim() || null;
+  const preheaderEl = doc.querySelector('div[style*="display:none"], div[style*="max-height:0"]');
+  const preheader = preheaderEl?.textContent?.trim() || null;
+  const pardotRegions = doc.querySelectorAll('[pardot-region]');
+  const bodyParts = [];
+  pardotRegions.forEach(el => {
+    if (el.getAttribute('pardot-region-type') === 'image') return;
+    const text = el.textContent?.trim();
+    if (text) bodyParts.push(text);
+  });
+  const bodyText = bodyParts.length > 0
+    ? bodyParts.join('\n')
+    : doc.body?.textContent?.replace(/\s+/g, ' ').trim() || '';
+  return { subject, preheader, bodyText };
+}
+
+async function classifyCampaign() {
+  const input = document.getElementById('cc-input')?.value?.trim();
+  if (!input) { alert('Paste email copy or HTML first.'); return; }
+  const key = getAiKey();
+  if (!key) { aiNoKey('Campaign Classifier'); return; }
+  aiSetBtn('cc-btn', true, 'Classify →', 'Classifying…');
+
+  let inputType = 'plain_text';
+  let userContent = input;
+
+  if (isHTMLContent(input)) {
+    inputType = 'html_edm';
+    const { subject, preheader, bodyText } = extractEDMContent(input);
+    userContent = [
+      subject   ? `Subject: ${subject}`     : '',
+      preheader ? `Preheader: ${preheader}` : '',
+      `Body:\n${bodyText}`,
+    ].filter(Boolean).join('\n\n');
+  }
+
+  try {
+    const raw   = await callClaude(CC_SYSTEM, `Classify this ${inputType === 'html_edm' ? 'HTML EDM (text extracted)' : 'plain text email'}:\n\n${userContent}`);
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Could not parse response. Try again.');
+    const r = JSON.parse(match[0]);
+    r.input_type = inputType;
+    renderCampaignResult(r);
+  } catch (e) {
+    if (e.message === 'NO_KEY') aiNoKey('Campaign Classifier');
+    else alert('Error: ' + e.message);
+  }
+  aiSetBtn('cc-btn', false, 'Classify →', 'Classifying…');
+}
+
+function renderCampaignResult(r) {
+  const colour  = CC_COLOURS[r.campaign] || 'var(--accent)';
+  const confPct = Math.round((r.confidence || 0) * 100);
+
+  const signalsHtml = (r.signals || []).map(s => `
+    <div class="cc-signal-row">
+      <span class="cc-signal-dot"></span>
+      <span>${escapeHtml(s)}</span>
+    </div>`).join('');
+
+  const misalignHtml = (r.misalignments || []).length ? `
+    <div class="cc-section">
+      <div class="cc-section-title">Misalignments</div>
+      ${r.misalignments.map(m => `
+        <div class="cc-misalign-row">
+          <span class="cc-misalign-icon">⚠</span>
+          <span>${escapeHtml(m)}</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  const fixHtml = r.suggested_fix ? `
+    <div class="cc-fix-block">
+      <div class="cc-fix-label">Suggested fix</div>
+      <div class="cc-fix-text">${escapeHtml(r.suggested_fix)}</div>
+    </div>` : `
+    <div class="cc-fix-block cc-fix-ok">
+      <div class="cc-fix-label">Alignment</div>
+      <div class="cc-fix-text">Well aligned — no fix needed.</div>
+    </div>`;
+
+  document.getElementById('cc-result').innerHTML = `
+    <div class="cc-banner" style="--cc-colour:${colour}">
+      <div class="cc-banner-left">
+        <div class="cc-campaign-name">${escapeHtml(r.campaign)}</div>
+        ${r.sub_product ? `<div class="cc-sub-product">${escapeHtml(r.sub_product)}</div>` : ''}
+        ${r.email_subject ? `<div class="cc-subject-line">"${escapeHtml(r.email_subject)}"</div>` : ''}
+      </div>
+      <div class="cc-banner-right">
+        <div class="cc-conf-label">Confidence</div>
+        <div class="cc-conf-value">${confPct}%</div>
+        <div class="cc-conf-bar-wrap">
+          <div class="cc-conf-bar-fill" style="width:${confPct}%"></div>
+        </div>
+        <div class="cc-input-badge">${r.input_type === 'html_edm' ? 'HTML EDM' : 'Plain text'}</div>
+      </div>
+    </div>
+    ${signalsHtml ? `<div class="cc-section"><div class="cc-section-title">Signals</div>${signalsHtml}</div>` : ''}
+    ${misalignHtml}
+    ${fixHtml}`;
+
+  document.getElementById('cc-output').hidden = false;
+}
+
+// ══════════════════════════════════════════════════════════════════
 // QUICK NOTES DRAWER
 // ══════════════════════════════════════════════════════════════════
 

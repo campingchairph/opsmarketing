@@ -1601,40 +1601,87 @@
 
       </div>
 
-      <!-- ── INSTRUCTION ANALYZER ── -->
+      <!-- ── INSTRUCTION ANALYZER + CAMPAIGN CLASSIFIER ── -->
       <div id="page-analyze" class="page">
-        <div class="alert-box info" style="margin-bottom:20px">
-          <div class="alert-title">Instruction Analyzer — powered by Groq (free)</div>
-          <p>Paste any instruction, email, or brief — the AI reads it and extracts the key data: job type, deadline, priority, links, important details, a plain-English summary, and a casual suggested reply.</p>
+
+        <!-- Sub-tab bar -->
+        <div class="diff-mode-bar" style="margin-bottom:20px">
+          <button class="diff-mode-btn active" id="analyze-mode-ia" onclick="switchAnalyzeMode('ia')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="3"/></svg>
+            Instruction Analyzer
+          </button>
+          <button class="diff-mode-btn" id="analyze-mode-cc" onclick="switchAnalyzeMode('cc')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M2 2h12v12H2z"/><path d="M5 6h6M5 9h4"/><circle cx="12" cy="12" r="4" fill="var(--bg-1)" stroke="currentColor"/><path d="M10.5 12l1 1 2-2"/></svg>
+            Campaign Classifier
+          </button>
         </div>
-        <div class="ai-feature-block" id="instruction-analyzer">
-          <div class="section-block-header ai-feature-header">
-            <div class="sh-icon" style="background:var(--accent-dim)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="3"/><line x1="15.1" y1="13.1" x2="16" y2="14"/></svg>
-            </div>
-            <span class="sh-title">Instruction Analyzer</span>
-            <span class="ai-badge">AI</span>
+
+        <!-- ── Instruction Analyzer section ── -->
+        <div id="analyze-ia-section">
+          <div class="alert-box info" style="margin-bottom:20px">
+            <div class="alert-title">Instruction Analyzer — powered by Groq (free)</div>
+            <p>Paste any instruction, email, or brief — the AI reads it and extracts the key data: job type, deadline, priority, links, important details, a plain-English summary, and a casual suggested reply.</p>
           </div>
-          <div class="ai-feature-body">
-            <div class="ai-controls">
-              <div class="ai-field-row">
-                <label class="ai-label">Instruction, email, or brief</label>
-                <textarea id="ia-input" class="form-textarea" rows="6" style="height:160px;resize:vertical"
-                  placeholder="Paste the full instruction, email, brief, or task description here…"></textarea>
+          <div class="ai-feature-block" id="instruction-analyzer">
+            <div class="section-block-header ai-feature-header">
+              <div class="sh-icon" style="background:var(--accent-dim)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="3"/><line x1="15.1" y1="13.1" x2="16" y2="14"/></svg>
               </div>
-              <button id="ia-btn" class="btn-add" onclick="analyzeInstruction()">Analyze →</button>
+              <span class="sh-title">Instruction Analyzer</span>
+              <span class="ai-badge">AI</span>
             </div>
-            <div class="ai-output" id="ia-output" hidden>
-              <div class="ai-output-label">Instruction breakdown</div>
-              <div id="ia-steps" class="ia-steps-list"></div>
-              <button class="ai-copy-btn" onclick="copyAiOutput('ia-plain-text')" style="margin-top:10px">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
-                Copy as plain text
-              </button>
-              <textarea id="ia-plain-text" style="position:absolute;left:-9999px" readonly></textarea>
+            <div class="ai-feature-body">
+              <div class="ai-controls">
+                <div class="ai-field-row">
+                  <label class="ai-label">Instruction, email, or brief</label>
+                  <textarea id="ia-input" class="form-textarea" rows="6" style="height:160px;resize:vertical"
+                    placeholder="Paste the full instruction, email, brief, or task description here…"></textarea>
+                </div>
+                <button id="ia-btn" class="btn-add" onclick="analyzeInstruction()">Analyze →</button>
+              </div>
+              <div class="ai-output" id="ia-output" hidden>
+                <div class="ai-output-label">Instruction breakdown</div>
+                <div id="ia-steps" class="ia-steps-list"></div>
+                <button class="ai-copy-btn" onclick="copyAiOutput('ia-plain-text')" style="margin-top:10px">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                  Copy as plain text
+                </button>
+                <textarea id="ia-plain-text" style="position:absolute;left:-9999px" readonly></textarea>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- ── Campaign Classifier section ── -->
+        <div id="analyze-cc-section" style="display:none">
+          <div class="alert-box info" style="margin-bottom:20px">
+            <div class="alert-title">Campaign Classifier — powered by Groq (free)</div>
+            <p>Paste plain text email copy or a full HTML EDM — the AI classifies it into one of the four Assetline campaign pushes, with confidence score, copy signals, misalignments, and a suggested fix.</p>
+          </div>
+          <div class="ai-feature-block">
+            <div class="section-block-header ai-feature-header">
+              <div class="sh-icon" style="background:var(--accent-dim)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 2h12v12H2z"/><path d="M5 6h6M5 9h4"/><circle cx="12" cy="12" r="4" fill="var(--bg-2)" stroke="var(--accent)"/><path d="M10.5 12l1 1 2-2"/></svg>
+              </div>
+              <span class="sh-title">Campaign Classifier</span>
+              <span class="ai-badge">AI</span>
+            </div>
+            <div class="ai-feature-body">
+              <div class="ai-controls">
+                <div class="ai-field-row">
+                  <label class="ai-label">Plain text copy or full HTML EDM</label>
+                  <textarea id="cc-input" class="form-textarea" rows="8" style="height:180px;resize:vertical;font-family:var(--font-mono);font-size:11px"
+                    placeholder="Paste plain text email copy, or paste the full HTML source of an EDM — the classifier handles both…"></textarea>
+                </div>
+                <button id="cc-btn" class="btn-add" onclick="classifyCampaign()">Classify →</button>
+              </div>
+              <div id="cc-output" hidden>
+                <div id="cc-result"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div id="page-timer" class="page">
