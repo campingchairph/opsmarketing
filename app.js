@@ -274,6 +274,10 @@ function navigate(pageId) {
   else                          { setEdmSidebarVisible(false); }
   if (pageId === 'edmreport')   { renderEdmReportPage(); }
   if (pageId === 'plaintext')   { renderPlainTextPage(); }
+
+  // Task reminder panel — show on task pages, hide everywhere else
+  if (TRP_PAGES && TRP_PAGES[pageId]) showTaskReminderPanel(pageId);
+  else hideTaskReminderPanel();
   if (pageId === 'skills')      { renderSkillsPage(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
@@ -5352,6 +5356,166 @@ function addMistake() {
   savePersonalMistakes(list);
   ['ml-what','ml-mistake','ml-fix'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderMlPersonalList();
+  // invalidate reminder cache so next visit to a task page re-analyzes
+  try { localStorage.removeItem(TRP_CACHE_KEY); } catch {}
+  // if already on a task page, refresh reminders live
+  if (TRP_CURRENT_PAGE) loadTaskReminders(true);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TASK REMINDER PANEL
+// ══════════════════════════════════════════════════════════════════
+const TRP_CACHE_KEY   = 'msc_task_reminders_v1';
+const TRP_PAGES = {
+  salesforce: 'Salesforce EDM sending process — building the email in Salesforce Account Engagement, adding UTM tracking, sending test emails, QA sign-off, scheduling the send, and notifying the team',
+  edmreport:  'EDM reporting task — reviewing email performance metrics (opens, clicks, unsubscribes, bounces), writing up the campaign report, and sharing results with the team',
+  plaintext:  'Plain text email document task — converting an HTML EDM into a clean plain text Word document, checking that all copy is present, verifying page count, formatting links correctly, and matching the HTML version exactly',
+};
+
+let TRP_CURRENT_PAGE      = null;
+let TRP_COLLAPSED         = false;
+let TRP_LOADING           = false;
+
+function getMistakesHash() {
+  const all = [
+    ...PRELOADED_MISTAKES.map(m => m.what + m.fix),
+    ...loadPersonalMistakes().map(m => m.mistake + m.fix),
+  ].join('');
+  return all.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 0).toString(36);
+}
+
+function getAllMistakesText() {
+  const personal = loadPersonalMistakes().map((m, i) =>
+    `[Personal #${i+1}] Task: ${m.task} | Mistake: ${m.mistake} | Fix: ${m.fix}`
+  );
+  const preloaded = PRELOADED_MISTAKES.map((m, i) =>
+    `[System #${i+1}] Task: ${m.task} | Mistake: ${m.what} | Fix: ${m.fix}`
+  );
+  return [...personal, ...preloaded].join('\n');
+}
+
+function loadTrpCache() {
+  try { return JSON.parse(localStorage.getItem(TRP_CACHE_KEY)) || {}; } catch { return {}; }
+}
+function saveTrpCache(data) {
+  try { localStorage.setItem(TRP_CACHE_KEY, JSON.stringify(data)); } catch {}
+}
+
+function showTaskReminderPanel(pageId) {
+  TRP_CURRENT_PAGE = pageId;
+  const panel = document.getElementById('task-reminder-panel');
+  if (!panel) return;
+  panel.style.display = '';
+  loadTaskReminders(false);
+}
+
+function hideTaskReminderPanel() {
+  TRP_CURRENT_PAGE = null;
+  const panel = document.getElementById('task-reminder-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+function toggleTaskReminder() {
+  TRP_COLLAPSED = !TRP_COLLAPSED;
+  const body    = document.getElementById('trp-body');
+  const chevron = document.getElementById('trp-chevron');
+  if (body)    body.style.display    = TRP_COLLAPSED ? 'none' : '';
+  if (chevron) chevron.style.transform = TRP_COLLAPSED ? 'rotate(-90deg)' : '';
+}
+
+async function loadTaskReminders(forceRefresh) {
+  const pageId = TRP_CURRENT_PAGE;
+  if (!pageId || !TRP_PAGES[pageId]) return;
+
+  const hash  = getMistakesHash();
+  const cache = loadTrpCache();
+  const hit   = cache[pageId];
+
+  if (!forceRefresh && hit && hit.hash === hash) {
+    renderTrpItems(hit.items, false);
+    return;
+  }
+
+  const key = getAiKey();
+  if (!key) {
+    renderTrpNoKey();
+    return;
+  }
+
+  TRP_LOADING = true;
+  renderTrpLoading();
+
+  const system = `You are a personal task coach for a marketing coordinator at Assetline Capital.
+
+You will be given a list of logged mistakes, feedback, and setbacks. Your job is to analyze them and surface the ones most relevant to the current task — then rephrase them as short, actionable "watch for" reminders.
+
+Rules:
+- Return ONLY a JSON array of strings — no markdown, no preamble
+- 3 to 6 reminders max
+- Each reminder must be under 14 words
+- Frame as "Check…", "Verify…", "Always confirm…", "Double-check…", "Make sure…" style
+- Prioritise personal/user-added mistakes over system ones
+- If fewer than 3 mistakes are clearly relevant, add practical best-practice reminders for this specific task type
+- Be specific to the task context — skip anything clearly unrelated`;
+
+  const userMsg = `Current task: ${TRP_PAGES[pageId]}
+
+All logged mistakes and fixes:
+${getAllMistakesText()}
+
+Return a JSON array of 3–6 short reminders specific to this task.`;
+
+  try {
+    const raw   = await callClaude(system, userMsg);
+    const match = raw.match(/\[[\s\S]*?\]/);
+    if (!match) throw new Error('parse');
+    const items = JSON.parse(match[0]).filter(s => typeof s === 'string');
+
+    const updated = loadTrpCache();
+    updated[pageId] = { hash, items, ts: Date.now() };
+    saveTrpCache(updated);
+
+    renderTrpItems(items, true);
+  } catch {
+    renderTrpError();
+  }
+  TRP_LOADING = false;
+}
+
+function renderTrpItems(items, fresh) {
+  const state = document.getElementById('trp-state');
+  const list  = document.getElementById('trp-list');
+  const badge = document.getElementById('trp-badge');
+  const src   = document.getElementById('trp-source');
+  if (!list) return;
+  if (state) state.style.display = 'none';
+  if (badge) { badge.textContent = items.length; badge.style.display = ''; }
+  if (src)   src.textContent = fresh ? 'Just analyzed your mistakes log' : 'From your mistakes log';
+  list.innerHTML = items.map(item => `<li class="trp-item">${escapeHtml(item)}</li>`).join('');
+  list.style.display = '';
+}
+
+function renderTrpLoading() {
+  const state = document.getElementById('trp-state');
+  const list  = document.getElementById('trp-list');
+  const badge = document.getElementById('trp-badge');
+  if (state) { state.textContent = 'Analyzing your mistakes log…'; state.className = 'trp-state trp-state-loading'; state.style.display = ''; }
+  if (list)  list.style.display = 'none';
+  if (badge) badge.style.display = 'none';
+}
+
+function renderTrpNoKey() {
+  const state = document.getElementById('trp-state');
+  const list  = document.getElementById('trp-list');
+  const badge = document.getElementById('trp-badge');
+  if (state) { state.textContent = 'Set your AI key to enable smart reminders.'; state.className = 'trp-state trp-state-dim'; state.style.display = ''; }
+  if (list)  list.style.display = 'none';
+  if (badge) badge.style.display = 'none';
+}
+
+function renderTrpError() {
+  const state = document.getElementById('trp-state');
+  if (state) { state.textContent = 'Could not load reminders — try refreshing.'; state.className = 'trp-state trp-state-dim'; state.style.display = ''; }
 }
 
 // ── Notes Drawer (override toggle to close others) ───────────────
