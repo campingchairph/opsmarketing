@@ -2,38 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marketing Coordinator — Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Assetline — Marketing Coordinator Learning Hub</title>
 <style>
 :root {
   --orange: #E4572E;
   --dark: #191919;
   --cream: #FAFAF2;
-  --orange-light: #fdf0eb;
-  --orange-mid: #f5c4b2;
-  --green: #2D9E6B;
-  --green-light: #e8f7f1;
-  --yellow: #F5A623;
-  --yellow-light: #fef8ee;
-  --red: #D94F3D;
-  --red-light: #fdf0ee;
-  --blue: #2C7BE5;
-  --blue-light: #eef4fd;
-  --grey: #6B7280;
   --border: #E5E7EB;
-  --card-bg: #fff;
+  --grey: #6B7280;
   --radius: 12px;
-  --shadow: 0 2px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+
+  --cat-daily: #F59E0B;
+  --cat-daily-light: #fffbeb;
+  --cat-daily-border: #fde68a;
+
+  --cat-marketing: #2563EB;
+  --cat-marketing-light: #eff6ff;
+  --cat-marketing-border: #bfdbfe;
+
+  --cat-admin: #059669;
+  --cat-admin-light: #ecfdf5;
+  --cat-admin-border: #a7f3d0;
+
+  --cat-design: #E4572E;
+  --cat-design-light: #fff5f2;
+  --cat-design-border: #fecdb8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--cream);
   color: var(--dark);
-  font-size: 16px;
-  line-height: 1.6;
-  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.65;
 }
 
 /* ── HEADER ── */
@@ -41,699 +45,484 @@ body {
   background: var(--dark);
   color: #fff;
   padding: 0 20px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 56px;
+  height: 54px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }
-.site-header .logo {
-  width: 32px; height: 32px;
-  background: var(--orange);
-  border-radius: 8px;
+.site-logo {
+  width: 30px; height: 30px;
+  background: var(--orange); border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 16px; flex-shrink: 0;
+  font-weight: 900; font-size: 15px; color: #fff; flex-shrink: 0;
 }
-.site-header h1 { font-size: 15px; font-weight: 600; flex: 1; }
+.site-header h1 { font-size: 14px; font-weight: 600; flex: 1; }
 .site-header h1 span { color: var(--orange); }
-.progress-bar-wrap {
-  position: fixed; top: 56px; left: 0; right: 0; height: 3px;
-  background: var(--border); z-index: 99;
+.progress-wrap {
+  position: fixed; top: 54px; left: 0; right: 0;
+  height: 3px; background: rgba(255,255,255,.1); z-index: 199;
 }
-.progress-bar { height: 3px; background: var(--orange); transition: width .4s; }
+.progress-fill { height: 3px; background: var(--orange); transition: width .4s; width: 0%; }
 
 /* ── LAYOUT ── */
-.app-shell {
-  display: flex;
-  min-height: calc(100vh - 59px);
-}
+.shell { display: flex; min-height: calc(100vh - 57px); }
 
 /* ── SIDEBAR ── */
 .sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  background: #fff;
-  border-right: 1px solid var(--border);
-  padding: 16px 0;
-  position: sticky;
-  top: 59px;
-  height: calc(100vh - 59px);
+  width: 250px; flex-shrink: 0;
+  background: #fff; border-right: 1px solid var(--border);
+  padding: 12px 0 40px;
+  position: sticky; top: 57px;
+  height: calc(100vh - 57px);
   overflow-y: auto;
 }
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--grey);
-  padding: 12px 20px 4px;
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.nav-section-label {
+  font-size: 9px; font-weight: 800; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--grey);
+  padding: 14px 16px 4px; display: flex; align-items: center; gap: 6px;
 }
-.stage-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  cursor: pointer;
+.nav-section-label .cat-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; cursor: pointer;
+  font-size: 13px; color: #374151;
   border-left: 3px solid transparent;
-  transition: all .15s;
-  font-size: 14px;
-  color: var(--dark);
-  text-decoration: none;
+  transition: all .12s;
   position: relative;
 }
-.stage-nav-item:hover { background: var(--cream); }
-.stage-nav-item.active {
-  border-left-color: var(--orange);
-  background: var(--orange-light);
-  color: var(--orange);
-  font-weight: 600;
+.nav-item:hover { background: var(--cream); color: var(--dark); }
+.nav-item.active {
+  font-weight: 700; color: var(--dark);
+  background: var(--cream);
 }
-.stage-nav-item.done .nav-icon { background: var(--green); }
-.stage-icon {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; flex-shrink: 0;
-  font-weight: 700; color: var(--grey);
-}
-.stage-nav-item.active .stage-icon { background: var(--orange); color: #fff; }
-.stage-nav-item.done .stage-icon { background: var(--green); color: #fff; }
-.nav-text { flex: 1; line-height: 1.3; }
-.nav-text small { display: block; color: var(--grey); font-size: 11px; font-weight: 400; }
-.stage-nav-item.active .nav-text small { color: var(--orange); opacity: .7; }
-.nav-check { font-size: 14px; color: var(--green); }
+.nav-item .ni-icon { font-size: 15px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-item .ni-label { flex: 1; }
+.nav-item .ni-done { font-size: 12px; color: #059669; }
 
-/* ── MAIN CONTENT ── */
-.main-content {
-  flex: 1;
-  padding: 32px 28px;
-  max-width: 860px;
-}
+.nav-item.active.cat-daily { border-left-color: var(--cat-daily); background: var(--cat-daily-light); }
+.nav-item.active.cat-marketing { border-left-color: var(--cat-marketing); background: var(--cat-marketing-light); }
+.nav-item.active.cat-admin { border-left-color: var(--cat-admin); background: var(--cat-admin-light); }
+.nav-item.active.cat-design { border-left-color: var(--cat-design); background: var(--cat-design-light); }
+
+/* ── CONTENT ── */
+.content { flex: 1; max-width: 820px; padding: 28px 28px 80px; }
+
 .page { display: none; }
 .page.active { display: block; }
 
 /* ── HOME ── */
 .home-hero {
-  background: var(--dark);
-  border-radius: var(--radius);
-  padding: 40px 32px;
-  color: #fff;
-  margin-bottom: 32px;
-  position: relative;
-  overflow: hidden;
+  background: var(--dark); border-radius: var(--radius);
+  padding: 36px 28px; color: #fff; margin-bottom: 28px;
+  position: relative; overflow: hidden;
 }
-.home-hero::before {
-  content: '';
-  position: absolute;
-  right: -40px; top: -40px;
-  width: 200px; height: 200px;
-  background: var(--orange);
-  border-radius: 50%;
-  opacity: .12;
+.home-hero::after {
+  content: ''; position: absolute;
+  right: -30px; bottom: -30px;
+  width: 160px; height: 160px;
+  background: var(--orange); border-radius: 50%; opacity: .1;
 }
-.home-hero h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-.home-hero h2 span { color: var(--orange); }
-.home-hero p { color: rgba(255,255,255,.7); font-size: 15px; max-width: 480px; }
-.hero-stats {
-  display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap;
-}
-.hero-stat { text-align: center; }
-.hero-stat strong { font-size: 22px; color: var(--orange); display: block; }
-.hero-stat span { font-size: 12px; color: rgba(255,255,255,.6); }
+.home-hero .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--orange); margin-bottom: 8px; }
+.home-hero h2 { font-size: 24px; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+.home-hero p { color: rgba(255,255,255,.65); font-size: 14px; max-width: 460px; }
 
-.stages-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cat-card {
+  border-radius: var(--radius); padding: 20px;
+  cursor: pointer; transition: all .15s;
+  border: 2px solid transparent;
 }
-.stage-card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  border: 2px solid var(--border);
-  padding: 20px;
-  cursor: pointer;
-  transition: all .15s;
-  position: relative;
-}
-.stage-card:hover { border-color: var(--orange); box-shadow: var(--shadow); transform: translateY(-2px); }
-.stage-card.done { border-color: var(--green); }
-.stage-card.current { border-color: var(--orange); }
-.card-stage-num {
-  font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--grey); margin-bottom: 6px;
-}
-.card-stage-num .dot {
-  display: inline-block; width: 8px; height: 8px;
-  border-radius: 50%; margin-right: 6px; vertical-align: middle;
-}
-.stage-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-.stage-card p { font-size: 13px; color: var(--grey); line-height: 1.5; }
-.card-badge {
-  position: absolute; top: 14px; right: 14px;
-  font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 20px;
-}
-.badge-done { background: var(--green-light); color: var(--green); }
-.badge-current { background: var(--orange-light); color: var(--orange); }
-.badge-locked { background: var(--border); color: var(--grey); }
-.card-time {
-  margin-top: 12px; font-size: 12px; color: var(--grey);
-  display: flex; align-items: center; gap: 4px;
-}
+.cat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.cat-card.daily { background: var(--cat-daily-light); border-color: var(--cat-daily-border); }
+.cat-card.marketing { background: var(--cat-marketing-light); border-color: var(--cat-marketing-border); }
+.cat-card.admin { background: var(--cat-admin-light); border-color: var(--cat-admin-border); }
+.cat-card.design { background: var(--cat-design-light); border-color: var(--cat-design-border); }
+.cat-card .cc-icon { font-size: 28px; margin-bottom: 8px; }
+.cat-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.cat-card p { font-size: 12px; color: var(--grey); line-height: 1.5; }
+.cat-card .cc-lessons { margin-top: 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--grey); }
 
 /* ── PAGE HEADER ── */
-.page-header {
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+.pg-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
 }
-.stage-badge {
+.pg-eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
-  background: var(--orange-light); color: var(--orange);
-  font-size: 12px; font-weight: 700; padding: 4px 12px;
-  border-radius: 20px; margin-bottom: 10px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+  padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
 }
-.page-header h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-.page-header .subtitle { color: var(--grey); font-size: 15px; }
-.time-estimate {
-  margin-top: 12px; display: inline-flex; align-items: center; gap: 6px;
-  background: var(--border); border-radius: 20px;
-  padding: 4px 12px; font-size: 12px; color: var(--grey);
-}
+.pg-eyebrow.daily { background: var(--cat-daily-light); color: #92600A; }
+.pg-eyebrow.marketing { background: var(--cat-marketing-light); color: var(--cat-marketing); }
+.pg-eyebrow.admin { background: var(--cat-admin-light); color: var(--cat-admin); }
+.pg-eyebrow.design { background: var(--cat-design-light); color: var(--cat-design); }
 
-/* ── CONTENT BLOCKS ── */
-.section { margin-bottom: 32px; }
+.pg-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.pg-header .pg-sub { font-size: 14px; color: var(--grey); }
+
+/* ── SECTION ── */
+.section { margin-bottom: 28px; }
 .section-title {
-  font-size: 13px; font-weight: 700; letter-spacing: .5px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px;
   text-transform: uppercase; color: var(--grey);
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   display: flex; align-items: center; gap: 8px;
 }
-.section-title::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-.lesson-card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  margin-bottom: 12px;
+/* ── ACCORDION ── */
+.accordion {
+  background: #fff; border-radius: var(--radius);
+  border: 1px solid var(--border); margin-bottom: 10px;
   overflow: hidden;
 }
-.lesson-header {
-  padding: 16px 20px;
-  display: flex; align-items: center; gap: 14px;
-  cursor: pointer;
+.acc-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; cursor: pointer;
   transition: background .1s;
 }
-.lesson-header:hover { background: var(--cream); }
-.lesson-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-}
-.lesson-meta { flex: 1; }
-.lesson-meta h4 { font-size: 15px; font-weight: 600; }
-.lesson-meta span { font-size: 12px; color: var(--grey); }
-.lesson-toggle { font-size: 14px; color: var(--grey); transition: transform .2s; }
-.lesson-card.open .lesson-toggle { transform: rotate(180deg); }
-.lesson-body {
-  display: none;
-  padding: 0 20px 20px;
+.acc-head:hover { background: var(--cream); }
+.acc-icon { font-size: 20px; width: 36px; height: 36px; background: var(--cream); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.acc-text { flex: 1; }
+.acc-text h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.acc-text span { font-size: 12px; color: var(--grey); }
+.acc-arrow { color: var(--grey); font-size: 12px; transition: transform .2s; }
+.accordion.open .acc-arrow { transform: rotate(180deg); }
+.acc-body {
+  display: none; padding: 0 18px 18px;
   border-top: 1px solid var(--border);
 }
-.lesson-card.open .lesson-body { display: block; }
-.lesson-body p { font-size: 14px; line-height: 1.7; color: #374151; margin-bottom: 12px; }
-.lesson-body p:last-child { margin-bottom: 0; }
-.lesson-body strong { color: var(--dark); }
-
-/* ── CALLOUTS ── */
-.callout {
-  border-radius: 10px; padding: 14px 16px;
-  margin: 14px 0; font-size: 14px; line-height: 1.6;
-  display: flex; gap: 10px;
-}
-.callout .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.callout.tip { background: var(--yellow-light); border-left: 3px solid var(--yellow); }
-.callout.warning { background: var(--red-light); border-left: 3px solid var(--red); }
-.callout.info { background: var(--blue-light); border-left: 3px solid var(--blue); }
-.callout.success { background: var(--green-light); border-left: 3px solid var(--green); }
-.callout strong { display: block; margin-bottom: 4px; }
+.accordion.open .acc-body { display: block; }
+.acc-body p { font-size: 14px; color: #374151; line-height: 1.7; margin-bottom: 10px; }
+.acc-body p:last-child { margin-bottom: 0; }
 
 /* ── STEPS ── */
-.steps-list { list-style: none; }
-.step-item {
+.steps { list-style: none; }
+.step {
   display: flex; gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 0; border-bottom: 1px solid var(--border);
 }
-.step-item:last-child { border-bottom: none; }
-.step-num {
+.step:last-child { border-bottom: none; padding-bottom: 0; }
+.step-n {
   width: 28px; height: 28px; border-radius: 50%;
   background: var(--orange); color: #fff;
-  font-size: 13px; font-weight: 700;
+  font-size: 12px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 2px;
+  flex-shrink: 0; margin-top: 1px;
 }
-.step-num.critical { background: var(--red); }
-.step-num.done-mark { background: var(--green); }
-.step-content h5 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.step-content p { font-size: 13px; color: #374151; line-height: 1.6; }
-.step-tag {
+.step-n.red { background: #DC2626; }
+.step-n.green { background: #059669; }
+.step-body h5 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.step-body p { font-size: 13px; color: #374151; line-height: 1.65; }
+.step-body p + p { margin-top: 6px; }
+.tag {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 11px; font-weight: 700; padding: 2px 8px;
   border-radius: 10px; margin-top: 6px;
 }
-.tag-critical { background: var(--red-light); color: var(--red); }
-.tag-warning { background: var(--yellow-light); color: #92600a; }
-.tag-tip { background: var(--blue-light); color: var(--blue); }
+.tag-red { background: #fee2e2; color: #DC2626; }
+.tag-yellow { background: #fef9c3; color: #854d0e; }
+.tag-blue { background: #dbeafe; color: #1d4ed8; }
+.tag-green { background: #dcfce7; color: #15803d; }
+
+/* ── CALLOUTS ── */
+.callout {
+  border-radius: 10px; padding: 13px 15px;
+  font-size: 13px; line-height: 1.65;
+  display: flex; gap: 10px; margin: 12px 0;
+}
+.callout .ci { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+.callout.tip { background: #fffbeb; border-left: 3px solid var(--cat-daily); }
+.callout.warn { background: #fee2e2; border-left: 3px solid #DC2626; }
+.callout.info { background: #eff6ff; border-left: 3px solid var(--cat-marketing); }
+.callout.ok { background: #ecfdf5; border-left: 3px solid var(--cat-admin); }
+.callout strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
 
 /* ── CHECKLIST ── */
-.checklist { list-style: none; }
-.check-item {
+.cl { list-style: none; }
+.cl li {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 10px 0; border-bottom: 1px solid var(--border);
-  font-size: 14px; cursor: pointer;
+  font-size: 13px; cursor: pointer;
 }
-.check-item:last-child { border-bottom: none; }
-.check-item input[type=checkbox] {
-  width: 18px; height: 18px; accent-color: var(--orange);
-  cursor: pointer; flex-shrink: 0; margin-top: 2px;
-}
-.check-item label { cursor: pointer; line-height: 1.5; }
-.check-item.checked label { text-decoration: line-through; color: var(--grey); }
+.cl li:last-child { border-bottom: none; }
+.cl li input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--orange); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.cl li label { cursor: pointer; line-height: 1.55; color: #374151; }
+.cl li.ticked label { text-decoration: line-through; color: var(--grey); }
 
 /* ── TABLE ── */
-.info-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.info-table th {
-  background: var(--cream); text-align: left;
-  padding: 10px 14px; font-weight: 700; font-size: 12px;
-  text-transform: uppercase; letter-spacing: .5px; color: var(--grey);
-  border-bottom: 2px solid var(--border);
-}
-.info-table td {
-  padding: 10px 14px; border-bottom: 1px solid var(--border);
-  vertical-align: top;
-}
-.info-table tr:last-child td { border-bottom: none; }
-.info-table tr:hover td { background: var(--cream); }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.tbl th { background: var(--cream); text-align: left; padding: 9px 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--grey); border-bottom: 2px solid var(--border); }
+.tbl td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.55; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--cream); }
 
-/* ── QUIZ / KNOWLEDGE CHECK ── */
-.quiz-card {
-  background: var(--dark); border-radius: var(--radius);
-  padding: 24px; color: #fff; margin-top: 28px;
+/* ── HIGHLIGHT BANNER ── */
+.banner {
+  border-radius: var(--radius); padding: 20px 22px;
+  margin-bottom: 20px; display: flex; gap: 14px; align-items: flex-start;
 }
-.quiz-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-.quiz-card p { font-size: 13px; color: rgba(255,255,255,.7); margin-bottom: 16px; }
-.quiz-options { display: flex; flex-direction: column; gap: 8px; }
-.quiz-option {
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-  border-radius: 8px; padding: 12px 16px; cursor: pointer;
-  font-size: 14px; color: #fff; transition: all .15s;
-}
-.quiz-option:hover { background: rgba(255,255,255,.15); }
-.quiz-option.correct { background: var(--green); border-color: var(--green); }
-.quiz-option.wrong { background: var(--red); border-color: var(--red); opacity: .7; }
-.quiz-feedback {
-  margin-top: 14px; padding: 12px 14px;
-  border-radius: 8px; font-size: 14px; display: none;
-}
-.quiz-feedback.show { display: block; }
-.quiz-feedback.good { background: var(--green); }
-.quiz-feedback.bad { background: var(--red); }
+.banner.orange { background: linear-gradient(135deg,#E4572E,#c94120); color: #fff; }
+.banner.dark { background: var(--dark); color: #fff; }
+.banner .bi { font-size: 28px; flex-shrink: 0; }
+.banner h3 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.banner p { font-size: 13px; opacity: .85; line-height: 1.6; }
 
-/* ── PEOPLE CARDS ── */
-.people-row { display: flex; gap: 14px; flex-wrap: wrap; }
-.person-card {
-  background: var(--card-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px; flex: 1; min-width: 180px;
-}
-.person-avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: var(--orange); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 700; margin-bottom: 10px;
-}
-.person-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-.person-card .role { font-size: 12px; color: var(--grey); margin-bottom: 8px; }
-.person-card .desc { font-size: 13px; color: #374151; line-height: 1.5; }
-
-/* ── RULE CARDS ── */
-.rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.rule-card {
-  background: var(--card-bg); border: 1px solid var(--border);
+/* ── RULES GRID ── */
+.rules { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rule {
+  background: #fff; border: 1px solid var(--border);
   border-radius: 10px; padding: 14px 16px;
 }
-.rule-card .rule-icon { font-size: 22px; margin-bottom: 8px; }
-.rule-card h5 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-.rule-card p { font-size: 12px; color: var(--grey); line-height: 1.5; }
+.rule .ri { font-size: 22px; margin-bottom: 6px; }
+.rule h5 { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.rule p { font-size: 12px; color: var(--grey); line-height: 1.5; }
 
-/* ── NAV BUTTONS ── */
-.page-nav {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 40px; padding-top: 24px;
-  border-top: 1px solid var(--border);
+/* ── COMPLETE ── */
+.complete-box {
+  background: #ecfdf5; border: 2px dashed #059669;
+  border-radius: var(--radius); padding: 22px;
+  text-align: center; margin-top: 28px;
 }
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 20px; border-radius: 8px; font-size: 14px;
-  font-weight: 600; cursor: pointer; border: none; transition: all .15s;
-  text-decoration: none;
-}
-.btn-primary {
-  background: var(--orange); color: #fff;
-}
-.btn-primary:hover { background: #c94120; }
-.btn-secondary {
-  background: var(--card-bg); color: var(--dark);
-  border: 1px solid var(--border);
-}
-.btn-secondary:hover { background: var(--cream); }
-.btn-success { background: var(--green); color: #fff; }
-.btn-success:hover { background: #24855a; }
-
-/* ── MOBILE NAV ── */
-.mobile-bottom-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: #fff; border-top: 1px solid var(--border);
-  z-index: 100; padding: 0 8px;
-}
-.mobile-nav-items {
-  display: flex; overflow-x: auto;
-  scrollbar-width: none; gap: 4px; padding: 8px 0;
-}
-.mobile-nav-items::-webkit-scrollbar { display: none; }
-.mobile-nav-btn {
-  flex-shrink: 0; display: flex; flex-direction: column;
-  align-items: center; gap: 3px; padding: 6px 12px;
-  border-radius: 8px; cursor: pointer; border: none;
-  background: transparent; font-size: 11px; color: var(--grey);
-  font-weight: 600; transition: all .15s;
-}
-.mobile-nav-btn .mn-icon { font-size: 20px; }
-.mobile-nav-btn.active { color: var(--orange); background: var(--orange-light); }
-.mobile-nav-btn.done { color: var(--green); }
-
-/* ── HIGHLIGHT BOX ── */
-.highlight-box {
-  background: linear-gradient(135deg, var(--orange) 0%, #c94120 100%);
-  border-radius: var(--radius); padding: 24px; color: #fff; margin-bottom: 24px;
-}
-.highlight-box h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-.highlight-box p { font-size: 14px; opacity: .85; line-height: 1.6; }
-
-/* ── COMPLETE BUTTON ── */
-.complete-section {
-  background: var(--green-light);
-  border: 2px dashed var(--green);
-  border-radius: var(--radius); padding: 24px;
-  text-align: center; margin-top: 32px;
-}
-.complete-section h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--green); }
-.complete-section p { font-size: 14px; color: var(--grey); margin-bottom: 16px; }
-.stage-done-badge {
-  display: inline-block; background: var(--green); color: #fff;
-  padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: 700;
+.complete-box h4 { font-weight: 800; color: #059669; margin-bottom: 6px; }
+.complete-box p { font-size: 13px; color: var(--grey); margin-bottom: 14px; }
+.done-badge {
+  display: inline-block; background: #059669; color: #fff;
+  padding: 4px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;
   margin-bottom: 12px;
 }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .sidebar { display: none; }
-  .mobile-bottom-nav { display: block; }
-  .main-content { padding: 20px 16px 100px; }
-  .home-hero { padding: 28px 20px; }
-  .home-hero h2 { font-size: 20px; }
-  .stages-grid { grid-template-columns: 1fr; }
-  .rules-grid { grid-template-columns: 1fr; }
-  .people-row { flex-direction: column; }
-  .page-nav { flex-direction: column; gap: 10px; }
-  .page-nav .btn { width: 100%; justify-content: center; }
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: none; transition: all .12s; text-decoration: none;
 }
-@media (max-width: 480px) {
-  .hero-stats { gap: 16px; }
-  .hero-stat strong { font-size: 18px; }
+.btn-primary { background: var(--orange); color: #fff; }
+.btn-primary:hover { background: #c94120; }
+.btn-ghost { background: #fff; color: var(--dark); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--cream); }
+.btn-green { background: #059669; color: #fff; }
+.btn-green:hover { background: #047857; }
+
+.pg-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 36px; padding-top: 20px;
+  border-top: 1px solid var(--border); gap: 10px;
+}
+
+/* ── CODE ── */
+code {
+  background: #f3f4f6; border-radius: 4px;
+  padding: 1px 6px; font-size: 12px;
+  font-family: 'Courier New', monospace; color: #DC2626;
+}
+
+/* ── QUIZ ── */
+.quiz {
+  background: var(--dark); border-radius: var(--radius);
+  padding: 20px 22px; margin-top: 24px; color: #fff;
+}
+.quiz h4 { font-size: 15px; margin-bottom: 6px; }
+.quiz .qp { font-size: 13px; color: rgba(255,255,255,.65); margin-bottom: 14px; }
+.q-opts { display: flex; flex-direction: column; gap: 8px; }
+.q-opt {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px; padding: 11px 14px; cursor: pointer;
+  font-size: 13px; color: #fff; transition: all .12s;
+}
+.q-opt:hover { background: rgba(255,255,255,.15); }
+.q-opt.correct { background: #059669; border-color: #059669; }
+.q-opt.wrong { background: #DC2626; border-color: #DC2626; opacity: .7; }
+.q-fb { margin-top: 12px; padding: 11px 13px; border-radius: 8px; font-size: 13px; display: none; }
+.q-fb.show { display: block; }
+.q-fb.good { background: #059669; }
+.q-fb.bad { background: #DC2626; }
+
+/* ── MOBILE BOTTOM NAV ── */
+.mob-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid var(--border);
+  z-index: 200; padding: 4px 0 env(safe-area-inset-bottom, 4px);
+}
+.mob-tabs { display: flex; }
+.mob-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 6px 4px;
+  font-size: 10px; font-weight: 700; color: var(--grey);
+  cursor: pointer; border: none; background: transparent;
+  transition: color .12s;
+}
+.mob-tab .mt-icon { font-size: 20px; }
+.mob-tab.active-daily { color: var(--cat-daily); }
+.mob-tab.active-marketing { color: var(--cat-marketing); }
+.mob-tab.active-admin { color: var(--cat-admin); }
+.mob-tab.active-design { color: var(--cat-design); }
+.mob-tab.active-home { color: var(--orange); }
+
+/* ── PHASE BADGE ── */
+.phase-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--dark); color: var(--orange);
+  font-size: 11px; font-weight: 800; letter-spacing: .5px;
+  text-transform: uppercase; padding: 4px 12px;
+  border-radius: 20px; margin-bottom: 10px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 767px) {
+  .sidebar { display: none; }
+  .mob-nav { display: block; }
+  .content { padding: 20px 16px 96px; }
+  .cat-grid { grid-template-columns: 1fr; }
+  .rules { grid-template-columns: 1fr; }
+  .pg-nav { flex-direction: column; }
+  .pg-nav .btn { width: 100%; justify-content: center; }
+  .home-hero h2 { font-size: 20px; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar { width: 200px; }
+  .content { padding: 24px 20px 60px; }
 }
 </style>
 </head>
 <body>
 
 <header class="site-header">
-  <div class="logo">A</div>
+  <div class="site-logo">A</div>
   <h1>Assetline <span>Learning Hub</span></h1>
-  <div style="font-size:13px;color:rgba(255,255,255,.5)" id="overallPct">0% done</div>
+  <div style="font-size:12px;color:rgba(255,255,255,.45)" id="pctLabel">0% complete</div>
 </header>
-<div class="progress-bar-wrap">
-  <div class="progress-bar" id="progressBar" style="width:0%"></div>
-</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
 
-<div class="app-shell">
+<div class="shell">
 
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="sidebar-label">Your Learning Path</div>
-  <div id="sidebarNav"></div>
-</nav>
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar" id="sidebarEl"></nav>
 
-<!-- CONTENT -->
-<main class="main-content" id="mainContent">
+<!-- ══ PAGES ══ -->
+<main class="content">
 
-<!-- ════════════════════ HOME ════════════════════ -->
+<!-- ═══════════════════════ HOME ═══════════════════════ -->
 <div class="page active" data-page="home">
   <div class="home-hero">
-    <h2>Welcome to your <span>marketing journey</span> 👋</h2>
-    <p>This guide will teach you everything step by step — no experience needed. Each stage builds on the last, so just start at Stage 1 and keep going.</p>
-    <div class="hero-stats">
-      <div class="hero-stat"><strong>8</strong><span>Stages</span></div>
-      <div class="hero-stat"><strong>~6hrs</strong><span>Total time</span></div>
-      <div class="hero-stat"><strong>0%</strong><span id="heroProgress">Completed</span></div>
-    </div>
+    <div class="eyebrow">Marketing Coordinator — Assetline Capital</div>
+    <h2>Your step-by-step learning guide 📚</h2>
+    <p>No design experience? No admin background? No problem. This guide teaches you exactly what you need to know — one task at a time.</p>
   </div>
 
   <div class="section">
-    <div class="section-title">Start Here — Pick a Stage</div>
-    <div class="stages-grid" id="stagesGrid"></div>
+    <div class="section-title">Four categories of work</div>
+    <div class="cat-grid" id="catGrid">
+      <div class="cat-card daily" onclick="showPage('daily-ops')">
+        <div class="cc-icon">📅</div>
+        <h3>Daily Tasks</h3>
+        <p>What you do every morning, during the day, and before you log off.</p>
+        <div class="cc-lessons">1 lesson • ~20 min</div>
+      </div>
+      <div class="cat-card marketing" onclick="showPage('edm-send')">
+        <div class="cc-icon">📧</div>
+        <h3>Marketing Tasks</h3>
+        <p>Sending EDM campaigns, plain text broker emails, and reporting.</p>
+        <div class="cc-lessons">3 lessons • ~2.5 hrs</div>
+      </div>
+      <div class="cat-card admin" onclick="showPage('admin-files')">
+        <div class="cc-icon">🗂️</div>
+        <h3>Admin Tasks</h3>
+        <p>File naming, trackers, escalating blockers, message templates.</p>
+        <div class="cc-lessons">1 lesson • ~20 min</div>
+      </div>
+      <div class="cat-card design" onclick="showPage('brand-qc')">
+        <div class="cc-icon">🎨</div>
+        <h3>Design Tasks</h3>
+        <p>Brand & QC, InDesign, Illustrator, PDF editing, Text Compare.</p>
+        <div class="cc-lessons">4 lessons • ~2 hrs</div>
+      </div>
+    </div>
   </div>
 
-  <div class="callout tip">
-    <div class="icon">💡</div>
-    <div><strong>How to use this guide</strong> Click any stage card to start learning. Read each lesson, tick the checklists, and answer the quick questions. Your progress saves automatically.</div>
+  <div class="callout ok">
+    <div class="ci">✅</div>
+    <div><strong>How to use this guide</strong>Pick a category above and work through each lesson. Tick checklists as you go. Your progress saves in this browser automatically — come back any time.</div>
+  </div>
+
+  <div class="callout info">
+    <div class="ci">👥</div>
+    <div><strong>Two people you must know</strong><br><b>Petro</b> — Marketing Lead. All your work goes to him for approval. Nothing goes live without his written sign-off.<br><b>Laura Stanley</b> — National Director, Private Lending. You prepare her broker outreach emails — she sends them herself.</div>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 1 ════════════════════ -->
-<div class="page" data-page="stage1">
-  <div class="page-header">
-    <div class="stage-badge">📍 Stage 1</div>
-    <h2>Welcome & Orientation</h2>
-    <p class="subtitle">Understand your role, the people you'll work with, and the tools you'll use every day.</p>
-    <div class="time-estimate">⏱ About 30 minutes</div>
+<!-- ═══════════════════════ DAILY OPS ═══════════════════════ -->
+<div class="page" data-page="daily-ops">
+  <div class="pg-header">
+    <div class="pg-eyebrow daily">📅 Daily Tasks</div>
+    <h2>Daily Ops — Your Everyday Routine</h2>
+    <p class="pg-sub">Three checklists that run your day: morning, core work, and end of day.</p>
   </div>
 
-  <div class="section">
-    <div class="section-title">What is this job?</div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fff3e0">🎯</div>
-        <div class="lesson-meta">
-          <h4>Your role in plain English</h4>
-          <span>Start here — 2 min read</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
-      </div>
-      <div class="lesson-body">
-        <p>You are the <strong>Marketing Coordinator</strong> at Assetline Capital — a financial company that lends money to property developers and investors.</p>
-        <p>Your job is to make sure that every marketing thing the company sends out is <strong>correct, on-brand, and approved</strong>. That means emails, documents, event materials, and more.</p>
-        <p>Think of it this way: the marketing lead (Petro) designs things and makes decisions. <strong>You are the person who makes it all actually happen</strong> — sending emails, checking quality, keeping files organised, and making sure deadlines are met.</p>
-        <div class="callout success">
-          <div class="icon">✅</div>
-          <div><strong>You don't need to know everything on Day 1.</strong> What you need is a habit of checking things carefully and asking questions before a deadline — not after.</div>
-        </div>
-      </div>
+  <div class="banner orange">
+    <div class="bi">🏅</div>
+    <div>
+      <h3>The Golden Rule</h3>
+      <p>If a deadline is at risk — flag it to Petro <strong>3–4 hours before</strong> it hits. Even one line: "I'm stuck on X — need guidance." Never wait until after the deadline. This is the most important habit in this role.</p>
     </div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fce4ec">👥</div>
-        <div class="lesson-meta">
-          <h4>The two key people you'll work with</h4>
-          <span>Know these names — 3 min read</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
-      </div>
-      <div class="lesson-body">
-        <div class="people-row">
-          <div class="person-card">
-            <div class="person-avatar">P</div>
-            <h4>Petro</h4>
-            <div class="role">Marketing Lead</div>
-            <div class="desc">Your manager. He sends you files (usually as ZIP files), tells you when to send emails, reviews your work, and gives final approval on <em>everything</em>. Nothing goes out without Petro's OK.</div>
-          </div>
-          <div class="person-card">
-            <div class="person-avatar" style="background:#2C7BE5">L</div>
-            <h4>Laura Stanley</h4>
-            <div class="role">National Director, Private Lending</div>
-            <div class="desc">You'll prepare plain text broker emails on her behalf. She's the sender — you prepare the email content in Salesforce, then let her know it's ready. You don't send these yourself.</div>
-          </div>
-        </div>
-        <div class="callout tip" style="margin-top:14px">
-          <div class="icon">💡</div>
-          <div>When in doubt, <strong>ask Petro first</strong>. He'd rather answer a question than fix a mistake.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e8f5e9">🖥️</div>
-        <div class="lesson-meta">
-          <h4>The Marketing Hub app</h4>
-          <span>Your main tool — 3 min read</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
-      </div>
-      <div class="lesson-body">
-        <p>Assetline uses a custom web app called the <strong>Marketing Hub</strong>. It runs in your browser (like a website) and has all the step-by-step guides, checklists, and tools you need built right in.</p>
-        <p><strong>Important things to know about this app:</strong></p>
-        <ul style="padding-left:20px; margin-bottom:12px; font-size:14px; color:#374151; line-height:1.8">
-          <li>No login required — it just opens in the browser</li>
-          <li>Your data saves automatically in the browser (called "localStorage")</li>
-          <li>Closing and reopening the browser keeps your data — it's like a save file for a game</li>
-          <li>Never clear your browser data without saving important notes first</li>
-        </ul>
-        <div class="callout info">
-          <div class="icon">ℹ️</div>
-          <div>The app also has <strong>AI tools</strong> built in (powered by Groq — it's free). These help you write emails, check campaigns, and more. You'll learn how to use them in Stage 7.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">How to navigate the app</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e3f2fd">🗂️</div>
-        <div class="lesson-meta">
-          <h4>The sidebar and its sections</h4>
-          <span>3 min read</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
-      </div>
-      <div class="lesson-body">
-        <p>The app has a <strong>left sidebar</strong> with four sections. Here's what's in each:</p>
-        <table class="info-table" style="margin-top:8px">
-          <tr><th>Section</th><th>What's inside</th></tr>
-          <tr><td><strong>Workflow</strong></td><td>Daily checklist, Email sending guide, Reporting, Plain text emails</td></tr>
-          <tr><td><strong>Brand Tools</strong></td><td>Brand checklist, Brief intake form, AI writing tools, Analyze tab</td></tr>
-          <tr><td><strong>Reference</strong></td><td>Skills AI chat, Tools list, Glossary, Text Compare</td></tr>
-          <tr><td><strong>Survival Kit</strong></td><td>First week guide, Message templates, Timesheet</td></tr>
-        </table>
-        <div class="callout tip" style="margin-top:14px">
-          <div class="icon">💡</div>
-          <div>You can <strong>drag and reorder</strong> the tabs within each section — arrange them in the order you use them most. This saves automatically.</div>
-        </div>
-        <p style="margin-top:12px">There's also a <strong>clock in the header</strong> showing Manila time and Sydney time side by side. This is important when Petro says something like "send at 9 AM Sydney" — you can see your local time instantly.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="quiz-card">
-    <h4>🧠 Quick Check — Stage 1</h4>
-    <p>If Petro sends you a test email and says "looks good!", can you publish it to send to all brokers?</p>
-    <div class="quiz-options">
-      <div class="quiz-option" onclick="checkAnswer(this, false)">Yes — if Petro says it looks good, that's approval enough</div>
-      <div class="quiz-option" onclick="checkAnswer(this, true)">No — you need written sign-off, not a verbal "looks good"</div>
-      <div class="quiz-option" onclick="checkAnswer(this, false)">Yes — once you've sent your test to yourself, you can go ahead</div>
-    </div>
-    <div class="quiz-feedback" id="qfeedback"></div>
-  </div>
-
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s1badge" style="display:none">✅ Stage 1 Complete</div>
-    <h4>Ready to move on?</h4>
-    <p>Once you've read all the lessons above and answered the quiz, mark this stage complete.</p>
-    <button class="btn btn-success" onclick="completeStage('stage1', 1)">Mark Stage 1 Complete ✓</button>
-  </div>
-
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('home')">← Back to overview</button>
-    <button class="btn btn-primary" onclick="showPage('stage2')">Stage 2: Daily Routine →</button>
-  </div>
-</div>
-
-<!-- ════════════════════ STAGE 2 ════════════════════ -->
-<div class="page" data-page="stage2">
-  <div class="page-header">
-    <div class="stage-badge">📅 Stage 2</div>
-    <h2>Your Daily Routine</h2>
-    <p class="subtitle">What you do every single workday — morning, during, and end of day.</p>
-    <div class="time-estimate">⏱ About 40 minutes</div>
-  </div>
-
-  <div class="highlight-box">
-    <h3>The Golden Rule 🏅</h3>
-    <p>If a deadline is at risk — say something <strong>3–4 hours before</strong> it hits. Even a one-line message is fine: "I'm stuck on X — guidance needed." <br><br>Never wait until after the deadline has passed. That's the one thing that will really stress out a marketing lead.</p>
   </div>
 
   <div class="section">
     <div class="section-title">Morning Routine</div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fff3e0">🌅</div>
-        <div class="lesson-meta">
-          <h4>When you first sit down — what to check</h4>
-          <span>5 min read + interactive checklist</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🌅</div>
+        <div class="acc-text"><h4>When you first sit down</h4><span>Run through this before any other work</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>Do these things every morning before you start any design or sending work:</p>
-        <ul class="checklist" id="morning-cl">
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Check overnight emails — flag anything urgent, tell Petro if it needs his attention</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Check the shared folder for new briefs from Petro — sort by deadline (most urgent first)</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Review campaign timelines — is anything at risk of being late today or tomorrow?</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Check the CRM (Salesforce) for any data issues or uploads still pending</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Check the event calendar — any RSVPs or reminders due today?</label></li>
+      <div class="acc-body">
+        <ul class="cl" id="cl-morning">
+          <li onclick="tick(this)"><input type="checkbox"><label>Check overnight emails — anything urgent? Escalate to Petro if needed</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Check the shared folder for new briefs from Petro — sort by deadline, most urgent first</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Review campaign timelines — is anything at risk of being late today or tomorrow?</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Check Salesforce for data issues or uploads still pending</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Check the event calendar — any RSVPs or reminders due today?</label></li>
         </ul>
         <div class="callout tip" style="margin-top:12px">
-          <div class="icon">💡</div>
-          <div>The Marketing Hub app has a <strong>Daily Ops</strong> tab with these checklists built in. Use it — it saves your progress automatically.</div>
+          <div class="ci">💡</div>
+          <div>This routine takes about 15 minutes. Do it before you open any design files or Salesforce workflows.</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Core Tasks (During the Day)</div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e8f5e9">⚙️</div>
-        <div class="lesson-meta">
-          <h4>What "doing the work" looks like</h4>
-          <span>5 min read</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Core Tasks — During the Day</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">⚙️</div>
+        <div class="acc-text"><h4>What "doing the work" looks like</h4><span>The tasks that fill your day</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>Throughout the day, your job is to:</p>
-        <ul class="checklist">
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Execute approved content — update websites, schedule emails in Salesforce, update platforms</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Keep trackers updated — campaign tracker, event tracker, contact tracker, asset tracker</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Process pending invoice submissions</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Respond to supplier queries using pre-approved briefs</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>QC any material before it goes to Petro — logo correct? Disclaimer present? On-template?</label></li>
+      <div class="acc-body">
+        <ul class="cl">
+          <li onclick="tick(this)"><input type="checkbox"><label>Execute approved content — schedule emails in Salesforce, update websites or platforms</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Keep all trackers updated: campaign tracker, event tracker, contact tracker, asset tracker</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Process any pending invoice submissions</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Respond to supplier queries using pre-approved briefs</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>QC any material before sending to Petro — logo correct? Disclaimer present? On-template?</label></li>
         </ul>
-        <div class="callout warning">
-          <div class="icon">⚠️</div>
-          <div><strong>QC before sending to Petro — not after.</strong> Every file you send to Petro for review should already be checked by you. His time is for sign-off, not for finding your mistakes.</div>
+        <div class="callout warn" style="margin-top:12px">
+          <div class="ci">⚠️</div>
+          <div><strong>QC before Petro — not after.</strong> Everything you send him for review should already be checked by you. His time is for sign-off, not for finding mistakes.</div>
         </div>
       </div>
     </div>
@@ -741,75 +530,66 @@ body {
 
   <div class="section">
     <div class="section-title">End of Day</div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fce4ec">🌙</div>
-        <div class="lesson-meta">
-          <h4>Before you log off</h4>
-          <span>4 min read</span>
-        </div>
-        <div class="lesson-toggle">▼</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🌙</div>
+        <div class="acc-text"><h4>Before you log off</h4><span>4 things to always do</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <ul class="checklist">
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Update all open task statuses and trackers — nothing "in progress" left unexplained</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Flag any blockers or delays to Petro before end of day — not after</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>File all approved materials to the correct shared folder</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Confirm tomorrow's key deadlines and prep any templates you'll need</label></li>
+      <div class="acc-body">
+        <ul class="cl">
+          <li onclick="tick(this)"><input type="checkbox"><label>Update all open task statuses in your trackers — nothing left as "in progress" unexplained</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Flag any blockers or delays to Petro BEFORE end of day</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>File all approved materials to the correct shared folder</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Check tomorrow's deadlines and prep any templates you'll need</label></li>
         </ul>
-        <div class="callout info" style="margin-top:12px">
-          <div class="icon">ℹ️</div>
-          <div>The Marketing Hub's <strong>AI Write tab</strong> has an "EOD Wrap Generator" — describe your day in plain words and it writes your end-of-day sign-off message for you.</div>
-        </div>
       </div>
     </div>
   </div>
 
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s2badge" style="display:none">✅ Stage 2 Complete</div>
-    <h4>Got the routine down?</h4>
-    <p>The daily checklist in the app makes this easy to follow — you won't need to memorise all of it.</p>
-    <button class="btn btn-success" onclick="completeStage('stage2', 2)">Mark Stage 2 Complete ✓</button>
+  <div class="complete-box">
+    <div class="done-badge" id="db-daily" style="display:none">✅ Lesson Complete</div>
+    <h4>Got the routine?</h4>
+    <p>The Marketing Hub app has the Daily Ops checklists built in — tick them there every day.</p>
+    <button class="btn btn-green" onclick="markDone('daily-ops')">Mark Complete ✓</button>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage1')">← Stage 1</button>
-    <button class="btn btn-primary" onclick="showPage('stage3')">Stage 3: Sending an Email →</button>
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('home')">← Back to overview</button>
+    <button class="btn btn-primary" onclick="showPage('edm-send')">Next: Salesforce EDM →</button>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 3 ════════════════════ -->
-<div class="page" data-page="stage3">
-  <div class="page-header">
-    <div class="stage-badge">📧 Stage 3</div>
-    <h2>Sending an EDM Email</h2>
-    <p class="subtitle">This is the most important task in the role. An "EDM" is a designed marketing email sent to all brokers via Salesforce. There are 16 steps — we'll go through each one.</p>
-    <div class="time-estimate">⏱ About 90 minutes</div>
+<!-- ═══════════════════════ SALESFORCE EDM ═══════════════════════ -->
+<div class="page" data-page="edm-send">
+  <div class="pg-header">
+    <div class="pg-eyebrow marketing">📧 Marketing Tasks</div>
+    <h2>Salesforce EDM — Sending a Designed Email</h2>
+    <p class="pg-sub">This is the most important task in the role. 16 steps across 7 phases. Read carefully — mistakes here reach thousands of brokers.</p>
   </div>
 
   <div class="callout info">
-    <div class="icon">ℹ️</div>
-    <div><strong>What is an EDM?</strong> EDM stands for "Electronic Direct Mail." It's a nicely designed HTML email — like a digital newsletter or product announcement — sent to Assetline's database of mortgage brokers.</div>
+    <div class="ci">ℹ️</div>
+    <div><strong>What is an EDM?</strong> EDM = Electronic Direct Mail. It's a professionally designed HTML email — like a digital newsletter — sent to Assetline's database of mortgage brokers. Petro designs it, you send it.</div>
   </div>
 
   <div class="section">
     <div class="section-title">Phase 1 — Receive & Open Files</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num">1</div>
-        <div class="step-content">
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n">1</div>
+        <div class="step-body">
           <h5>Receive the ZIP file from Petro via Teams</h5>
-          <p>Petro sends a Microsoft Teams message with a ZIP file attached. The message will include: the HTML email file, campaign name, send date and time, and sometimes special notes about the sender details.</p>
-          <p style="margin-top:8px">As soon as you receive it, <strong>update the "Campaign Details" card</strong> at the top of the Salesforce EDM page in the Marketing Hub app with the campaign name and any sender changes Petro mentions.</p>
+          <p>Petro sends a ZIP file via Microsoft Teams. It includes: the HTML email file, campaign name, send date and time, and sometimes notes about the sender details.</p>
+          <p>As soon as it arrives, open the <strong>Campaign Details card</strong> at the top of the Salesforce EDM page in the Marketing Hub app and fill in the campaign name and any sender changes Petro mentions. Do this now — not later.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">2</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n">2</div>
+        <div class="step-body">
           <h5>Extract the ZIP and open both files in Chrome</h5>
-          <p>Inside the ZIP folder, there will be a date-named folder. Inside that, find two files: <code>index.html</code> (the designed email) and <code>plain-text-version.txt</code>.</p>
-          <p style="margin-top:8px">Right-click each file → "Open with Google Chrome." Keep both Chrome tabs open the entire time you're working on this send.</p>
+          <p>Inside the ZIP is a date-named folder. Inside that folder you'll find two files: <code>index.html</code> (the designed email) and <code>plain-text-version.txt</code>.</p>
+          <p>Right-click each file → "Open with Google Chrome." Keep both Chrome tabs open the entire time. Don't close them until the send is complete.</p>
         </div>
       </li>
     </ul>
@@ -817,31 +597,30 @@ body {
 
   <div class="section">
     <div class="section-title">Phase 2 — Create the Template in Salesforce</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <h5>Create a new email template in Salesforce</h5>
-          <p>In Salesforce Account Engagement, go to: <strong>Email → Templates → New</strong></p>
-          <p style="margin-top:6px">Name the template using this format: <strong>YYMMDD_Description</strong> (e.g., 260630_HorizonMortgages_NewRates)</p>
-          <p style="margin-top:6px">Set the Campaign to match exactly what's in your Campaign Details card. Tracker domain must be <strong>go.assetline.com.au</strong>. Then click Save.</p>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n">3</div>
+        <div class="step-body">
+          <h5>Create a new template in Account Engagement</h5>
+          <p>In Salesforce: go to <strong>Account Engagement → Email → Templates → New</strong></p>
+          <p>Name it using this format: <code>YYMMDD_Description</code> — e.g., <code>260701_HorizonMortgages</code></p>
+          <p>Set Campaign to exactly match the Campaign Details card. Tracker domain must be <code>go.assetline.com.au</code>. Click Save.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">4</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n">4</div>
+        <div class="step-body">
           <h5>Skip the layout step</h5>
-          <p>On the screen after saving, Salesforce shows layout options. <strong>Skip this step entirely.</strong></p>
-          <p style="margin-top:6px">The HTML file from Petro already includes the full email layout — you don't need Salesforce to add one.</p>
+          <p>After saving, Salesforce shows a layout selector. <strong>Skip this entirely.</strong> The HTML file from Petro already has the complete email layout built in. Choosing a Salesforce layout on top of it will break things.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">5</div>
-        <div class="step-content">
-          <h5>Build the email: subject line, HTML content, plain text</h5>
-          <p><strong>Subject line:</strong> Look at the Chrome tab title for index.html — that's your subject line. Type it in exactly. Double check the spelling.</p>
-          <p style="margin-top:8px"><strong>HTML content:</strong> In your Chrome tab with the email open, click inside the email body → then right-click on the page → "View Page Source" → Select All → Copy. Then in Salesforce's HTML tab, delete whatever's there and paste. Save.</p>
-          <p style="margin-top:8px"><strong>Plain text:</strong> Go to your other Chrome tab (the plain text version) → Select All → Copy → paste into Salesforce's Text tab. Save.</p>
+      <li class="step">
+        <div class="step-n">5</div>
+        <div class="step-body">
+          <h5>Build the email — subject line, HTML, and plain text</h5>
+          <p><strong>Subject line:</strong> Look at the Chrome tab title showing <code>index.html</code> — that is your subject line. Type it exactly. Check every word.</p>
+          <p><strong>HTML tab:</strong> In Chrome on the email page, click anywhere in the email body → right-click → View Page Source → Ctrl+A → Ctrl+C. Go to the HTML tab in Salesforce, delete everything there, paste, and save.</p>
+          <p><strong>Text tab:</strong> Go to the other Chrome tab (plain text file) → Ctrl+A → Ctrl+C → paste into Salesforce's Text tab → save.</p>
         </div>
       </li>
     </ul>
@@ -849,31 +628,30 @@ body {
 
   <div class="section">
     <div class="section-title">Phase 3 — Review & Fix</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num">6</div>
-        <div class="step-content">
-          <h5>Check everything in the Editor tab</h5>
-          <p>Go to the Editor tab in Salesforce — the email should show up visually. Read the wording, check the content, make sure the layout looks right.</p>
-          <p style="margin-top:6px">Don't panic if spacing looks slightly off in the editor — this is normal. The actual sent email will look correct.</p>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n">6</div>
+        <div class="step-body">
+          <h5>Check the email in the Editor tab</h5>
+          <p>Click the Editor tab — the email should display visually. Read the wording, check the layout, confirm the content is correct. Small spacing glitches in the editor are normal and won't appear in the actual sent email.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num critical">7</div>
-        <div class="step-content">
-          <h5>Add missing links — especially LinkedIn</h5>
-          <p>Check every clickable icon (social media icons, buttons, logos) for missing URLs. <strong>The LinkedIn icon almost always comes through with no link attached.</strong></p>
-          <p style="margin-top:6px">Manually add the Assetline LinkedIn URL every single time: <code>linkedin.com/company/assetline-capital</code></p>
-          <div class="step-tag tag-critical">🔴 Critical — do this every send, every time</div>
+      <li class="step">
+        <div class="step-n red">7</div>
+        <div class="step-body">
+          <h5>Check every link — especially LinkedIn</h5>
+          <p>Click every icon and button in the email and confirm each one has a working URL. The <strong>LinkedIn icon almost always arrives with no URL attached</strong> — this is a known issue with how the HTML is generated.</p>
+          <p>Every single time, manually add: <code>https://linkedin.com/company/assetline-capital</code></p>
+          <div class="tag tag-red">🔴 Do this every send — never assume it's already there</div>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">8</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n">8</div>
+        <div class="step-body">
           <h5>Verify merge fields in the Preview tab</h5>
-          <p>Go to the Preview tab and select a sample contact (e.g., "Billy"). Check that the first name field shows the actual name, not a code like <code>{{FirstName}}</code>.</p>
-          <p style="margin-top:6px">This is the <em>only</em> way to verify merge fields — they won't show up in test emails. Then save.</p>
-          <div class="step-tag tag-warning">⚠️ Merge fields only work in Preview — not in test sends</div>
+          <p>Go to the Preview tab. Select a sample contact (e.g., "Billy"). Check that the first name field shows an actual name — not code like <code>{{FirstName}}</code>.</p>
+          <p>This is the <em>only</em> place merge fields display correctly. They won't show in test emails. Then save.</p>
+          <div class="tag tag-yellow">⚠️ Only verifiable in Preview — not in test sends</div>
         </div>
       </li>
     </ul>
@@ -881,15 +659,14 @@ body {
 
   <div class="section">
     <div class="section-title">Phase 4 — Sender Setup</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num critical">9</div>
-        <div class="step-content">
-          <h5>Set the sender name, email, and reply-to</h5>
-          <p>Go to the Sending tab. Look at the Campaign Details card at the top of the Marketing Hub page — Petro specifies these for each send.</p>
-          <p style="margin-top:6px">Set: Sender name → Save. Sender email → Save. Reply-to → Save.</p>
-          <p style="margin-top:6px"><strong>These change campaign to campaign.</strong> Always read from the card. Never assume they're the same as last time.</p>
-          <div class="step-tag tag-critical">🔴 Critical — wrong sender = serious problem</div>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n red">9</div>
+        <div class="step-body">
+          <h5>Set sender name, email address, and reply-to</h5>
+          <p>Go to the Sending tab. Read the Campaign Details card — Petro specifies these for each campaign. They change every time.</p>
+          <p>Set sender name → save. Sender email → save. Reply-to → save.</p>
+          <div class="tag tag-red">🔴 Never copy from a previous send — always read from the card</div>
         </div>
       </li>
     </ul>
@@ -897,20 +674,20 @@ body {
 
   <div class="section">
     <div class="section-title">Phase 5 — Test & Publish</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num">10</div>
-        <div class="step-content">
-          <h5>Send a test email to yourself first</h5>
-          <p>Before anything goes to Petro, send a test to yourself only. Check: does the layout look right? Do all the links work? Is the wording correct? Does your name appear where the merge field is?</p>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n">10</div>
+        <div class="step-body">
+          <h5>Send a test to yourself — not Petro yet</h5>
+          <p>Send a test email to your own email address only. Check: layout looks correct, all links work, wording is right, no errors. Fix anything before Petro sees it.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">11</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n">11</div>
+        <div class="step-body">
           <h5>Publish the template</h5>
-          <p>Once you're happy with your own test, click "Publish" from the Editor tab. <strong>This does NOT send the email to anyone</strong> — it just makes the template available to use in a Send (next phase).</p>
-          <div class="step-tag tag-tip">💡 Publishing ≠ Sending. No one receives anything yet.</div>
+          <p>Once satisfied with your own test, click Publish from the Editor tab. <strong>This does NOT send to anyone.</strong> It simply makes the template available for use in a Send. No recipients receive anything at this point.</p>
+          <div class="tag tag-blue">💡 Publishing ≠ Sending. Safe to do.</div>
         </div>
       </li>
     </ul>
@@ -918,41 +695,41 @@ body {
 
   <div class="section">
     <div class="section-title">Phase 6 — Build the Send</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num">12</div>
-        <div class="step-content">
-          <h5>Create a new Send in the Sends tab</h5>
-          <p>Go to the Sends tab → New Send. Name it the same as your template: <strong>YYMMDD_Description</strong>. Set the Campaign from the Campaign Details card. Save.</p>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n">12</div>
+        <div class="step-body">
+          <h5>Create a new Send</h5>
+          <p>Go to the Sends tab → New Send. Name it the same as your template: <code>YYMMDD_Description</code>. Set the Campaign from the card. Save.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">13</div>
-        <div class="step-content">
-          <h5>Apply the template, then notify Petro</h5>
-          <p>In the Send, search for your template by name and select it. All the subject line, HTML, and sender details carry over automatically.</p>
-          <p style="margin-top:6px"><strong>Now send a test to Petro.</strong> This is the first time he sees it. Use the Teams message from the notification widget on the Marketing Hub page to let him know.</p>
+      <li class="step">
+        <div class="step-n">13</div>
+        <div class="step-body">
+          <h5>Apply the template — then notify Petro</h5>
+          <p>In the Send, search for your template by name and select it. Subject line, HTML, and sender details all carry over automatically.</p>
+          <p>Now send a test to <strong>Petro</strong>. This is the first time he sees it. Use the Teams message from the notification widget on the Marketing Hub page.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num critical">14</div>
-        <div class="step-content">
-          <h5>Add ALL four recipient lists — every single time</h5>
-          <p>This step is critical. Add all four of these lists to every send, no exceptions:</p>
-          <ul style="padding-left:20px; margin-top:8px; font-size:13px; line-height:2">
+      <li class="step">
+        <div class="step-n red">14</div>
+        <div class="step-body">
+          <h5>Add all four recipient lists — every send, no exceptions</h5>
+          <p>You must add all four of these every single time:</p>
+          <ul style="padding-left:18px;margin-top:8px;font-size:13px;line-height:2;color:#374151">
             <li>✅ All Brokers (Leads + Contacts)</li>
             <li>✅ James Green Database</li>
             <li>✅ Assetline Team Managerial/Executive</li>
             <li>✅ State Managers</li>
           </ul>
-          <div class="step-tag tag-critical">🔴 Critical — missing a list = people who should get it, don't</div>
+          <div class="tag tag-red">🔴 Missing a list = people who should get it, don't</div>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">15</div>
-        <div class="step-content">
-          <h5>Run the Final QA checklist on the page</h5>
-          <p>The Marketing Hub has a QA checklist on the Salesforce EDM page. Go through every item. All must be confirmed before you proceed to the final step.</p>
+      <li class="step">
+        <div class="step-n">15</div>
+        <div class="step-body">
+          <h5>Run the Final QA checklist</h5>
+          <p>The Marketing Hub has a QA checklist on the Salesforce EDM page. Go through every item and confirm before proceeding to the final step.</p>
         </div>
       </li>
     </ul>
@@ -960,148 +737,363 @@ body {
 
   <div class="section">
     <div class="section-title">Phase 7 — Send or Schedule</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num critical">16</div>
-        <div class="step-content">
-          <h5>Send now or schedule at the right time</h5>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n red">16</div>
+        <div class="step-body">
+          <h5>Send now or schedule at the correct local time</h5>
           <p>If Petro says send immediately → click "Send Now."</p>
-          <p style="margin-top:8px">If Petro gives a specific time → click "Schedule." <strong>Important: Salesforce uses your local Philippines time.</strong></p>
-          <p style="margin-top:8px">If Petro says "9 AM Sydney time" — subtract 3 hours. Schedule it at 6 AM your time.</p>
-          <div class="step-tag tag-critical">🔴 Wrong timezone = email goes at the wrong time</div>
-          <div class="callout tip" style="margin-top:12px">
-            <div class="icon">💡</div>
-            <div>The dual clock in the Marketing Hub header shows Sydney and Manila time side by side — use it to calculate the right local time to schedule.</div>
+          <p>If Petro gives a specific time → click "Schedule." <strong>Salesforce uses your Manila local time.</strong> If Petro says "9 AM Sydney" — subtract 3 hours and schedule at 6 AM Manila time.</p>
+          <div class="tag tag-red">🔴 Wrong timezone = email goes at the wrong time</div>
+          <div class="callout tip" style="margin-top:10px">
+            <div class="ci">💡</div>
+            <div>The Marketing Hub header shows Manila and Sydney clocks side by side — use it to calculate the correct time.</div>
           </div>
         </div>
       </li>
     </ul>
   </div>
 
-  <div class="quiz-card">
-    <h4>🧠 Quick Check — Stage 3</h4>
-    <p>You're about to send an EDM. You've added 3 out of 4 recipient lists — All Brokers, James Green, and State Managers. Should you send?</p>
-    <div class="quiz-options">
-      <div class="quiz-option" onclick="checkAnswer(this, false)">Yes — three lists is enough, State Managers and All Brokers overlap anyway</div>
-      <div class="quiz-option" onclick="checkAnswer(this, true)">No — you must add all 4 lists every single time without exception</div>
-      <div class="quiz-option" onclick="checkAnswer(this, false)">Only if Petro specifically mentioned the 4th list in his instructions</div>
+  <div class="quiz">
+    <h4>🧠 Quick Check</h4>
+    <div class="qp">You're about to send an EDM. You've added 3 of the 4 lists — All Brokers, James Green, and State Managers. Should you send?</div>
+    <div class="q-opts">
+      <div class="q-opt" onclick="qa(this,false,'You must add all 4 lists every single time — no exceptions. Go back and add Assetline Team Managerial/Executive.')">Yes — 3 out of 4 is close enough for now</div>
+      <div class="q-opt" onclick="qa(this,true,'Correct. All 4 lists are required every single send. Missing even one means people who should receive it, won\'t.')">No — all 4 lists are required, every time</div>
+      <div class="q-opt" onclick="qa(this,false,'Only if Petro says so is not right — all 4 is the standing rule regardless.')">Only if Petro specifically asked for the 4th list</div>
     </div>
-    <div class="quiz-feedback" id="qfeedback3"></div>
+    <div class="q-fb" id="qf-edm"></div>
   </div>
 
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s3badge" style="display:none">✅ Stage 3 Complete</div>
-    <h4>That's the full EDM process!</h4>
-    <p>16 steps across 7 phases. The Marketing Hub app guides you through each one with detailed instructions on the right-hand panel.</p>
-    <button class="btn btn-success" onclick="completeStage('stage3', 3)">Mark Stage 3 Complete ✓</button>
+  <div class="complete-box">
+    <div class="done-badge" id="db-edm" style="display:none">✅ Lesson Complete</div>
+    <h4>That's the full 16-step EDM process</h4>
+    <p>The Marketing Hub guides you through each step with a right-panel instruction sheet. Use it every send.</p>
+    <button class="btn btn-green" onclick="markDone('edm-send')">Mark Complete ✓</button>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage2')">← Stage 2</button>
-    <button class="btn btn-primary" onclick="showPage('stage4')">Stage 4: Plain Text Emails →</button>
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('daily-ops')">← Daily Ops</button>
+    <button class="btn btn-primary" onclick="showPage('plain-text')">Next: Plain Text Emails →</button>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 4 ════════════════════ -->
-<div class="page" data-page="stage4">
-  <div class="page-header">
-    <div class="stage-badge">✉️ Stage 4</div>
+<!-- ═══════════════════════ PLAIN TEXT EMAIL ═══════════════════════ -->
+<div class="page" data-page="plain-text">
+  <div class="pg-header">
+    <div class="pg-eyebrow marketing">📧 Marketing Tasks</div>
     <h2>Plain Text Emails</h2>
-    <p class="subtitle">A different type of email — simpler, no design, sent as if it came directly from a person like Laura Stanley.</p>
-    <div class="time-estimate">⏱ About 30 minutes</div>
+    <p class="pg-sub">Simpler than an EDM — no design, just words. These appear to come directly from a person like Laura Stanley.</p>
   </div>
 
   <div class="callout info">
-    <div class="icon">ℹ️</div>
-    <div><strong>Plain text emails are different from EDMs.</strong> There's no HTML design, no images, no layout. It reads like a personal email from a colleague. These go to brokers and look like Laura Stanley wrote them herself.</div>
+    <div class="ci">ℹ️</div>
+    <div><strong>What's different about plain text emails?</strong> No HTML design, no images, no layout blocks. It reads like a personal email from a colleague. They go through <strong>Email Content</strong> (not Account Engagement Email) in Salesforce. You prepare it — the sender (e.g., Laura) activates and sends it herself.</div>
+  </div>
+
+  <div class="callout warn">
+    <div class="ci">⚠️</div>
+    <div><strong>Plain text body = internal only.</strong> The customer never sees the plain text version. It exists so Salesforce contact records show what was sent without loading the full HTML. Always sync it — but it's not customer-facing.</div>
   </div>
 
   <div class="section">
-    <div class="section-title">The 5-Step Plain Text Workflow</div>
-    <ul class="steps-list">
-      <li class="step-item">
-        <div class="step-num">1</div>
-        <div class="step-content">
+    <div class="section-title">The 5-Step Workflow</div>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-n">1</div>
+        <div class="step-body">
           <h5>Clone the previous email</h5>
-          <p>In Salesforce Account Engagement, go to: <strong>Content → Email Content</strong>. Find the most recent email for the same product. Click the dropdown arrow next to it → Clone → Enter the new name → Save.</p>
-          <p style="margin-top:6px">Cloning saves time — you're starting from the right template structure instead of from scratch.</p>
+          <p>In Salesforce Account Engagement: <strong>Content → Email Content</strong>. Find the most recent email for the same product (e.g., Private Lending). Click the dropdown arrow → Clone → enter the new name using the naming convention → Save.</p>
+          <p>Cloning keeps the template structure so you're not starting from scratch — it's faster and less error-prone.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">2</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n">2</div>
+        <div class="step-body">
           <h5>Update the subject line</h5>
-          <p>Open the cloned email → Edit → New Email Experience (it's pre-selected, just click through). Click the edit icon on the subject line field. Copy the subject from the Word document provided by Petro or Laura → paste → Save.</p>
+          <p>Open the cloned email → Edit → New Email Experience (already selected — just click through). Click the edit icon on the subject line. Copy the subject from the Word document provided → paste → save.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <h5>Update the email body — body only</h5>
-          <p>Edit only the first block — the body copy. Everything below (sender name, title, email, phone) uses merge fields — <strong>do not touch these</strong>. Delete the old body copy, paste the new body copy from the Word document, fix any spacing, then Save.</p>
-          <div class="step-tag tag-warning">⚠️ Don't duplicate the closing line — check if "chat soon" is already in the template</div>
+      <li class="step">
+        <div class="step-n">3</div>
+        <div class="step-body">
+          <h5>Update the body copy only — nothing else</h5>
+          <p>Edit only the <strong>first block</strong> — the body copy. Everything below (sender name, title, email, phone number) is controlled by merge fields. <strong>Do not touch those.</strong></p>
+          <p>Delete the old body text → paste the new body text from the Word document → fix any spacing → save.</p>
+          <div class="tag tag-yellow">⚠️ Check if "chat soon" is already in the template — don't duplicate it</div>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">4</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n">4</div>
+        <div class="step-body">
           <h5>Sync the plain text body</h5>
-          <p>In the email view, find the Text Body section → click the pencil icon → click "Sync from HTML" → Confirm → Save.</p>
-          <p style="margin-top:6px">This updates the internal Salesforce record to match the email body. <strong>The customer never sees the plain text body</strong> — it's just for internal CRM records so you can see what was sent.</p>
+          <p>In the email view, find the Text Body section → click the pencil icon → click <strong>Sync from HTML</strong> → Confirm → Save. This updates the internal Salesforce record to match the email body.</p>
         </div>
       </li>
-      <li class="step-item">
-        <div class="step-num">5</div>
-        <div class="step-content">
+      <li class="step">
+        <div class="step-n green">5</div>
+        <div class="step-body">
           <h5>Notify the sender — you don't send it yourself</h5>
-          <p>Copy the link to the email record and let Laura (or whoever the sender is) know it's ready. <strong>You do not send this email.</strong> The sender handles the final activation and send themselves.</p>
-          <div class="step-tag tag-tip">💡 Your job ends at "it's ready" — the sender pushes the button</div>
+          <p>Copy the link to the email record in Salesforce and send it to Laura (or whoever the sender is) with a message saying it's ready. She handles the final activation and send. Your job is done at this point.</p>
+          <div class="tag tag-green">✓ Your role ends at "it's ready"</div>
         </div>
       </li>
     </ul>
   </div>
 
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s4badge" style="display:none">✅ Stage 4 Complete</div>
-    <button class="btn btn-success" onclick="completeStage('stage4', 4)">Mark Stage 4 Complete ✓</button>
+  <div class="complete-box">
+    <div class="done-badge" id="db-pt" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('plain-text')">Mark Complete ✓</button>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage3')">← Stage 3</button>
-    <button class="btn btn-primary" onclick="showPage('stage5')">Stage 5: Brand & QC →</button>
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('edm-send')">← Salesforce EDM</button>
+    <button class="btn btn-primary" onclick="showPage('edm-reporting')">Next: EDM Reporting →</button>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 5 ════════════════════ -->
-<div class="page" data-page="stage5">
-  <div class="page-header">
-    <div class="stage-badge">✅ Stage 5</div>
-    <h2>Brand & Quality Control</h2>
-    <p class="subtitle">Before anything goes to Petro, you run through this checklist. Brand and compliance mistakes can be costly — this is how you catch them.</p>
-    <div class="time-estimate">⏱ About 45 minutes</div>
+<!-- ═══════════════════════ EDM REPORTING ═══════════════════════ -->
+<div class="page" data-page="edm-reporting">
+  <div class="pg-header">
+    <div class="pg-eyebrow marketing">📧 Marketing Tasks</div>
+    <h2>EDM Reporting</h2>
+    <p class="pg-sub">What you do after each campaign goes out — collecting metrics and building the performance report.</p>
   </div>
 
-  <div class="highlight-box">
-    <h3>Why QC matters so much 🔍</h3>
-    <p>Assetline Capital is a financial company. Wrong rates, missing disclaimers, or wrong logos aren't just embarrassing — they can be legal and compliance issues. <strong>Always QC before submitting.</strong></p>
+  <div class="section">
+    <div class="section-title">What you measure after each send</div>
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📊</div>
+        <div class="acc-text"><h4>The 8 metrics to collect from Salesforce</h4><span>After every campaign</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <tr><th>Metric</th><th>What it means</th></tr>
+          <tr><td><strong>Campaign name</strong></td><td>The name of the email campaign</td></tr>
+          <tr><td><strong>Send date</strong></td><td>The date it was sent</td></tr>
+          <tr><td><strong>Subject line</strong></td><td>The email subject — helps identify the campaign</td></tr>
+          <tr><td><strong>Opens</strong></td><td>How many people opened the email</td></tr>
+          <tr><td><strong>Clicks</strong></td><td>How many people clicked a link inside the email</td></tr>
+          <tr><td><strong>Unsubscribes</strong></td><td>People who opted out — track this carefully</td></tr>
+          <tr><td><strong>Bounces</strong></td><td>Emails that couldn't be delivered (bad addresses, full inboxes)</td></tr>
+          <tr><td><strong>Click map image</strong></td><td>A screenshot showing where inside the email people clicked</td></tr>
+        </table>
+        <div class="callout info" style="margin-top:12px">
+          <div class="ci">ℹ️</div>
+          <div>Find all these metrics inside Salesforce Account Engagement under the campaign's engagement report. The click map is a visual you screenshot and save.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Building the report in the Marketing Hub</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🗒️</div>
+        <div class="acc-text"><h4>How to use the EDM Reporting tab</h4><span>Step by step</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Open the EDM Reporting tab in the Marketing Hub</h5>
+              <p>Sidebar → Workflow → eDM Reporting.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>Set the report period</h5>
+              <p>Enter the start month and end month for the reporting period Petro is asking about.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <h5>Fill in each campaign entry</h5>
+              <p>Add one row per campaign: paste in the name, date, subject line, then type in the metrics you pulled from Salesforce. Drag and drop the click map screenshot for that campaign.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n green">4</div>
+            <div class="step-body">
+              <h5>Export and share with Petro</h5>
+              <p>Click Export — the app generates a formatted report view. Share this with Petro when he asks for campaign results. Your data persists in the browser so you can build it up across multiple sessions.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-box">
+    <div class="done-badge" id="db-rep" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('edm-reporting')">Mark Complete ✓</button>
+  </div>
+
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('plain-text')">← Plain Text</button>
+    <button class="btn btn-primary" onclick="showPage('admin-files')">Next: Admin Tasks →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ADMIN TASKS ═══════════════════════ -->
+<div class="page" data-page="admin-files">
+  <div class="pg-header">
+    <div class="pg-eyebrow admin">🗂️ Admin Tasks</div>
+    <h2>Admin — Files, Trackers & Communication</h2>
+    <p class="pg-sub">The behind-the-scenes work that keeps everything organised and on track.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">File Naming Convention</div>
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📁</div>
+        <div class="acc-text"><h4>How to name every file</h4><span>Consistent naming = easy to find anything</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <p>All files follow the format: <code>YYMMDD_Description</code></p>
+        <p>Examples:<br>
+        <code>260701_HorizonMortgages_NewRates</code><br>
+        <code>260715_PrivateLending_BrokerOutreach</code><br>
+        <code>260801_DevelopmentFinance_Update</code>
+        </p>
+        <table class="tbl" style="margin-top:10px">
+          <tr><th>Part</th><th>What it means</th><th>Example</th></tr>
+          <tr><td><code>YY</code></td><td>2-digit year</td><td>26</td></tr>
+          <tr><td><code>MM</code></td><td>2-digit month</td><td>07</td></tr>
+          <tr><td><code>DD</code></td><td>2-digit day</td><td>01</td></tr>
+          <tr><td><code>Description</code></td><td>Short descriptive name — no spaces, use underscores</td><td>HorizonMortgages_NewRates</td></tr>
+        </table>
+        <div class="callout warn" style="margin-top:12px">
+          <div class="ci">⚠️</div>
+          <div><strong>Never use spaces in file names.</strong> Use underscores instead. Spaces in file names cause issues in Salesforce and shared folders.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Always Download Fresh — Never Reuse Old Files</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">☁️</div>
+        <div class="acc-text"><h4>Where to get assets — and why this matters</h4><span>Critical for brand compliance</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <ul class="cl">
+          <li onclick="tick(this)"><input type="checkbox"><label>Always download the logo fresh from the shared folder — never from an old email or previous job</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Always use the current template from the shared folder — not a personal copy saved on your desktop</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Always get copy and rates from the most recent approved document — not from memory or an old campaign</label></li>
+        </ul>
+        <div class="callout warn" style="margin-top:12px">
+          <div class="ci">⚠️</div>
+          <div>Old files on your desktop may have an outdated logo, old rates, or a retired template. The shared folder is always the source of truth.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Keeping Trackers Updated</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📋</div>
+        <div class="acc-text"><h4>The four trackers you maintain</h4><span>Update these every day</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <tr><th>Tracker</th><th>What it records</th></tr>
+          <tr><td><strong>Campaign tracker</strong></td><td>Every email campaign — status, send date, metrics once sent</td></tr>
+          <tr><td><strong>Event tracker</strong></td><td>Upcoming events, RSVPs, registration deadlines</td></tr>
+          <tr><td><strong>Contact tracker</strong></td><td>Key broker and supplier contacts — updates from Salesforce</td></tr>
+          <tr><td><strong>Asset tracker</strong></td><td>Design files, PDFs, approved versions — where they're stored</td></tr>
+        </table>
+        <div class="callout tip" style="margin-top:12px">
+          <div class="ci">💡</div>
+          <div>Update trackers the moment a task changes status — not at the end of the week. Stale trackers make it impossible to report accurately to Petro.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Message Templates — What to Say When</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">💌</div>
+        <div class="acc-text"><h4>Ready-made messages for common situations</h4><span>Don't write these from scratch</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <tr><th>Situation</th><th>What to say (paraphrase to suit)</th></tr>
+          <tr><td><strong>Requesting approval</strong></td><td>"Hi Petro, [task name] is ready for your review — [link/attached]. Please let me know if anything needs adjusting."</td></tr>
+          <tr><td><strong>Flagging a blocker</strong></td><td>"Hi Petro, just a heads-up — I'm stuck on [X] and need [guidance/the file/approval] to move forward. Happy to jump on a call."</td></tr>
+          <tr><td><strong>Sending a deliverable</strong></td><td>"Hi [name], [file name] is ready. Here's the link: [link]. Notes: [any relevant detail]."</td></tr>
+          <tr><td><strong>Following up</strong></td><td>"Hi Petro, following up on [task] — just checking if you've had a chance to review. No rush, just want to make sure it's not stuck."</td></tr>
+          <tr><td><strong>Notifying a delay</strong></td><td>"Hi Petro, wanted to flag early — [task] is running behind due to [reason]. New ETA is [time]. Let me know if that's an issue."</td></tr>
+        </table>
+        <div class="callout ok" style="margin-top:12px">
+          <div class="ci">✅</div>
+          <div>The Survival Kit → Message Templates tab in the Marketing Hub has these ready to copy — just fill in the brackets.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-box">
+    <div class="done-badge" id="db-admin" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('admin-files')">Mark Complete ✓</button>
+  </div>
+
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('edm-reporting')">← EDM Reporting</button>
+    <button class="btn btn-primary" onclick="showPage('brand-qc')">Next: Brand & QC →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ BRAND & QC ═══════════════════════ -->
+<div class="page" data-page="brand-qc">
+  <div class="pg-header">
+    <div class="pg-eyebrow design">🎨 Design Tasks</div>
+    <h2>Brand Guide & QC Checklist</h2>
+    <p class="pg-sub">Run through this before submitting any design to Petro. Brand and compliance mistakes can have legal consequences at a financial company.</p>
+  </div>
+
+  <div class="banner orange">
+    <div class="bi">🔍</div>
+    <div>
+      <h3>Always QC before submitting</h3>
+      <p>Wrong rates, missing disclaimers, or the wrong logo are not just embarrassing — at a regulated financial services company, they can be compliance violations. Never skip this checklist.</p>
+    </div>
   </div>
 
   <div class="section">
     <div class="section-title">Brand Checklist</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fce4ec">🎨</div>
-        <div class="lesson-meta"><h4>Logo, Fonts & Colours</h4><span>The core brand rules</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🏷️</div>
+        <div class="acc-text"><h4>Logo, Fonts & Colours</h4><span>The core brand rules — check these every single file</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <table class="info-table">
-          <tr><th>What to check</th><th>What to look for</th></tr>
-          <tr><td><strong>Logo</strong></td><td>Current single-colour version with full stop. No orange dot (it's retired). Never stretch, rotate, or add effects. Always download fresh from the shared folder — never from an old email or job.</td></tr>
-          <tr><td><strong>Fonts</strong></td><td>Silvana Text (for display/headlines) and ABC Diatype (for body text) only. In InDesign: Type → Find Font → fix any substituted fonts before exporting.</td></tr>
-          <tr><td><strong>Colours</strong></td><td>#E4572E (orange), #191919 (dark), #FAFAF2 (cream), and approved neutrals only. No RGB values in print jobs. Delete unused colour swatches.</td></tr>
-          <tr><td><strong>Template</strong></td><td>Always use the correct Assetline template from the shared folder. Never use a personal copy, an old version, or a file someone emailed you.</td></tr>
-          <tr><td><strong>Paragraph styles</strong></td><td>All text must use InDesign styles from the Assetline style sheet. Look for the "+" symbol in the Paragraph Styles panel — that means text has been manually overridden. Fix it.</td></tr>
+      <div class="acc-body">
+        <table class="tbl">
+          <tr><th>Check</th><th>What to look for</th></tr>
+          <tr><td><strong>Logo</strong></td><td>Single-colour version with the full stop. <strong>No orange dot</strong> — that version is retired. No stretching, rotation, shadows, or colour changes. Always download fresh from the shared folder.</td></tr>
+          <tr><td><strong>Fonts</strong></td><td><strong>Silvana Text</strong> for display/headlines. <strong>ABC Diatype</strong> for body text. No other fonts allowed. In InDesign: Type → Find Font → fix any substituted fonts before exporting.</td></tr>
+          <tr><td><strong>Colours</strong></td><td><strong>#E4572E</strong> (orange), <strong>#191919</strong> (near black), <strong>#FAFAF2</strong> (cream), plus approved neutrals only. Never use RGB values in print files — use CMYK. Delete unused colour swatches.</td></tr>
+          <tr><td><strong>Template</strong></td><td>Must be the current Assetline template from the shared folder. Never use a personal copy, an old version, or a file someone emailed you.</td></tr>
+          <tr><td><strong>Paragraph styles</strong></td><td>All text in InDesign must use styles from the Assetline style sheet. A <code>+</code> symbol next to a style name in the Paragraph Styles panel means text has been manually overridden — fix it.</td></tr>
         </table>
       </div>
     </div>
@@ -1109,46 +1101,60 @@ body {
 
   <div class="section">
     <div class="section-title">Copy Checklist</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e3f2fd">📝</div>
-        <div class="lesson-meta"><h4>Wording, Disclaimers & Numbers</h4><span>Compliance lives here</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📝</div>
+        <div class="acc-text"><h4>Wording, Disclaimers & Numbers</h4><span>Compliance lives here</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <table class="info-table">
-          <tr><th>What to check</th><th>What to look for</th></tr>
-          <tr><td><strong>Copy matches brief</strong></td><td>Word-for-word match with the approved copy document. Print the doc and compare side-by-side. Any copy change needs re-approval from Petro.</td></tr>
-          <tr><td><strong>Disclaimers</strong></td><td>AFSL number, general advice warning, and any product-specific disclosure must appear verbatim — never paraphrased or shortened.</td></tr>
-          <tr><td><strong>Spelling & grammar</strong></td><td>Australian English. Run spell check AND read it manually. Spell check misses "form" vs "from", wrong names, and wrong rates.</td></tr>
-          <tr><td><strong>No placeholder text</strong></td><td>Search for: "Lorem ipsum", "TBC", "XXX", "[insert", "PLACEHOLDER". These slip through on deadline-rushed jobs.</td></tr>
-          <tr><td><strong>Dates, figures, rates</strong></td><td>Cross-check every number against the brief. Wrong rates are a compliance issue — not just an embarrassment.</td></tr>
-        </table>
+      <div class="acc-body">
+        <ul class="cl">
+          <li onclick="tick(this)"><input type="checkbox"><label><strong>Copy matches the approved brief word-for-word.</strong> Print the brief and compare side by side. Any change must be re-approved by Petro in writing.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label><strong>Disclaimers are present and verbatim</strong> — AFSL number, general advice warning, product-specific disclosure. Never paraphrase or shorten these.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label><strong>Australian English spelling</strong> — run spell check AND manually read it. Spell check won't catch "form" vs "from", wrong names, or wrong rates.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label><strong>No placeholder text</strong> — search the document for: Lorem ipsum, TBC, XXX, [insert, PLACEHOLDER. Common miss on deadline-rushed jobs.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label><strong>Every date, figure, and rate cross-checked</strong> against the brief. Wrong rates = compliance issue.</label></li>
+        </ul>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Layout & Export Checklist</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e8f5e9">📐</div>
-        <div class="lesson-meta"><h4>Layout, PDF Export & Filing</h4><span>The final checks before submitting</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Layout Checklist</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📐</div>
+        <div class="acc-text"><h4>InDesign layout checks before export</h4><span>Catch issues before Petro sees them</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <ul class="checklist">
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>No overset text — red "+" indicator on a text frame means text is cut off. Fix before submitting.</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>No reflow or broken layouts — scroll every page, especially after a late copy change</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>All images linked — Window → Links panel — no warning icons. Re-link any missing images.</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Image resolution 300+ PPI for print — below 200 PPI, flag it</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Page numbers correct and sequential</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>No guides or artefacts — View → Screen Mode → Preview before exporting</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>InDesign Preflight = zero errors — Window → Output → Preflight. Resolve all (red dot = problem)</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Correct PDF preset — Print: PDF/X-1a or PDF/X-4. Digital: High Quality Print</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Print jobs: 3mm bleed on all sides. Backgrounds must extend into bleed.</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>Open the exported PDF in Acrobat and scroll every page — never assume the export was clean</label></li>
-          <li class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><label>File saved and packaged correctly — File → Package. Correct naming convention.</label></li>
+      <div class="acc-body">
+        <ul class="cl">
+          <li onclick="tick(this)"><input type="checkbox"><label>No overset text — a red <code>+</code> on a text frame means text is cut off. Fix before submitting.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>No reflow or broken layouts — scroll every page, especially after a last-minute copy change</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>All images properly linked — Window → Links panel → no warning icons. Re-link any missing images.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Image resolution 300+ PPI for print. Below 200 PPI — flag it to Petro.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Page numbers are correct and sequential</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>No guides or construction marks visible — View → Screen Mode → Preview before exporting</label></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Preflight & Export Checklist</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📤</div>
+        <div class="acc-text"><h4>Before the PDF leaves your machine</h4><span>Run these in this order</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <ul class="cl">
+          <li onclick="tick(this)"><input type="checkbox"><label>InDesign Preflight shows zero errors — Window → Output → Preflight. A red dot means there are errors. Resolve all before exporting.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Correct PDF preset — Print jobs: PDF/X-1a or PDF/X-4. Digital/screen: High Quality Print.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Print jobs: 3mm bleed on all sides. Backgrounds and images must extend into the bleed area.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Open the exported PDF in Acrobat and scroll every page. Never assume the export was clean.</label></li>
+          <li onclick="tick(this)"><input type="checkbox"><label>Save and package the InDesign file — File → Package. Name the folder correctly per naming convention.</label></li>
         </ul>
       </div>
     </div>
@@ -1156,342 +1162,567 @@ body {
 
   <div class="section">
     <div class="section-title">Compliance Non-Negotiables</div>
-    <div class="callout warning">
-      <div class="icon">⚠️</div>
+    <div class="callout warn">
+      <div class="ci">🔴</div>
       <div>
-        <strong>Every single Assetline output must have ALL of these:</strong>
-        <ul style="padding-left:18px; margin-top:8px; line-height:2">
+        <strong>Every Assetline output must have ALL of these — no exceptions:</strong>
+        <ul style="padding-left:16px;margin-top:8px;line-height:2.2">
           <li>Current logo (single-colour, full stop, from shared folder)</li>
-          <li>General advice warning — verbatim (exact wording)</li>
+          <li>General advice warning — exact verbatim wording</li>
           <li>AFSL number visible</li>
           <li>Correct brand fonts only</li>
           <li>Correct colour palette only</li>
-          <li>Template from shared folder (not a personal copy)</li>
+          <li>Template downloaded from shared folder</li>
           <li>Written copy approval from Petro before placing in design</li>
-          <li>Written sign-off recorded before distributing — email or shared doc only</li>
+          <li>Written sign-off from Petro before distributing — email or shared doc only</li>
         </ul>
       </div>
     </div>
   </div>
 
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s5badge" style="display:none">✅ Stage 5 Complete</div>
-    <button class="btn btn-success" onclick="completeStage('stage5', 5)">Mark Stage 5 Complete ✓</button>
+  <div class="complete-box">
+    <div class="done-badge" id="db-brand" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('brand-qc')">Mark Complete ✓</button>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage4')">← Stage 4</button>
-    <button class="btn btn-primary" onclick="showPage('stage6')">Stage 6: Reporting →</button>
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('admin-files')">← Admin Tasks</button>
+    <button class="btn btn-primary" onclick="showPage('indesign')">Next: InDesign →</button>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 6 ════════════════════ -->
-<div class="page" data-page="stage6">
-  <div class="page-header">
-    <div class="stage-badge">📊 Stage 6</div>
-    <h2>EDM Reporting & Brief Intake</h2>
-    <p class="subtitle">What happens after an email is sent — and how to capture new tasks properly.</p>
-    <div class="time-estimate">⏱ About 30 minutes</div>
+<!-- ═══════════════════════ INDESIGN ═══════════════════════ -->
+<div class="page" data-page="indesign">
+  <div class="pg-header">
+    <div class="pg-eyebrow design">🎨 Design Tasks</div>
+    <h2>InDesign Essentials</h2>
+    <p class="pg-sub">Adobe InDesign is used to lay out print and digital documents — brochures, rate cards, invitations, event collateral. You don't need to design from scratch, but you need to know how to edit and QC files correctly.</p>
+  </div>
+
+  <div class="callout ok">
+    <div class="ci">✅</div>
+    <div><strong>Your role in InDesign</strong> You're working with existing Assetline templates — not creating designs from scratch. Your job is to: place approved copy into the layout, check everything looks right, fix issues, and export a clean PDF for Petro's approval.</div>
   </div>
 
   <div class="section">
-    <div class="section-title">EDM Reporting</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e3f2fd">📈</div>
-        <div class="lesson-meta"><h4>Building a campaign performance report</h4><span>What to measure after each send</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Opening & Setting Up a File</div>
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📂</div>
+        <div class="acc-text"><h4>The right way to open an InDesign file</h4><span>Don't skip these steps</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>After each email campaign goes out, Petro may ask for a performance report. You build this in the <strong>EDM Reporting tab</strong> of the Marketing Hub.</p>
-        <p><strong>What you collect from Salesforce for each campaign:</strong></p>
-        <ul style="padding-left:20px; margin-top:8px; font-size:14px; line-height:2; color:#374151">
-          <li>Campaign name</li>
-          <li>Send date</li>
-          <li>Subject line</li>
-          <li>Opens (how many people opened it)</li>
-          <li>Clicks (how many people clicked a link)</li>
-          <li>Unsubscribes (people who opted out)</li>
-          <li>Bounces (emails that couldn't be delivered)</li>
-          <li>Click map image (screenshot of where people clicked)</li>
+      <div class="acc-body">
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Always open the packaged folder — not a loose file</h5>
+              <p>A properly packaged InDesign job is a folder containing the <code>.indd</code> file, a <code>Links</code> folder (images), and a <code>Document fonts</code> folder. Always open the <code>.indd</code> from inside this folder — never move the files around.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>Check the Links panel immediately</h5>
+              <p>Window → Links. If any image shows a yellow warning triangle (modified) or a red circle (missing), fix it before doing anything else. Click the warning → Relink → navigate to the correct file.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <h5>Check for font substitutions</h5>
+              <p>Type → Find Font. If InDesign is substituting a font it can't find, it shows up here with a warning icon. Install the missing font or relink to the correct one. Pink/highlighted text in the document = substituted font.</p>
+            </div>
+          </li>
         </ul>
-        <div class="callout tip" style="margin-top:12px">
-          <div class="icon">💡</div>
-          <div>The reporting page saves all your entries automatically. You can export the report as a formatted view to share with Petro. Data persists between sessions so you can build it up over time.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Editing Text in InDesign</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">✏️</div>
+        <div class="acc-text"><h4>How to update copy correctly</h4><span>Paragraph styles are everything</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Use the Type tool (T) to click into a text frame</h5>
+              <p>Press <code>T</code> to activate the Type tool. Click inside a text frame to start editing. Double-click a frame to enter it directly.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>Delete old text and paste new text — then apply the correct paragraph style</h5>
+              <p>Select the old text → delete. Paste the new text. Then open the Paragraph Styles panel (Window → Styles → Paragraph Styles). Click the correct style name to apply it. Never manually change font, size, or colour — always use the style.</p>
+              <div class="tag tag-yellow">⚠️ A + symbol next to a style name means manual overrides exist — click the style name while holding Alt/Option to clear them</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <h5>Check for overset text after every edit</h5>
+              <p>A red <code>+</code> in the bottom-right of a text frame means text is cut off (overset). Either reduce the text length, increase the frame size, or reduce the font size — but only if the style allows it. Flag to Petro if you're unsure.</p>
+            </div>
+          </li>
+        </ul>
+        <div class="callout warn" style="margin-top:12px">
+          <div class="ci">⚠️</div>
+          <div><strong>Never use free transform to resize a text frame if it distorts content.</strong> Hold Shift when resizing images to maintain proportions. Text frames can be freely resized — images cannot be distorted.</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Brief Intake</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fff3e0">📋</div>
-        <div class="lesson-meta"><h4>Capturing new tasks properly</h4><span>Do this before starting any task</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Exporting a PDF from InDesign</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📤</div>
+        <div class="acc-text"><h4>File → Export — the right settings</h4><span>Getting the PDF right first time</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>Every time you receive a new task — from Petro or anyone else — fill in the <strong>Brief Intake form</strong> in the Marketing Hub (Brand Tools → Brief Intake) before you start working on it.</p>
-        <p><strong>What you record:</strong></p>
-        <ul style="padding-left:20px; margin-top:8px; font-size:14px; line-height:2; color:#374151">
-          <li>Task type and description</li>
-          <li>Who assigned it</li>
-          <li>Deadline</li>
-          <li>Deliverable format (PDF? HTML? Word doc?)</li>
-          <li>Special notes or constraints</li>
+      <div class="acc-body">
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Run Preflight first — zero errors required</h5>
+              <p>Window → Output → Preflight. The panel at the bottom of the screen shows a green circle (no errors) or red circle (errors found). Fix all errors before exporting. Common errors: missing images, overset text, wrong colour space.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>Switch to Preview mode to check appearance</h5>
+              <p>View → Screen Mode → Preview (or press <code>W</code>). This hides all guides, margins, and bleed indicators so you see exactly what the output will look like. Check every page.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <h5>Export: File → Export → Adobe PDF (Print)</h5>
+              <p><strong>For print jobs:</strong> Choose PDF/X-1a or PDF/X-4 preset. Set bleed to 3mm on all sides. Confirm "Use Document Bleed Settings" is checked.<br>
+              <strong>For digital/screen:</strong> Choose "High Quality Print" preset. No bleed needed.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n green">4</div>
+            <div class="step-body">
+              <h5>Open the PDF in Acrobat and scroll every page</h5>
+              <p>Never assume the export was clean. Open the PDF, go full screen, and scroll through every page. Look for: cut-off text, missing images, wrong colours, blank pages, incorrect page order. Only then file it and send to Petro.</p>
+            </div>
+          </li>
         </ul>
-        <div class="callout warning" style="margin-top:12px">
-          <div class="icon">⚠️</div>
-          <div><strong>Fill this in BEFORE you start</strong> — not after. It takes 2 minutes and prevents the "I didn't realise that was needed" problem when you're already halfway through.</div>
-        </div>
-        <p style="margin-top:12px">Past briefs are saved and you can review them directly on the page. This becomes your work history.</p>
       </div>
     </div>
   </div>
 
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s6badge" style="display:none">✅ Stage 6 Complete</div>
-    <button class="btn btn-success" onclick="completeStage('stage6', 6)">Mark Stage 6 Complete ✓</button>
+  <div class="section">
+    <div class="section-title">Key Keyboard Shortcuts</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">⌨️</div>
+        <div class="acc-text"><h4>Shortcuts that will save you every day</h4><span>Learn these — they're used constantly</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <tr><th>Shortcut</th><th>What it does</th></tr>
+          <tr><td><code>V</code></td><td>Selection tool (move and resize objects)</td></tr>
+          <tr><td><code>T</code></td><td>Type tool (click into text)</td></tr>
+          <tr><td><code>W</code></td><td>Toggle Preview mode (hide guides and bleed)</td></tr>
+          <tr><td><code>Ctrl+D</code></td><td>Place (insert an image into a frame)</td></tr>
+          <tr><td><code>Ctrl+Shift+D</code></td><td>Open Links panel (check images)</td></tr>
+          <tr><td><code>Ctrl+Alt+Shift+F</code></td><td>Fit content proportionally to frame</td></tr>
+          <tr><td><code>Ctrl+Z</code></td><td>Undo</td></tr>
+          <tr><td><code>Ctrl+S</code></td><td>Save</td></tr>
+          <tr><td><code>Ctrl+Shift+P</code></td><td>Paragraph Styles panel</td></tr>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage5')">← Stage 5</button>
-    <button class="btn btn-primary" onclick="showPage('stage7')">Stage 7: Smart Tools →</button>
+  <div class="complete-box">
+    <div class="done-badge" id="db-id" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('indesign')">Mark Complete ✓</button>
+  </div>
+
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('brand-qc')">← Brand QC</button>
+    <button class="btn btn-primary" onclick="showPage('illustrator')">Next: Illustrator →</button>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 7 ════════════════════ -->
-<div class="page" data-page="stage7">
-  <div class="page-header">
-    <div class="stage-badge">🤖 Stage 7</div>
-    <h2>Smart Tools & AI Features</h2>
-    <p class="subtitle">The Marketing Hub has AI tools built in — here's what they do and when to use them.</p>
-    <div class="time-estimate">⏱ About 40 minutes</div>
+<!-- ═══════════════════════ ILLUSTRATOR ═══════════════════════ -->
+<div class="page" data-page="illustrator">
+  <div class="pg-header">
+    <div class="pg-eyebrow design">🎨 Design Tasks</div>
+    <h2>Illustrator Essentials</h2>
+    <p class="pg-sub">Adobe Illustrator is used for logos, icons, vector artwork, and social media graphics. For this role, you'll mostly edit existing assets — not create from scratch.</p>
   </div>
 
   <div class="callout info">
-    <div class="icon">ℹ️</div>
-    <div><strong>First: Get your free Groq API key.</strong> Go to console.groq.com, create a free account, and generate an API key. Paste it into the app via the AI Settings button in the sidebar footer. Without this, none of the AI tools will work.</div>
+    <div class="ci">ℹ️</div>
+    <div><strong>Illustrator vs InDesign</strong> InDesign = multi-page layout documents (brochures, PDFs). Illustrator = individual graphics and vector assets (logos, social posts, charts, icons). You'll use both.</div>
   </div>
 
   <div class="section">
-    <div class="section-title">AI Writing Tools (AI Write & QC Tab)</div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e8f5e9">✍️</div>
-        <div class="lesson-meta"><h4>The 5 AI tools — what each one does</h4><span>5 min read</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Working with the Assetline Logo</div>
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🏷️</div>
+        <div class="acc-text"><h4>Logo rules — never guess, always check</h4><span>The logo is a compliance asset</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <table class="info-table">
-          <tr><th>Tool</th><th>What it does</th><th>When to use it</th></tr>
-          <tr><td><strong>EDM Filename Generator</strong></td><td>Paste email content → AI generates the correct filename in the right naming convention</td><td>Every time you need to name an EDM file</td></tr>
-          <tr><td><strong>EOD Wrap Generator</strong></td><td>Describe your day in plain words → AI writes your end-of-day sign-off message</td><td>At the end of each workday</td></tr>
-          <tr><td><strong>Broker Email Writer</strong></td><td>Paste bullet points or notes → AI writes a full broker email with subject line</td><td>When drafting outreach emails</td></tr>
-          <tr><td><strong>Test Email Writer</strong></td><td>Fill in template name + QC notes → AI writes the message to send to Petro with your test email</td><td>When forwarding a test email to Petro for sign-off</td></tr>
-          <tr><td><strong>Message Reply Writer</strong></td><td>Paste a message you received → AI writes a natural reply in your voice</td><td>When you need to reply to Petro, Laura, or suppliers</td></tr>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Analyze Tab</div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fce4ec">🔍</div>
-        <div class="lesson-meta"><h4>Instruction Analyzer — never miss a detail again</h4><span>4 min read</span></div>
-        <div class="lesson-toggle">▼</div>
-      </div>
-      <div class="lesson-body">
-        <p>Paste any instruction, email, or Teams message into the Instruction Analyzer. The AI reads it and extracts:</p>
-        <ul style="padding-left:20px; margin-top:8px; font-size:14px; line-height:2; color:#374151">
-          <li><strong>Job type</strong> — what kind of task is this?</li>
-          <li><strong>Summary</strong> — plain English explanation of what's being asked</li>
-          <li><strong>Deadline</strong> — pulled from the message if mentioned</li>
-          <li><strong>Priority</strong> — high / medium / low based on urgency language</li>
-          <li><strong>Key information</strong> — every concrete detail: campaign name, file names, audience, format specs</li>
-          <li><strong>Watch out for</strong> — things unclear or missing that need clarification before starting</li>
-          <li><strong>Suggested reply</strong> — a casual acknowledgment you can send back</li>
-        </ul>
-        <div class="callout tip" style="margin-top:12px">
-          <div class="icon">💡</div>
-          <div>Use this whenever Petro sends a long or complicated message. It's like having a second pair of eyes to make sure you haven't missed anything.</div>
+      <div class="acc-body">
+        <div class="callout warn">
+          <div class="ci">⚠️</div>
+          <div>
+            <strong>Never use the logo from your desktop, a previous job, or an email attachment.</strong> Always download the current approved version from the shared folder. The logo has been updated — old versions exist and must not be used.
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e3f2fd">🏷️</div>
-        <div class="lesson-meta"><h4>Campaign Classifier — know which product the email belongs to</h4><span>4 min read</span></div>
-        <div class="lesson-toggle">▼</div>
-      </div>
-      <div class="lesson-body">
-        <p>Assetline has 4 main campaign types. If you're unsure which one an email belongs to, paste the content into the Campaign Classifier:</p>
-        <table class="info-table" style="margin-top:8px">
-          <tr><th>Campaign</th><th>What it's about</th></tr>
-          <tr><td><strong>Horizon Mortgages</strong></td><td>Long-term property loans for self-employed borrowers, trusts, complex incomes</td></tr>
-          <tr><td><strong>Development Finance</strong></td><td>Ground-up building projects — construction, site purchase through to completion</td></tr>
-          <tr><td><strong>Private Lending</strong></td><td>Short-term capital ($500k–$40m) secured against property — fast turnaround</td></tr>
-          <tr><td><strong>Bridging Loans</strong></td><td>Buy before you sell / Equity release — personal situations</td></tr>
+        <table class="tbl" style="margin-top:10px">
+          <tr><th>Rule</th><th>Detail</th></tr>
+          <tr><td><strong>Version to use</strong></td><td>Single-colour version with the full stop. Period/full stop is part of the brand name.</td></tr>
+          <tr><td><strong>Retired version</strong></td><td>The version with an orange dot is retired — do not use it under any circumstances.</td></tr>
+          <tr><td><strong>No distortion</strong></td><td>Always scale proportionally (Shift+drag or lock aspect ratio). Never stretch the logo.</td></tr>
+          <tr><td><strong>No effects</strong></td><td>No shadows, glows, outlines, colour changes, or transparency on the logo.</td></tr>
+          <tr><td><strong>Clear space</strong></td><td>Keep adequate clear space around the logo — nothing should crowd it.</td></tr>
         </table>
-        <p style="margin-top:12px">The AI also gives you a <strong>confidence score</strong> and tells you what signals pointed to that campaign — plus what copy feels off-tone if anything does.</p>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Skills AI Chat</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fff3e0">💬</div>
-        <div class="lesson-meta"><h4>Ask it anything about the job</h4><span>2 min read</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Colour Swatches</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🎨</div>
+        <div class="acc-text"><h4>Managing brand colours in Illustrator</h4><span>Only approved colours — always</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>The Skills AI Chat (Reference → Skills) is a chatbot that knows everything in the Marketing Hub — all the EDM steps, plain text workflow, brand rules, compliance requirements, and your saved notes.</p>
-        <p style="margin-top:10px"><strong>Example questions to ask it:</strong></p>
-        <ul style="padding-left:20px; margin-top:6px; font-size:14px; line-height:2; color:#374151">
-          <li>"What do I do after I publish the template?"</li>
-          <li>"What lists do I add to the Send?"</li>
-          <li>"What's the LinkedIn URL for Assetline?"</li>
-          <li>"What does the brand guide say about font usage?"</li>
-        </ul>
-        <p style="margin-top:10px">You can also add your own guides and checklists to the <strong>Skill Library</strong> at the bottom — the AI will then be able to reference them in its answers.</p>
+      <div class="acc-body">
+        <p>The Assetline brand colours are:</p>
+        <table class="tbl">
+          <tr><th>Name</th><th>Hex</th><th>Use for</th></tr>
+          <tr><td>Assetline Orange</td><td><code>#E4572E</code></td><td>Primary brand colour — accents, CTAs, highlights</td></tr>
+          <tr><td>Near Black</td><td><code>#191919</code></td><td>Dark backgrounds, body text on light backgrounds</td></tr>
+          <tr><td>Cream</td><td><code>#FAFAF2</code></td><td>Light backgrounds, off-white areas</td></tr>
+        </table>
+        <div class="callout warn" style="margin-top:10px">
+          <div class="ci">⚠️</div>
+          <div><strong>For print work:</strong> colours must be set to CMYK — not RGB. Open the Swatches panel (Window → Swatches) and confirm colour mode. Delete any unused swatches from the panel before export.</div>
+        </div>
+        <p>To edit a colour: double-click it in the Swatches panel. Never use the colour picker freehand — always start from an approved swatch.</p>
       </div>
     </div>
   </div>
 
-  <div class="complete-section">
-    <div class="stage-done-badge" id="s7badge" style="display:none">✅ Stage 7 Complete</div>
-    <button class="btn btn-success" onclick="completeStage('stage7', 7)">Mark Stage 7 Complete ✓</button>
+  <div class="section">
+    <div class="section-title">Editing Text in Illustrator</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">✍️</div>
+        <div class="acc-text"><h4>Updating copy in an Illustrator file</h4><span>Similar to InDesign but simpler</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Use the Type tool (T) to click into text</h5>
+              <p>Press <code>T</code> then click into a text block. Select the text you need to change and type the replacement. Don't change the font, size, or colour manually — match the existing style.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>Check for font issues — Type → Find/Replace Font</h5>
+              <p>If text appears in a different font or shows a pink highlight, go to Type → Find/Replace Font. Replace any missing font with the correct Assetline font (Silvana Text or ABC Diatype).</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n green">3</div>
+            <div class="step-body">
+              <h5>Spell check — Edit → Spelling → Check Spelling</h5>
+              <p>Always run spell check in Illustrator before export. It's easy to miss a typo on a social graphic or banner.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage6')">← Stage 6</button>
-    <button class="btn btn-primary" onclick="showPage('stage8')">Stage 8: Survival Kit →</button>
+  <div class="section">
+    <div class="section-title">Exporting from Illustrator</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">💾</div>
+        <div class="acc-text"><h4>Saving for screen vs print</h4><span>Different formats for different needs</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <tr><th>Output needed</th><th>How to export</th></tr>
+          <tr><td><strong>Screen / web / email</strong></td><td>File → Export → Export As → PNG. Resolution: 150–300 PPI. Colour mode: RGB.</td></tr>
+          <tr><td><strong>Social media image</strong></td><td>File → Export → Export for Screens. Select the artboard(s), choose PNG or JPG, set scale to 1x or 2x.</td></tr>
+          <tr><td><strong>Print PDF</strong></td><td>File → Save As → Adobe PDF. Use the PDF/X-1a preset. Include bleed if the design has one.</td></tr>
+          <tr><td><strong>Sending artwork to InDesign</strong></td><td>Save as PDF or EPS from Illustrator. Place it in InDesign via Ctrl+D (File → Place).</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-box">
+    <div class="done-badge" id="db-ai" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('illustrator')">Mark Complete ✓</button>
+  </div>
+
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('indesign')">← InDesign</button>
+    <button class="btn btn-primary" onclick="showPage('pdf-acrobat')">Next: PDF Editing →</button>
   </div>
 </div>
 
-<!-- ════════════════════ STAGE 8 ════════════════════ -->
-<div class="page" data-page="stage8">
-  <div class="page-header">
-    <div class="stage-badge">🧰 Stage 8</div>
-    <h2>Survival Kit & Key Rules</h2>
-    <p class="subtitle">Message templates, timesheet, the mistakes log, and the rules you must never forget.</p>
-    <div class="time-estimate">⏱ About 30 minutes</div>
+<!-- ═══════════════════════ PDF EDITING ═══════════════════════ -->
+<div class="page" data-page="pdf-acrobat">
+  <div class="pg-header">
+    <div class="pg-eyebrow design">🎨 Design Tasks</div>
+    <h2>PDF Editing & Acrobat</h2>
+    <p class="pg-sub">You'll use Adobe Acrobat to review PDFs, annotate for corrections, compare versions, and make minor text edits. It's not for major design changes — that always goes back to InDesign or Illustrator.</p>
   </div>
 
   <div class="section">
-    <div class="section-title">Message Templates</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#e8f5e9">💌</div>
-        <div class="lesson-meta"><h4>Ready-made professional messages</h4><span>3 min read</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Reviewing a PDF</div>
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🔍</div>
+        <div class="acc-text"><h4>How to review a PDF properly</h4><span>Never just scroll past it quickly</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>The Survival Kit → Message Templates tab has ready-to-copy messages for common situations. Don't write these from scratch — just copy and fill in the blanks:</p>
-        <table class="info-table" style="margin-top:8px">
-          <tr><th>Situation</th><th>Template available for</th></tr>
-          <tr><td>Requesting approval</td><td>"Hi Petro, [X] is ready for your review — attached/linked here…"</td></tr>
-          <tr><td>Flagging a blocker</td><td>"Hi Petro, heads up — I'm stuck on [X] and need [guidance/file/approval]…"</td></tr>
-          <tr><td>Sending a deliverable</td><td>Standard handover format with file name, what it is, any notes</td></tr>
-          <tr><td>Following up on feedback</td><td>Polite follow-up when you haven't heard back</td></tr>
-          <tr><td>Acknowledging a brief</td><td>Confirmation you've received and understood the task</td></tr>
-          <tr><td>Notifying of a delay</td><td>Early warning with reason and revised ETA</td></tr>
-        </table>
+      <div class="acc-body">
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Open in Acrobat (not just a browser PDF viewer)</h5>
+              <p>Right-click the PDF → Open with → Adobe Acrobat. A browser preview won't show all issues — Acrobat will.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>View at 100% zoom and scroll every single page</h5>
+              <p>Set zoom to 100% (Ctrl+1). Go page by page. Don't skim. Look for: cut-off text, missing images, wrong fonts, broken layout, incorrect colours, wrong page order, blank pages.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <h5>Check the disclaimer and legal text</h5>
+              <p>These are usually small. Zoom in (Ctrl+= to zoom in) and read them. Check the AFSL number is present and the general advice warning is verbatim.</p>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Mistakes Log</div>
-    <div class="lesson-card">
-      <div class="lesson-header" onclick="toggleLesson(this)">
-        <div class="lesson-icon" style="background:#fce4ec">📓</div>
-        <div class="lesson-meta"><h4>Your personal error journal — and why it's powerful</h4><span>3 min read</span></div>
-        <div class="lesson-toggle">▼</div>
+    <div class="section-title">Annotating a PDF for Corrections</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">💬</div>
+        <div class="acc-text"><h4>How to mark up a PDF to send back for corrections</h4><span>Use comments — never edit the design in Acrobat</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="lesson-body">
-        <p>The Mistakes Log (right-side drawer → "Mistakes" tab) has two parts:</p>
-        <ul style="padding-left:20px; margin-top:8px; font-size:14px; line-height:2; color:#374151">
-          <li><strong>Preloaded mistakes</strong> — common marketing coordinator errors and how to catch them</li>
-          <li><strong>Personal mistakes</strong> — entries you add yourself as you encounter real situations</li>
-        </ul>
-        <p style="margin-top:12px">For each entry you add, write:</p>
-        <ol style="padding-left:20px; margin-top:6px; font-size:14px; line-height:2; color:#374151">
-          <li>What task were you doing?</li>
-          <li>What went wrong?</li>
-          <li>What would have caught it?</li>
-        </ol>
-        <div class="callout success" style="margin-top:12px">
-          <div class="icon">✅</div>
-          <div><strong>The Task Reminder Panel uses this log.</strong> When you're working on an EDM send, it reads your mistakes log and shows you relevant "watch out for" reminders in a floating panel. The more you log, the smarter it gets.</div>
+      <div class="acc-body">
+        <p>When you find an issue in a PDF, don't try to fix it in Acrobat (unless it's a tiny text fix). Instead, annotate the PDF with a comment and send it back to be fixed in the original InDesign/Illustrator file.</p>
+        <table class="tbl" style="margin-top:8px">
+          <tr><th>Tool</th><th>Where to find it</th><th>When to use</th></tr>
+          <tr><td><strong>Sticky Note / Comment</strong></td><td>Tools → Comment → Add Text Comment</td><td>Explain what's wrong and what it should be</td></tr>
+          <tr><td><strong>Highlight</strong></td><td>Tools → Comment → Highlight Text</td><td>Highlight the specific text that needs changing</td></tr>
+          <tr><td><strong>Strikethrough</strong></td><td>Tools → Comment → Strikethrough</td><td>Mark text that should be deleted</td></tr>
+          <tr><td><strong>Insert text</strong></td><td>Tools → Comment → Insert Text at Cursor</td><td>Mark where new text should be inserted</td></tr>
+        </table>
+        <div class="callout tip" style="margin-top:10px">
+          <div class="ci">💡</div>
+          <div>Always be specific in your comments: "Change 'from' to 'form'" is useful. "Fix this" is not. The designer needs to know exactly what to change.</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Rules to Never Forget</div>
-    <div class="rules-grid">
-      <div class="rule-card">
-        <div class="rule-icon">✍️</div>
-        <h5>Written approval only</h5>
-        <p>Verbal "looks good" or a Slack thumbs up is not approval. Written sign-off in email or a shared doc — every time.</p>
+    <div class="section-title">Minor Text Edits in Acrobat</div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">✏️</div>
+        <div class="acc-text"><h4>When you can (and can't) edit directly in Acrobat</h4><span>Only for small, approved fixes</span></div>
+        <div class="acc-arrow">▼</div>
       </div>
-      <div class="rule-card">
-        <div class="rule-icon">🔗</div>
-        <h5>LinkedIn link always missing</h5>
-        <p>Manually add linkedin.com/company/assetline-capital in Step 7 of every single EDM send — no exceptions.</p>
-      </div>
-      <div class="rule-card">
-        <div class="rule-icon">4️⃣</div>
-        <h5>Always 4 recipient lists</h5>
-        <p>All Brokers + James Green Database + Assetline Executive + State Managers. Every send. Never skip one.</p>
-      </div>
-      <div class="rule-card">
-        <div class="rule-icon">🕐</div>
-        <h5>Timezone for scheduling</h5>
-        <p>Salesforce uses your local Manila time. 9 AM Sydney = 6 AM Manila. Always subtract 3 hours from Sydney time.</p>
-      </div>
-      <div class="rule-card">
-        <div class="rule-icon">📁</div>
-        <h5>Never use personal copies</h5>
-        <p>Always re-download the logo, templates, and assets from the shared folder. Old files on your desktop are not safe to use.</p>
-      </div>
-      <div class="rule-card">
-        <div class="rule-icon">🚨</div>
-        <h5>Flag blockers 3–4 hours early</h5>
-        <p>If a deadline is at risk, say so well before it hits. A one-liner message is enough. Never wait until after.</p>
-      </div>
-      <div class="rule-card">
-        <div class="rule-icon">👁️</div>
-        <h5>Plain text body is internal only</h5>
-        <p>Customers never see it. Sync from HTML so the CRM record matches the email body — it's purely for internal records.</p>
-      </div>
-      <div class="rule-card">
-        <div class="rule-icon">🧪</div>
-        <h5>Test yourself before Petro</h5>
-        <p>Always send a test to yourself first. Only send to Petro once you've verified it yourself looks right.</p>
+      <div class="acc-body">
+        <div class="callout warn">
+          <div class="ci">⚠️</div>
+          <div><strong>Only edit in Acrobat for very minor fixes</strong> — a wrong date, a typo in one word, a wrong phone number. Never use Acrobat for layout changes, font changes, image swaps, or anything that changes the design. Those must go back to InDesign.</div>
+        </div>
+        <p style="margin-top:10px">To edit text in Acrobat: <strong>Tools → Edit PDF → Edit</strong>. Click the text you want to change. Acrobat loads the editable text block. Make your change. Be careful — Acrobat may not have the exact font installed and may substitute it.</p>
+        <p>After any Acrobat edit: save a copy as a new file (<code>_AcrobatEdit</code> added to the filename) so the original is preserved. Send the edited version to Petro and note what was changed.</p>
       </div>
     </div>
   </div>
 
-  <div class="complete-section" style="background: linear-gradient(135deg,#e8f5e9,#f0fdf4); border-color:var(--green)">
-    <div class="stage-done-badge" id="s8badge" style="display:none">🎉 All Stages Complete!</div>
-    <h4 style="color:var(--green)">You've completed the full learning guide!</h4>
-    <p>You now know every major workflow, checklist, and rule for the marketing coordinator role. Keep this guide open as a reference whenever you need it — and use the Marketing Hub app every day to stay on track.</p>
-    <button class="btn btn-success" onclick="completeStage('stage8', 8)" style="margin-top:4px">Mark Stage 8 Complete ✓</button>
+  <div class="complete-box">
+    <div class="done-badge" id="db-pdf" style="display:none">✅ Lesson Complete</div>
+    <button class="btn btn-green" onclick="markDone('pdf-acrobat')">Mark Complete ✓</button>
   </div>
 
-  <div class="page-nav">
-    <button class="btn btn-secondary" onclick="showPage('stage7')">← Stage 7</button>
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('illustrator')">← Illustrator</button>
+    <button class="btn btn-primary" onclick="showPage('text-compare')">Next: Text Compare →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TEXT COMPARE ═══════════════════════ -->
+<div class="page" data-page="text-compare">
+  <div class="pg-header">
+    <div class="pg-eyebrow design">🎨 Design Tasks</div>
+    <h2>Text Compare — Your QC Weapon</h2>
+    <p class="pg-sub">The Marketing Hub has a Text Compare tool built in. Use it to verify copy exactly matches the approved brief — word for word, character for character.</p>
+  </div>
+
+  <div class="callout ok">
+    <div class="ci">✅</div>
+    <div><strong>Why Text Compare matters for QC</strong> When you place copy from a Word document into InDesign or an email template, it's easy to accidentally change a word, miss a line, or introduce a spacing error. Text Compare catches these without you having to read both versions manually side by side.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Three Compare Modes</div>
+
+    <div class="accordion open">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📄</div>
+        <div class="acc-text"><h4>Mode 1: Text Compare</h4><span>Paste two versions of text — highlights every difference</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <p><strong>Where:</strong> Marketing Hub → Reference → Text Compare → Text tab</p>
+        <ul class="steps">
+          <li class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <h5>Paste the approved copy on the left</h5>
+              <p>Copy the approved text from the brief document (Word file or email from Petro) and paste it into the left panel.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <h5>Paste your placed copy on the right</h5>
+              <p>Copy the text from your InDesign file, email template, or wherever you placed the copy, and paste into the right panel.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-n green">3</div>
+            <div class="step-body">
+              <h5>Read the highlighted differences</h5>
+              <p>The tool highlights every line that differs. Changed words are highlighted within the line. If there are zero differences — you're clean. If there are differences — go back and fix the placed copy to match the brief.</p>
+            </div>
+          </li>
+        </ul>
+        <div class="callout tip" style="margin-top:10px">
+          <div class="ci">💡</div>
+          <div>Use this to compare: email copy vs brief, rate card numbers vs approved data, disclaimer text vs the standard wording, or two versions of the same document.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">📁</div>
+        <div class="acc-text"><h4>Mode 2: Doc / PDF Compare</h4><span>Upload two Word or PDF files — no manual copy-paste needed</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <p><strong>Where:</strong> Marketing Hub → Reference → Text Compare → Doc/PDF tab</p>
+        <p>Upload two versions of a Word (<code>.docx</code>) or PDF file. The tool extracts the text from both files automatically and runs the same line-by-line diff. No manual copying needed.</p>
+        <p><strong>When to use this:</strong></p>
+        <ul style="padding-left:18px;margin-top:6px;font-size:13px;line-height:2;color:#374151">
+          <li>Comparing two versions of a rate card</li>
+          <li>Checking an updated T&C document against the previous version</li>
+          <li>Verifying a revised brief against the original</li>
+        </ul>
+        <div class="callout ok" style="margin-top:10px">
+          <div class="ci">✅</div>
+          <div>All file processing happens in your browser — nothing is uploaded to a server. The content stays private.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-icon">🖼️</div>
+        <div class="acc-text"><h4>Mode 3: Image Compare</h4><span>Spot visual differences between two artwork versions</span></div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <p><strong>Where:</strong> Marketing Hub → Reference → Text Compare → Image tab</p>
+        <p>Upload two image files (e.g., before and after artwork, two versions of a banner or social graphic). The tool gives you three views:</p>
+        <table class="tbl" style="margin-top:8px">
+          <tr><th>View</th><th>What it shows</th></tr>
+          <tr><td><strong>Side by side</strong></td><td>Both images next to each other at the same zoom level</td></tr>
+          <tr><td><strong>Swipe comparison</strong></td><td>Drag a divider left and right to reveal one image over the other — great for spotting layout shifts</td></tr>
+          <tr><td><strong>Pixel difference overlay</strong></td><td>Highlights exactly which pixels differ between the two images — useful for catching tiny changes</td></tr>
+        </table>
+        <div class="callout tip" style="margin-top:10px">
+          <div class="ci">💡</div>
+          <div>Use the swipe view when checking if a revised social graphic has moved any elements compared to the approved version. The pixel diff view is good for catching colour changes or subtle text edits.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">When to use Text Compare</div>
+    <table class="tbl">
+      <tr><th>Situation</th><th>What to compare</th><th>Mode to use</th></tr>
+      <tr><td>Placing email copy into Salesforce</td><td>Approved Word doc vs what you pasted in</td><td>Text</td></tr>
+      <tr><td>Placing rates into a rate card PDF</td><td>Approved data sheet vs your InDesign output</td><td>Doc/PDF</td></tr>
+      <tr><td>Checking disclaimer wording</td><td>Standard disclaimer text vs what appears in the file</td><td>Text</td></tr>
+      <tr><td>Reviewing revised artwork</td><td>Version A vs Version B images</td><td>Image</td></tr>
+      <tr><td>Updated T&C document received</td><td>Old version vs new version</td><td>Doc/PDF</td></tr>
+    </table>
+  </div>
+
+  <div class="quiz">
+    <h4>🧠 Quick Check</h4>
+    <div class="qp">Petro gives you an approved Word document with email copy. You've pasted it into Salesforce. What's the best way to verify it's exactly right?</div>
+    <div class="q-opts">
+      <div class="q-opt" onclick="qa(this,false,'Reading it through yourself might miss subtle differences — a changed word, a missed line, a spacing error. Text Compare is more reliable.')">Read it through carefully in Salesforce</div>
+      <div class="q-opt" onclick="qa(this,true,'Correct. Paste the approved Word doc text on the left, the Salesforce copy on the right, and the tool highlights every single difference.')">Use Text Compare — paste the Word doc text vs the Salesforce text and check for differences</div>
+      <div class="q-opt" onclick="qa(this,false,'Asking Petro to re-check your work is not the right approach — QC is your responsibility before it reaches him.')">Ask Petro to re-read it before sending</div>
+    </div>
+    <div class="q-fb" id="qf-tc"></div>
+  </div>
+
+  <div class="complete-box">
+    <div class="done-badge" id="db-tc" style="display:none">✅ All Design Lessons Complete!</div>
+    <h4>You've completed all the design lessons 🎉</h4>
+    <p>You now have a solid foundation across brand QC, InDesign, Illustrator, PDF editing, and Text Compare. Use this guide as a reference whenever you need it.</p>
+    <button class="btn btn-green" onclick="markDone('text-compare')">Mark Complete ✓</button>
+  </div>
+
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('pdf-acrobat')">← PDF Editing</button>
     <button class="btn btn-primary" onclick="showPage('home')">↩ Back to Overview</button>
   </div>
 </div>
@@ -1500,143 +1731,143 @@ body {
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-bottom-nav">
-  <div class="mobile-nav-items" id="mobileNav"></div>
+<nav class="mob-nav">
+  <div class="mob-tabs">
+    <button class="mob-tab" onclick="showPage('home')" data-mob="home">
+      <span class="mt-icon">🏠</span>Home
+    </button>
+    <button class="mob-tab" onclick="showPage('daily-ops')" data-mob="daily">
+      <span class="mt-icon">📅</span>Daily
+    </button>
+    <button class="mob-tab" onclick="showPage('edm-send')" data-mob="marketing">
+      <span class="mt-icon">📧</span>Marketing
+    </button>
+    <button class="mob-tab" onclick="showPage('admin-files')" data-mob="admin">
+      <span class="mt-icon">🗂️</span>Admin
+    </button>
+    <button class="mob-tab" onclick="showPage('brand-qc')" data-mob="design">
+      <span class="mt-icon">🎨</span>Design
+    </button>
+  </div>
 </nav>
 
 <script>
-const STAGES = [
-  { id:'home',   icon:'🏠', label:'Home',       short:'Home',    time:'',       color:'#6B7280', desc:'Overview of all stages' },
-  { id:'stage1', icon:'📍', label:'Orientation', short:'Stage 1', time:'30 min', color:'#E4572E', desc:'Your role, people & the app' },
-  { id:'stage2', icon:'📅', label:'Daily Ops',   short:'Stage 2', time:'40 min', color:'#F5A623', desc:'Morning, during & end of day' },
-  { id:'stage3', icon:'📧', label:'EDM Send',    short:'Stage 3', time:'90 min', color:'#2C7BE5', desc:'The 16-step email send process' },
-  { id:'stage4', icon:'✉️', label:'Plain Text',  short:'Stage 4', time:'30 min', color:'#7C3AED', desc:'Broker outreach emails' },
-  { id:'stage5', icon:'✅', label:'Brand QC',    short:'Stage 5', time:'45 min', color:'#059669', desc:'Quality control checklists' },
-  { id:'stage6', icon:'📊', label:'Reporting',   short:'Stage 6', time:'30 min', color:'#0EA5E9', desc:'Metrics & brief intake' },
-  { id:'stage7', icon:'🤖', label:'AI Tools',    short:'Stage 7', time:'40 min', color:'#8B5CF6', desc:'AI writing & analysis tools' },
-  { id:'stage8', icon:'🧰', label:'Survival Kit',short:'Stage 8', time:'30 min', color:'#16A34A', desc:'Templates, rules & mistakes log' },
+// ── DATA ──
+const NAV = [
+  { id:'home', label:'Overview', icon:'🏠', cat:null },
+  { label:'DAILY TASKS', type:'header', color:'#F59E0B' },
+  { id:'daily-ops', label:'Daily Ops', icon:'📅', cat:'daily' },
+  { label:'MARKETING TASKS', type:'header', color:'#2563EB' },
+  { id:'edm-send', label:'Salesforce EDM', icon:'📧', cat:'marketing' },
+  { id:'plain-text', label:'Plain Text Emails', icon:'✉️', cat:'marketing' },
+  { id:'edm-reporting', label:'EDM Reporting', icon:'📊', cat:'marketing' },
+  { label:'ADMIN TASKS', type:'header', color:'#059669' },
+  { id:'admin-files', label:'Files & Admin', icon:'🗂️', cat:'admin' },
+  { label:'DESIGN TASKS', type:'header', color:'#E4572E' },
+  { id:'brand-qc', label:'Brand & QC', icon:'✅', cat:'design' },
+  { id:'indesign', label:'InDesign', icon:'📐', cat:'design' },
+  { id:'illustrator', label:'Illustrator', icon:'🎨', cat:'design' },
+  { id:'pdf-acrobat', label:'PDF & Acrobat', icon:'📄', cat:'design' },
+  { id:'text-compare', label:'Text Compare', icon:'🔍', cat:'design' },
 ];
 
-// Load progress
-let progress = JSON.parse(localStorage.getItem('lh_progress') || '{}');
+const PAGES = NAV.filter(n => n.id);
+let progress = JSON.parse(localStorage.getItem('lh2_prog') || '{}');
+let currentPage = 'home';
 
-function saveProgress() {
-  localStorage.setItem('lh_progress', JSON.stringify(progress));
-  renderNav();
-  updateProgressBar();
+function saveProgress() { localStorage.setItem('lh2_prog', JSON.stringify(progress)); }
+
+function getDone() { return PAGES.filter(p => p.id !== 'home' && progress[p.id]).length; }
+function getTotal() { return PAGES.filter(p => p.id !== 'home').length; }
+
+function updateProgress() {
+  const pct = Math.round((getDone() / getTotal()) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('pctLabel').textContent = pct + '% complete';
 }
 
-function renderNav() {
-  const sidebarEl = document.getElementById('sidebarNav');
-  const mobileEl = document.getElementById('mobileNav');
-  const currentPage = document.querySelector('.page.active')?.dataset.page || 'home';
-
-  sidebarEl.innerHTML = STAGES.map(s => {
-    const done = progress[s.id];
-    const active = currentPage === s.id;
-    return `<div class="stage-nav-item ${active?'active':''} ${done&&!active?'done':''}" onclick="showPage('${s.id}')">
-      <div class="stage-icon">${done ? '✓' : s.icon}</div>
-      <div class="nav-text">${s.label}<small>${s.time||'Overview'}</small></div>
-      ${done ? '<span class="nav-check">✓</span>' : ''}
+function renderSidebar() {
+  const el = document.getElementById('sidebarEl');
+  el.innerHTML = NAV.map(n => {
+    if (n.type === 'header') {
+      return `<div class="nav-section-label"><span class="cat-dot" style="background:${n.color}"></span>${n.label}</div>`;
+    }
+    const done = progress[n.id];
+    const active = currentPage === n.id;
+    return `<div class="nav-item ${active ? 'active cat-' + n.cat : ''}" onclick="showPage('${n.id}')">
+      <span class="ni-icon">${done ? '✓' : n.icon}</span>
+      <span class="ni-label">${n.label}</span>
+      ${done && !active ? '<span class="ni-done">✓</span>' : ''}
     </div>`;
   }).join('');
-
-  mobileEl.innerHTML = STAGES.map(s => {
-    const done = progress[s.id];
-    const active = currentPage === s.id;
-    return `<button class="mobile-nav-btn ${active?'active':''} ${done&&!active?'done':''}" onclick="showPage('${s.id}')">
-      <span class="mn-icon">${s.icon}</span>${s.short}
-    </button>`;
-  }).join('');
-
-  // Update stage cards on home
-  const grid = document.getElementById('stagesGrid');
-  if (grid) {
-    grid.innerHTML = STAGES.filter(s => s.id !== 'home').map((s, i) => {
-      const done = progress[s.id];
-      const isCurrent = !done && (i === 0 || progress[STAGES.filter(x=>x.id!=='home')[i-1]?.id]);
-      return `<div class="stage-card ${done?'done':''} ${isCurrent?'current':''}" onclick="showPage('${s.id}')">
-        ${done ? '<div class="card-badge badge-done">✓ Done</div>' : isCurrent ? '<div class="card-badge badge-current">▶ Start</div>' : ''}
-        <div class="card-stage-num"><span class="dot" style="background:${s.color}"></span>Stage ${i+1}</div>
-        <h3>${s.icon} ${s.label}</h3>
-        <p>${s.desc}</p>
-        ${s.time ? `<div class="card-time">⏱ ${s.time}</div>` : ''}
-      </div>`;
-    }).join('');
-  }
 }
 
-function updateProgressBar() {
-  const stageCount = STAGES.filter(s => s.id !== 'home').length;
-  const doneCount = STAGES.filter(s => s.id !== 'home' && progress[s.id]).length;
-  const pct = Math.round((doneCount / stageCount) * 100);
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('overallPct').textContent = pct + '% done';
-  const heroP = document.getElementById('heroProgress');
-  if (heroP) heroP.textContent = pct + '% Completed';
+function renderMobileNav() {
+  const catMap = { home: 'home', 'daily-ops': 'daily', 'edm-send': 'marketing', 'plain-text': 'marketing', 'edm-reporting': 'marketing', 'admin-files': 'admin', 'brand-qc': 'design', indesign: 'design', illustrator: 'design', 'pdf-acrobat': 'design', 'text-compare': 'design' };
+  const cat = catMap[currentPage] || 'home';
+  document.querySelectorAll('.mob-tab').forEach(t => {
+    t.className = 'mob-tab' + (t.dataset.mob === cat ? ' active-' + cat : '');
+  });
 }
 
 function showPage(id) {
+  currentPage = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
   window.scrollTo(0, 0);
-  renderNav();
+  renderSidebar();
+  renderMobileNav();
+  updateProgress();
+  // restore done badges
+  PAGES.forEach(p => {
+    if (p.id && p.id !== 'home' && progress[p.id]) {
+      const db = document.getElementById('db-' + {
+        'daily-ops':'daily','edm-send':'edm','plain-text':'pt','edm-reporting':'rep',
+        'admin-files':'admin','brand-qc':'brand','indesign':'id','illustrator':'ai',
+        'pdf-acrobat':'pdf','text-compare':'tc'
+      }[p.id]);
+      if (db) db.style.display = 'inline-block';
+    }
+  });
 }
 
-function toggleLesson(header) {
-  const card = header.closest('.lesson-card');
-  card.classList.toggle('open');
-}
-
-function toggleCheck(item) {
-  item.classList.toggle('checked');
-  const cb = item.querySelector('input[type=checkbox]');
-  if (cb) cb.checked = item.classList.contains('checked');
-}
-
-function completeStage(stageId, num) {
-  progress[stageId] = true;
+function markDone(id) {
+  progress[id] = true;
   saveProgress();
-  const badge = document.getElementById('s' + num + 'badge');
-  if (badge) badge.style.display = 'inline-block';
+  const badgeMap = { 'daily-ops':'daily','edm-send':'edm','plain-text':'pt','edm-reporting':'rep','admin-files':'admin','brand-qc':'brand','indesign':'id','illustrator':'ai','pdf-acrobat':'pdf','text-compare':'tc' };
+  const db = document.getElementById('db-' + badgeMap[id]);
+  if (db) db.style.display = 'inline-block';
+  updateProgress();
+  renderSidebar();
 }
 
-function checkAnswer(el, correct) {
-  const options = el.closest('.quiz-options').querySelectorAll('.quiz-option');
-  options.forEach(o => { o.onclick = null; });
-  const feedback = el.closest('.quiz-card').querySelector('.quiz-feedback');
+function toggleAcc(head) {
+  head.closest('.accordion').classList.toggle('open');
+}
+
+function tick(li) {
+  li.classList.toggle('ticked');
+  li.querySelector('input').checked = li.classList.contains('ticked');
+}
+
+function qa(el, correct, msg) {
+  el.closest('.q-opts').querySelectorAll('.q-opt').forEach(o => { o.onclick = null; });
+  const fb = el.closest('.quiz').querySelector('.q-fb');
   if (correct) {
     el.classList.add('correct');
-    if (feedback) {
-      feedback.textContent = '✅ Correct! ' + (el.dataset.explanation || 'Well done — that\'s exactly right.');
-      feedback.className = 'quiz-feedback show good';
-    }
+    fb.textContent = '✅ ' + msg;
+    fb.className = 'q-fb show good';
   } else {
     el.classList.add('wrong');
-    if (feedback) {
-      feedback.textContent = '❌ Not quite. Look for the correct answer above.';
-      feedback.className = 'quiz-feedback show bad';
-      // highlight the correct one
-      options.forEach(o => {
-        if (o.onclick === null) {
-          // find via attribute — we passed correct=true/false per option
-        }
-      });
-    }
+    fb.textContent = '❌ ' + msg;
+    fb.className = 'q-fb show bad';
   }
 }
 
 // Init
-renderNav();
-updateProgressBar();
-
-// Show stage done badges on load
-STAGES.forEach((s, i) => {
-  if (progress[s.id] && s.id !== 'home') {
-    const badge = document.getElementById('s' + (i) + 'badge');
-    if (badge) badge.style.display = 'inline-block';
-  }
-});
+renderSidebar();
+renderMobileNav();
+updateProgress();
 </script>
 </body>
 </html>
