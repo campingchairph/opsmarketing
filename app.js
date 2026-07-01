@@ -6496,15 +6496,47 @@ function renderPlainTextPage() {
         `)}
       `)}
 
-      ${section('How Sending Works (For Reference)', `
-        <p class="pt-para" style="color:var(--text-3);font-style:italic;font-size:12px;">You don't need to do this yet — context only.</p>
-        <ol class="pt-list pt-list-ol">
-          <li><strong>Activate for Automation</strong> — sets the primary sender and links the campaign</li>
-          <li><strong>Set Primary Sender</strong> — find the person's record, set as primary sender and reply-to user</li>
-          <li><strong>Activate</strong></li>
-          <li><strong>Go to Send</strong> — set campaign, tracker domain (always ${code('assetline')}), select recipient lists: All Brokers (leads and contacts) + any additional specific lists</li>
-          <li><strong>Send Test first</strong> — send to internal test list to verify before full send</li>
-        </ol>
+      ${section('Sending the Campaign', `
+
+        <div class="pt-phase-label">Phase 4 — Activate</div>
+        ${step(6, 'Activate the Campaign for Automation', null, `
+          Select the correct campaign from the brief.<br>
+          Enter the <strong>sender information</strong> provided in the brief.<br>
+          Click <strong>Activate for Automation</strong>.
+        `)}
+
+        <div class="pt-phase-label">Phase 5 — Test Send</div>
+        ${step(7, 'Send a test email before the actual campaign', {type:'warn', label:'test first'}, `
+          Go to <strong>Send</strong> → select the campaign.<br>
+          For <strong>Recipient List</strong>, choose: <strong>Asalone Marketing Test List</strong> only.<br>
+          Click <strong>Calculate Prospects</strong> — confirm exactly <strong>3 recipients</strong>:
+          <ul class="pt-list" style="margin-top:6px">
+            <li>Petro's email</li>
+            <li>Petro's second email</li>
+            <li>Your work email</li>
+          </ul>
+          Enter the <strong>Sender</strong> and <strong>Reply-To</strong> details from the brief → click <strong>Send</strong>.<br><br>
+          <div class="pt-note">The test email may take <strong>5–10 minutes</strong> to arrive. Review it when it lands, then let Petro know. <strong>Wait for Petro's approval before proceeding.</strong></div>
+        `)}
+
+        <div class="pt-phase-label">Phase 6 — Send or Schedule</div>
+        ${step(8, 'Send or schedule the actual campaign', {type:'key', label:'critical'}, `
+          After Petro approves the test:<br>
+          Go back to <strong>Send</strong> → select the campaign.<br>
+          Select the <strong>recipient lists specified in the brief</strong> — use the same lists as the marketing email sends. <strong>Do not include Team Members.</strong><br>
+          Enter the <strong>Sender</strong> and <strong>Reply-To</strong> from the brief.<br>
+          Click <strong>Calculate Prospects</strong> — confirm the expected count (~16,000 or as expected).<br>
+          Optionally preview the email, then either:
+          <ul class="pt-list" style="margin-top:6px">
+            <li><strong>Send</strong> — sends immediately</li>
+            <li><strong>Send Later</strong> — schedule using the date and time from the brief</li>
+          </ul>
+          <div class="pt-note" style="margin-top:8px">For your first few sends, take screenshots and send them to Petro so he can verify everything before you complete the send or schedule.</div>
+        `)}
+
+        <div class="pt-note" style="margin-top:16px">
+          <strong>Petro will always provide:</strong> Campaign name · Sender · Reply-To address · Recipient lists · Scheduled date and time (if applicable)
+        </div>
       `)}
 
     </div>
