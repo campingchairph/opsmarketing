@@ -396,6 +396,126 @@ code {
   .sidebar { width: 200px; }
   .content { padding: 24px 20px 60px; }
 }
+
+/* ── GLOSSARY TERM LINKS ── */
+.gl {
+  color: var(--orange); border-bottom: 1px dashed var(--orange);
+  cursor: pointer; font-weight: 600; transition: background .1s;
+  border-radius: 3px; padding: 0 1px;
+}
+.gl:hover { background: var(--cat-design-light); }
+
+/* ── TERM TOOLTIP ── */
+.term-tooltip {
+  position: fixed; z-index: 999;
+  background: var(--dark); color: #fff;
+  border-radius: 10px; padding: 14px 16px;
+  max-width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  display: none; pointer-events: auto;
+}
+.term-tooltip.show { display: block; }
+.term-tooltip h5 { font-size: 13px; color: var(--orange); margin-bottom: 5px; font-weight: 800; }
+.term-tooltip p { font-size: 12px; line-height: 1.6; color: rgba(255,255,255,.8); margin-bottom: 8px; }
+.term-tooltip a { font-size: 11px; color: var(--orange); text-decoration: none; font-weight: 700; }
+.term-tooltip .tt-close { float: right; cursor: pointer; font-size: 16px; color: rgba(255,255,255,.4); margin-top: -2px; }
+
+/* ── DAILY PROGRESS ── */
+.daily-progress {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px;
+}
+.dp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.dp-header h3 { font-size: 14px; font-weight: 800; }
+.dp-header span { font-size: 12px; color: var(--grey); }
+.dp-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-item {
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;
+}
+.dp-item.done { background: #dcfce7; color: #15803d; }
+.dp-item.not-done { background: var(--cream); color: var(--grey); }
+.dp-empty { font-size: 13px; color: var(--grey); }
+
+/* ── GLOSSARY PAGE ── */
+.gl-search {
+  width: 100%; padding: 11px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border); font-size: 14px;
+  margin-bottom: 16px; outline: none; background: #fff;
+  transition: border-color .15s;
+}
+.gl-search:focus { border-color: var(--orange); }
+.gl-letter { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--grey); margin: 18px 0 6px; text-transform: uppercase; }
+.gl-entry {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 8px;
+}
+.gl-entry h4 { font-size: 14px; font-weight: 800; color: var(--orange); margin-bottom: 4px; }
+.gl-entry p { font-size: 13px; color: #374151; line-height: 1.6; }
+.gl-entry.hidden { display: none; }
+.gl-tag {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 10px; margin-left: 6px;
+  vertical-align: middle; text-transform: uppercase; letter-spacing: .5px;
+}
+.gl-tag.design { background: var(--cat-design-light); color: var(--cat-design); }
+.gl-tag.marketing { background: var(--cat-marketing-light); color: var(--cat-marketing); }
+.gl-tag.admin { background: var(--cat-admin-light); color: var(--cat-admin); }
+.gl-tag.daily { background: var(--cat-daily-light); color: #92600a; }
+
+/* ── QUIZ PAGE ── */
+.quiz-pg { max-width: 640px; }
+.quiz-start {
+  background: var(--dark); border-radius: var(--radius);
+  padding: 32px 28px; text-align: center; color: #fff;
+}
+.quiz-start h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.quiz-start p { color: rgba(255,255,255,.65); font-size: 14px; margin-bottom: 20px; }
+.quiz-topics { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px; }
+.quiz-topic-chip {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.7);
+}
+.quiz-topic-chip.ready { background: rgba(228,87,46,.3); border-color: var(--orange); color: #fff; }
+
+.qz-question-wrap { display: none; }
+.qz-question-wrap.show { display: block; }
+.qz-progress-bar { height: 4px; background: rgba(255,255,255,.2); border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+.qz-progress-fill { height: 4px; background: var(--orange); transition: width .3s; }
+.qz-counter { font-size: 12px; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+.qz-q { font-size: 16px; font-weight: 700; margin-bottom: 16px; line-height: 1.4; }
+.qz-opts { display: flex; flex-direction: column; gap: 8px; }
+.qz-opt {
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.15);
+  border-radius: 9px; padding: 12px 16px; cursor: pointer;
+  font-size: 13px; color: #fff; text-align: left; transition: all .12s;
+  display: flex; align-items: center; gap: 10px;
+}
+.qz-opt:hover:not(:disabled) { background: rgba(255,255,255,.15); }
+.qz-opt .opt-letter {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(255,255,255,.15); font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.qz-opt.correct { background: #059669; border-color: #059669; }
+.qz-opt.wrong { background: #DC2626; border-color: #DC2626; }
+.qz-opt.reveal-correct { background: rgba(5,150,105,.3); border-color: #059669; }
+.qz-feedback { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
+.qz-feedback.show { display: block; }
+.qz-feedback.good { background: rgba(5,150,105,.3); }
+.qz-feedback.bad { background: rgba(220,38,38,.3); }
+.qz-next { margin-top: 14px; width: 100%; padding: 12px; border-radius: 8px; background: var(--orange); color: #fff; font-weight: 700; font-size: 14px; border: none; cursor: pointer; display: none; }
+.qz-next.show { display: block; }
+
+.qz-result { display: none; text-align: center; padding: 20px 0; }
+.qz-result.show { display: block; }
+.qz-score { font-size: 48px; font-weight: 900; color: var(--orange); }
+.qz-score-label { font-size: 14px; color: rgba(255,255,255,.6); margin-bottom: 16px; }
+.qz-medals { font-size: 36px; margin-bottom: 8px; }
+.qz-verdict { font-size: 15px; font-weight: 700; margin-bottom: 20px; }
+.qz-review { text-align: left; margin-bottom: 20px; }
+.qz-review-item { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
+.qz-review-item.rgt { background: rgba(5,150,105,.2); }
+.qz-review-item.wrg { background: rgba(220,38,38,.2); }
 </style>
 </head>
 <body>
@@ -453,9 +573,24 @@ code {
     </div>
   </div>
 
+  <!-- Daily Progress -->
+  <div class="daily-progress">
+    <div class="dp-header">
+      <h3>📅 Today's Progress</h3>
+      <span id="todayDate"></span>
+    </div>
+    <div class="dp-items" id="dpItems"></div>
+  </div>
+
+  <!-- Quick tools -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn btn-ghost" onclick="showPage('glossary')" style="flex:1;min-width:140px;justify-content:center">📖 Glossary of Terms</button>
+    <button class="btn btn-primary" onclick="showPage('quiz')" style="flex:1;min-width:140px;justify-content:center">🧠 Take a Quiz</button>
+  </div>
+
   <div class="callout ok">
     <div class="ci">✅</div>
-    <div><strong>How to use this guide</strong>Pick a category above and work through each lesson. Tick checklists as you go. Your progress saves in this browser automatically — come back any time.</div>
+    <div><strong>How to use this guide</strong> Pick a category above and work through each lesson. Tick checklists as you go. Click any <span class="gl" style="pointer-events:none">orange underlined word</span> to see what it means. Your progress saves automatically.</div>
   </div>
 
   <div class="callout info">
@@ -1727,32 +1862,97 @@ code {
   </div>
 </div>
 
+<!-- ═══════════════════════ GLOSSARY ═══════════════════════ -->
+<div class="page" data-page="glossary">
+  <div class="pg-header">
+    <div class="pg-eyebrow" style="background:#f3f4f6;color:#374151">📖 Reference</div>
+    <h2>Glossary of Terms</h2>
+    <p class="pg-sub">Every unfamiliar word explained in plain English. Click any <span class="gl" style="pointer-events:none">orange term</span> anywhere in the guide to jump to its definition.</p>
+  </div>
+  <input class="gl-search" type="text" placeholder="Search a term…" oninput="filterGlossary(this.value)" id="glSearch">
+  <div id="glList"></div>
+  <div class="pg-nav">
+    <button class="btn btn-ghost" onclick="showPage('home')">← Back to overview</button>
+    <button class="btn btn-primary" onclick="showPage('quiz')">Take a Quiz →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ QUIZ ═══════════════════════ -->
+<div class="page" data-page="quiz">
+  <div class="pg-header">
+    <div class="pg-eyebrow" style="background:#f3f4f6;color:#374151">🧠 Quiz</div>
+    <h2>Knowledge Check</h2>
+    <p class="pg-sub">10 random questions every time — drawn from the lessons you've completed. New shuffle on every visit.</p>
+  </div>
+
+  <div class="quiz-start quiz-pg" id="quizStart">
+    <div style="background:var(--dark);border-radius:var(--radius);padding:28px 24px;color:#fff">
+      <div style="font-size:36px;margin-bottom:10px">🧠</div>
+      <h2 style="font-size:20px;margin-bottom:8px">Ready to test yourself?</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:13px;margin-bottom:16px">Questions are randomly selected from your completed lessons. The more lessons you finish, the bigger the question pool.</p>
+      <div class="quiz-topics" id="quizTopicChips"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="startQuiz()">Start Quiz →</button>
+    </div>
+  </div>
+
+  <div class="quiz-pg" id="quizRunning" style="display:none">
+    <div style="background:var(--dark);border-radius:var(--radius);padding:24px;color:#fff">
+      <div class="qz-progress-bar"><div class="qz-progress-fill" id="qzFill"></div></div>
+      <div class="qz-counter" id="qzCounter">Question 1 of 10</div>
+      <div class="qz-q" id="qzQ"></div>
+      <div class="qz-opts" id="qzOpts"></div>
+      <div class="qz-feedback" id="qzFb"></div>
+      <button class="qz-next" id="qzNext" onclick="nextQuestion()">Next Question →</button>
+    </div>
+  </div>
+
+  <div class="quiz-pg" id="quizResult" style="display:none">
+    <div style="background:var(--dark);border-radius:var(--radius);padding:28px 24px;color:#fff;text-align:center">
+      <div class="qz-medals" id="qzMedal"></div>
+      <div class="qz-score" id="qzScore"></div>
+      <div class="qz-score-label" id="qzScoreLabel"></div>
+      <div class="qz-verdict" id="qzVerdict"></div>
+      <div class="qz-review" id="qzReview"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="startQuiz()">🔀 New Quiz</button>
+        <button class="btn btn-ghost" style="flex:1;justify-content:center;color:#fff;border-color:rgba(255,255,255,.2)" onclick="showPage('home')">← Home</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pg-nav" style="border-top:none;padding-top:0;margin-top:20px">
+    <button class="btn btn-ghost" onclick="showPage('glossary')">📖 Glossary</button>
+    <button class="btn btn-ghost" onclick="showPage('home')">← Home</button>
+  </div>
+</div>
+
 </main>
+</div>
+
+<!-- TERM TOOLTIP -->
+<div class="term-tooltip" id="termTooltip">
+  <span class="tt-close" onclick="closeTooltip()">✕</span>
+  <h5 id="ttTerm"></h5>
+  <p id="ttDef"></p>
+  <a onclick="closeTooltip();showPage('glossary')" style="cursor:pointer">📖 See all terms →</a>
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mob-nav">
   <div class="mob-tabs">
-    <button class="mob-tab" onclick="showPage('home')" data-mob="home">
-      <span class="mt-icon">🏠</span>Home
-    </button>
-    <button class="mob-tab" onclick="showPage('daily-ops')" data-mob="daily">
-      <span class="mt-icon">📅</span>Daily
-    </button>
-    <button class="mob-tab" onclick="showPage('edm-send')" data-mob="marketing">
-      <span class="mt-icon">📧</span>Marketing
-    </button>
-    <button class="mob-tab" onclick="showPage('admin-files')" data-mob="admin">
-      <span class="mt-icon">🗂️</span>Admin
-    </button>
-    <button class="mob-tab" onclick="showPage('brand-qc')" data-mob="design">
-      <span class="mt-icon">🎨</span>Design
-    </button>
+    <button class="mob-tab" onclick="showPage('home')" data-mob="home"><span class="mt-icon">🏠</span>Home</button>
+    <button class="mob-tab" onclick="showPage('daily-ops')" data-mob="daily"><span class="mt-icon">📅</span>Daily</button>
+    <button class="mob-tab" onclick="showPage('edm-send')" data-mob="marketing"><span class="mt-icon">📧</span>Marketing</button>
+    <button class="mob-tab" onclick="showPage('brand-qc')" data-mob="design"><span class="mt-icon">🎨</span>Design</button>
+    <button class="mob-tab" onclick="showPage('glossary')" data-mob="glossary"><span class="mt-icon">📖</span>Glossary</button>
+    <button class="mob-tab" onclick="showPage('quiz')" data-mob="quiz"><span class="mt-icon">🧠</span>Quiz</button>
   </div>
 </nav>
 
 <script>
-// ── DATA ──
+// ══════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════
 const NAV = [
   { id:'home', label:'Overview', icon:'🏠', cat:null },
   { label:'DAILY TASKS', type:'header', color:'#F59E0B' },
@@ -1769,17 +1969,400 @@ const NAV = [
   { id:'illustrator', label:'Illustrator', icon:'🎨', cat:'design' },
   { id:'pdf-acrobat', label:'PDF & Acrobat', icon:'📄', cat:'design' },
   { id:'text-compare', label:'Text Compare', icon:'🔍', cat:'design' },
+  { label:'TOOLS', type:'header', color:'#6B7280' },
+  { id:'glossary', label:'Glossary', icon:'📖', cat:'ref' },
+  { id:'quiz', label:'Quiz', icon:'🧠', cat:'ref' },
 ];
-
 const PAGES = NAV.filter(n => n.id);
 let progress = JSON.parse(localStorage.getItem('lh2_prog') || '{}');
 let currentPage = 'home';
-
 function saveProgress() { localStorage.setItem('lh2_prog', JSON.stringify(progress)); }
+function getDone() { return PAGES.filter(p => !['home','glossary','quiz'].includes(p.id) && progress[p.id]).length; }
+function getTotal() { return PAGES.filter(p => !['home','glossary','quiz'].includes(p.id)).length; }
 
-function getDone() { return PAGES.filter(p => p.id !== 'home' && progress[p.id]).length; }
-function getTotal() { return PAGES.filter(p => p.id !== 'home').length; }
+// ══════════════════════════════════════════════
+// GLOSSARY DATA
+// ══════════════════════════════════════════════
+const GLOSSARY = [
+  { term:'AFSL', cat:'marketing', def:'Australian Financial Services Licence. A legal requirement for financial companies in Australia. The AFSL number must appear on every single Assetline marketing output — brochures, emails, PDFs. Missing it is a compliance violation.' },
+  { term:'Account Engagement', cat:'marketing', def:'The Salesforce module used to build and send designed email campaigns (EDMs) to brokers. It was previously called Pardot — you\'ll hear both names used interchangeably.' },
+  { term:'Artboard', cat:'design', def:'The working canvas area in Adobe Illustrator — like a virtual piece of paper. You design inside the artboard and export it as your final image or file.' },
+  { term:'Bleed', cat:'design', def:'The extra artwork that extends beyond the final trim edge of a printed page. Assetline print jobs require 3mm bleed on all sides. Without it, white edges can appear after cutting.' },
+  { term:'Brief', cat:'admin', def:'A document or message describing a task — what needs to be made, who it\'s for, the deadline, and any specific requirements. Always capture a brief before starting any job.' },
+  { term:'Bounce', cat:'marketing', def:'An email that couldn\'t be delivered. Hard bounce = permanent failure (invalid address). Soft bounce = temporary issue (full inbox). Both are tracked in Salesforce campaign reports.' },
+  { term:'Campaign (Salesforce)', cat:'marketing', def:'A grouping in Salesforce that links all the sends, templates, and performance data for one marketing initiative (e.g., "Horizon Mortgages Q3"). Always assign templates and sends to the correct campaign.' },
+  { term:'Clone', cat:'marketing', def:'To make an exact copy of an existing record in Salesforce. When creating a plain text email, you clone the previous one so you don\'t start from scratch — then update only what\'s changed.' },
+  { term:'CMYK', cat:'design', def:'Cyan, Magenta, Yellow, Key (Black). The colour model used for printing. All print files at Assetline must be in CMYK — not RGB — otherwise colours will look wrong when the job goes to press.' },
+  { term:'CRM', cat:'admin', def:'Customer Relationship Management. A system for storing contacts, tracking interactions, and managing campaigns. Assetline uses Salesforce as its CRM.' },
+  { term:'Disclaimer', cat:'marketing', def:'Legal text that must appear verbatim (word for word) on every Assetline output. It includes the general advice warning and the AFSL number. Never paraphrase or shorten it.' },
+  { term:'DPI', cat:'design', def:'Dots Per Inch. A measure of print resolution. 300 DPI is the minimum for quality print output at Assetline. Low DPI images look blurry when printed.' },
+  { term:'EDM', cat:'marketing', def:'Electronic Direct Mail. A professionally designed HTML email sent to a list of contacts — like a digital newsletter or product announcement. Petro designs them; you send them via Salesforce.' },
+  { term:'EOD', cat:'daily', def:'End of Day. Used in instructions like "send an EOD update" — meaning a summary of what you completed and any blockers before you finish for the day.' },
+  { term:'HTML', cat:'marketing', def:'HyperText Markup Language. The code that structures web pages and email templates. For EDM sending you copy and paste it from Chrome\'s Page Source into Salesforce — you don\'t write it yourself.' },
+  { term:'Invoice', cat:'admin', def:'A bill from a supplier for services or products. Part of your admin role includes processing and submitting supplier invoices for payment.' },
+  { term:'Links Panel', cat:'design', def:'A panel in InDesign (Window → Links) listing all placed images in the document. A yellow warning triangle means an image has been modified; a red icon means it\'s missing. Fix all issues before exporting.' },
+  { term:'Merge Field', cat:'marketing', def:'A placeholder code like {{FirstName}} inside an email template. Salesforce automatically replaces it with real data from each contact\'s record at the moment the email is sent.' },
+  { term:'Opens', cat:'marketing', def:'The number of recipients who opened the email. Tracked when a tiny invisible tracking image loads from Salesforce\'s servers. Listed in your campaign performance report.' },
+  { term:'Overset Text', cat:'design', def:'In InDesign, when there\'s more text than fits inside a text frame. A small red + icon appears on the frame. This means content is hidden and won\'t print — it must be fixed before exporting.' },
+  { term:'Package (InDesign)', cat:'design', def:'InDesign\'s File → Package tool collects the .indd file, all linked images, and fonts into one folder. Always package a file before archiving or sharing it — otherwise images go missing.' },
+  { term:'Paragraph Style', cat:'design', def:'A saved set of text formatting rules (font, size, colour, line spacing) in InDesign. All text must use Assetline\'s approved styles. A + symbol next to a style name means someone has manually overridden the formatting — fix it.' },
+  { term:'Pardot', cat:'marketing', def:'The old name for Salesforce Account Engagement — the email marketing tool used to build and send EDMs. You\'ll still hear "Pardot" used, but the current product name is Account Engagement.' },
+  { term:'PDF/X-1a', cat:'design', def:'A PDF standard for print production. It ensures colours are CMYK, fonts are embedded, and the file will print correctly. Used for all Assetline print jobs.' },
+  { term:'Plain Text Email', cat:'marketing', def:'A simple email with no HTML design — just words and a signature. Appears to come directly from a person (like Laura Stanley). You prepare it in Salesforce; the sender activates and sends it themselves.' },
+  { term:'Preflight', cat:'design', def:'An InDesign tool (Window → Output → Preflight) that checks the file for errors before export — missing images, overset text, wrong colour spaces, font problems. Must show zero errors before exporting a PDF.' },
+  { term:'PPI', cat:'design', def:'Pixels Per Inch. The resolution of a placed image. Print files need images at 300+ PPI. The InDesign Links panel shows the effective PPI. Below 200 PPI = flag it and ask for a better image.' },
+  { term:'QC', cat:'daily', def:'Quality Control. The process of checking a file, email, or document for errors — wrong logo, missing disclaimer, overset text, bad links — before it goes to Petro or gets distributed.' },
+  { term:'Recipient List', cat:'marketing', def:'A saved group of contacts in Salesforce. When you add a recipient list to a Send, everyone in that list receives the email. Four lists must be added to every EDM send — no exceptions.' },
+  { term:'RGB', cat:'design', def:'Red, Green, Blue. The colour model used for screens and digital files. Email and web assets use RGB. Never use RGB in a print file — colours will look different when printed.' },
+  { term:'Salesforce', cat:'marketing', def:'The CRM and marketing platform Assetline uses to manage contacts, send emails, and track campaigns. Account Engagement (for EDMs) lives inside Salesforce.' },
+  { term:'Swatch', cat:'design', def:'A saved, named colour in Illustrator or InDesign. Assetline brand colours exist as swatches so you always use the exact correct shade. Never use the freehand colour picker — always start from a swatch.' },
+  { term:'Sync from HTML', cat:'marketing', def:'A button in Salesforce plain text email editor that copies the email body into the internal plain text record. The customer never sees this — it\'s for internal CRM records only. Always run it after editing the body.' },
+  { term:'Tracker', cat:'admin', def:'A spreadsheet tracking the status of ongoing tasks, campaigns, events, or contacts. You maintain four trackers in this role: campaign, event, contact, and asset. Update them every day.' },
+  { term:'Tracker Domain', cat:'marketing', def:'The URL domain used to track email opens and link clicks. For Assetline it must always be set to go.assetline.com.au when creating a new template in Account Engagement.' },
+  { term:'Unsubscribe', cat:'marketing', def:'When a recipient clicks the unsubscribe link in an email they\'re automatically removed from future sends. Track this number — a sudden spike can indicate the content or frequency isn\'t right.' },
+  { term:'Vector', cat:'design', def:'A type of graphic built from mathematical lines and curves rather than pixels. The Assetline logo is a vector file (Illustrator .ai or .eps). Vectors can be scaled to any size without losing quality.' },
+  { term:'ZIP File', cat:'admin', def:'A compressed file that bundles multiple files into one smaller package. Petro sends EDM files as ZIP files via Teams. You extract (unzip) the folder before working with the files inside.' },
+];
 
+// ══════════════════════════════════════════════
+// QUIZ QUESTIONS
+// ══════════════════════════════════════════════
+const QQ = [
+  // Daily Ops
+  { q:'What is the FIRST thing you should do every morning?', opts:['Open your InDesign files','Check overnight emails and flag anything urgent','Update the campaign tracker','Run Preflight in InDesign'], ans:1, topic:'daily-ops' },
+  { q:'How early should you flag a deadline risk to Petro?', opts:['After the deadline has passed','The morning of the deadline','3–4 hours before it hits','Only if you can\'t finish the task'], ans:2, topic:'daily-ops' },
+  { q:'What does QC stand for?', opts:['Quick Copy','Queue Check','Quality Control','Query Completion'], ans:2, topic:'daily-ops' },
+  { q:'What does EOD mean?', opts:['Edit on Demand','End of Day','Email Output Draft','Export on Desktop'], ans:1, topic:'daily-ops' },
+  { q:'Before sending anything to Petro, you must first:', opts:['Ask Laura for approval','QC it yourself — logo correct, disclaimer present, on-template','Wait for Petro to request it','Send a test to the full broker list'], ans:1, topic:'daily-ops' },
+  // EDM Send
+  { q:'How many recipient lists must be added to every EDM send?', opts:['1','2','3','4'], ans:3, topic:'edm-send' },
+  { q:'Which social media icon almost always arrives with a missing URL?', opts:['Facebook','Instagram','LinkedIn','Twitter/X'], ans:2, topic:'edm-send' },
+  { q:'What does "publishing" a template in Salesforce do?', opts:['Sends it to all brokers immediately','Sends a test to Petro','Makes the template available to use in a Send — no one receives anything yet','Deletes the draft'], ans:2, topic:'edm-send' },
+  { q:'What file naming format is used for all templates and sends?', opts:['Description_YYMMDD','YYMMDD_Description','DDMMYY_Description','ProjectName_V1'], ans:1, topic:'edm-send' },
+  { q:'Petro says "send at 9 AM Sydney time." You\'re in Manila. When do you schedule it?', opts:['9 AM Manila','12 PM Manila','6 AM Manila','11 AM Manila'], ans:2, topic:'edm-send' },
+  { q:'Where do you find the correct subject line for an EDM?', opts:['In the Campaign Details card','The Chrome tab title of index.html','Petro\'s Teams message only','The plain-text-version.txt file'], ans:1, topic:'edm-send' },
+  { q:'After sending a test to yourself and it looks good, what is the next step?', opts:['Send to all brokers immediately','Add the 4 recipient lists','Publish the template','Schedule the send'], ans:2, topic:'edm-send' },
+  { q:'What must you NEVER do when you receive Petro\'s ZIP file?', opts:['Open index.html in Chrome','Keep both Chrome tabs open','Use the logo from a previous job folder instead of the shared folder','Update the Campaign Details card'], ans:2, topic:'edm-send' },
+  // Plain Text
+  { q:'Who actually sends the plain text broker email?', opts:['You','Petro','The designated sender (e.g., Laura Stanley)','The marketing team together'], ans:2, topic:'plain-text' },
+  { q:'In a plain text email, which section must you NEVER touch?', opts:['The subject line','The body copy','The merge fields — sender name, title, phone','The campaign name in Salesforce'], ans:2, topic:'plain-text' },
+  { q:'What does "Sync from HTML" do in a plain text email?', opts:['Sends a test to yourself','Updates the internal plain text record to match the email body','Publishes the email to recipients','Copies the HTML to a new template'], ans:1, topic:'plain-text' },
+  { q:'Why do you clone a previous email instead of creating a new one from scratch?', opts:['Cloning is required by Salesforce','It keeps the correct template structure and saves time','Petro requires it for tracking','It automatically sets the recipient lists'], ans:1, topic:'plain-text' },
+  // EDM Reporting
+  { q:'What metric shows how many people clicked a link inside the email?', opts:['Opens','Bounces','Clicks','Unsubscribes'], ans:2, topic:'edm-reporting' },
+  { q:'What does a "bounce" mean in email reporting?', opts:['The email was forwarded','The email couldn\'t be delivered','The recipient clicked a link','The recipient replied to the email'], ans:1, topic:'edm-reporting' },
+  { q:'What is a "click map" in an EDM report?', opts:['A map of where subscribers are located','A screenshot showing which links in the email people clicked','A chart of open rates over time','A list of all clicked contacts'], ans:1, topic:'edm-reporting' },
+  // Admin
+  { q:'What is the correct file naming format?', opts:['ProjectName_Date','FileName_V2_Final','YYMMDD_Description','DDMMYYYY_ProjectName'], ans:2, topic:'admin-files' },
+  { q:'Where must you ALWAYS download the Assetline logo from?', opts:['The most recent email from Petro','A previous job folder on your desktop','The approved shared folder','Google Images'], ans:2, topic:'admin-files' },
+  { q:'Which of these is a tracker you maintain in this role?', opts:['Personal timesheet only','Campaign tracker, event tracker, contact tracker, asset tracker','Only the campaign tracker','Email open rate tracker'], ans:1, topic:'admin-files' },
+  // Brand & QC
+  { q:'What are the two approved Assetline fonts?', opts:['Arial and Times New Roman','Silvana Text and ABC Diatype','Helvetica and Garamond','Calibri and Georgia'], ans:1, topic:'brand-qc' },
+  { q:'What does a red "+" on a text frame in InDesign mean?', opts:['The frame has been updated','Text is overset — content is cut off and won\'t print','A new style has been applied','The frame is password-protected'], ans:1, topic:'brand-qc' },
+  { q:'What does a "+" next to a paragraph style name in InDesign mean?', opts:['A new style has been added','The style has a keyboard shortcut','The text has manual overrides — not using the pure style','The style is approved by Petro'], ans:2, topic:'brand-qc' },
+  { q:'How much bleed is required on Assetline print jobs?', opts:['1mm','5mm','3mm','No bleed — it\'s digital only'], ans:2, topic:'brand-qc' },
+  { q:'Which Assetline logo version must NEVER be used?', opts:['The single-colour version with a full stop','The version with an orange dot (retired)','The version from the shared folder','The version used in the most recent EDM'], ans:1, topic:'brand-qc' },
+  // InDesign
+  { q:'What keyboard shortcut activates the Type tool in InDesign?', opts:['P','V','T','A'], ans:2, topic:'indesign' },
+  { q:'What does InDesign\'s Preflight tool check for?', opts:['Grammar and spelling errors','Missing images, overset text, wrong colour spaces, font problems','Brand compliance and logo usage','PDF export settings only'], ans:1, topic:'indesign' },
+  { q:'What does pressing W do in InDesign?', opts:['Opens the Window menu','Activates the Selection tool','Toggles Preview mode — hides guides and bleed marks','Opens the Paragraph Styles panel'], ans:2, topic:'indesign' },
+  { q:'What PDF preset should you use for a print job from InDesign?', opts:['Smallest File Size','Acrobat 5 Compatible','High Quality Print for everything','PDF/X-1a or PDF/X-4'], ans:3, topic:'indesign' },
+  // Illustrator
+  { q:'For a print job in Illustrator, what colour mode must you use?', opts:['RGB','Pantone only','CMYK','Hex'], ans:2, topic:'illustrator' },
+  { q:'What should you do if you see pink highlighted text in Illustrator?', opts:['Delete it and retype','Change the colour to black','Fix the font substitution via Type → Find/Replace Font','Export immediately — it\'ll fix on export'], ans:2, topic:'illustrator' },
+  { q:'What is a "vector" file?', opts:['A photo taken with a professional camera','A graphic built from mathematical lines that scales without losing quality','A PDF with embedded fonts','A low-resolution screen graphic'], ans:1, topic:'illustrator' },
+  // PDF / Acrobat
+  { q:'After exporting a PDF from InDesign, what must you always do?', opts:['Email it to Petro immediately','Open it in Acrobat and scroll every single page','Delete the InDesign source file','Print it for physical review'], ans:1, topic:'pdf-acrobat' },
+  { q:'When is it acceptable to edit text directly in Acrobat?', opts:['For any design changes','For font and colour changes','Only for very minor fixes — a single wrong word, a wrong date','Never — always go back to InDesign'], ans:2, topic:'pdf-acrobat' },
+  // Text Compare
+  { q:'What are the three modes in the Marketing Hub Text Compare tool?', opts:['Copy, Paste, Review','Before, After, Diff','Text, Doc/PDF, Image','Edit, Compare, Export'], ans:2, topic:'text-compare' },
+  { q:'When should you use Text Compare for an EDM?', opts:['Only after sending the email','To verify the copy you pasted into Salesforce exactly matches the approved Word document','To compare two different campaigns','To check the HTML source code'], ans:1, topic:'text-compare' },
+  // Glossary
+  { q:'What does EDM stand for?', opts:['Electronic Design Manual','Email Display Module','Electronic Direct Mail','Email Distribution Manager'], ans:2, topic:'glossary' },
+  { q:'What is a merge field?', opts:['A field where two campaigns merge','A placeholder like {{FirstName}} replaced with real contact data when the email sends','A field for combining multiple lists','A text frame merger in InDesign'], ans:1, topic:'glossary' },
+  { q:'What does AFSL stand for?', opts:['Australian Financial Services Licence','Assetline Finance Standards List','Approved Financial Sender List','Australian Finance Support Letter'], ans:0, topic:'glossary' },
+  { q:'What is "bleed" in print design?', opts:['The ink colour used','The background colour of the page','Artwork that extends beyond the trim edge to prevent white borders after cutting','A type of paper finish'], ans:2, topic:'glossary' },
+  { q:'What does "overset text" mean in InDesign?', opts:['Text that is too large for the whole page','Text that is cut off because it doesn\'t fit in its frame','Text formatted with a wrong style','Text that overrides the paragraph style'], ans:1, topic:'glossary' },
+];
+
+// ══════════════════════════════════════════════
+// TERM HIGHLIGHTING
+// ══════════════════════════════════════════════
+const TERM_MAP = {};
+GLOSSARY.forEach(g => {
+  TERM_MAP[g.term.toLowerCase()] = g;
+  // short aliases
+  if (g.term === 'Campaign (Salesforce)') TERM_MAP['campaign'] = g;
+  if (g.term === 'Bounce') TERM_MAP['bounces'] = g;
+  if (g.term === 'Unsubscribe') TERM_MAP['unsubscribes'] = g;
+  if (g.term === 'Opens') TERM_MAP['opens'] = g;
+  if (g.term === 'Package (InDesign)') TERM_MAP['package'] = g;
+});
+
+const HIGHLIGHT_TERMS = [
+  'EDM','HTML','merge field','Salesforce','Account Engagement','Pardot',
+  'recipient list','tracker domain','clone','plain text','EOD','QC','brief',
+  'CRM','ZIP','AFSL','disclaimer','bleed','overset text','paragraph style',
+  'preflight','CMYK','RGB','PPI','DPI','vector','artboard','Links Panel',
+  'swatch','tracker','invoice','supplier','PDF/X-1a','Sync from HTML','bounce','unsubscribe',
+];
+
+function highlightTermsInEl(el) {
+  const seen = new Set();
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const p = node.parentElement;
+      if (!p) return NodeFilter.FILTER_REJECT;
+      const t = p.tagName;
+      if (t === 'CODE' || t === 'SCRIPT' || t === 'STYLE' || p.classList.contains('gl') || p.classList.contains('term-tooltip')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes = [];
+  let n; while ((n = walker.nextNode())) nodes.push(n);
+
+  // Sort terms longest first to match multi-word terms before single words
+  const sorted = [...HIGHLIGHT_TERMS].sort((a,b) => b.length - a.length);
+
+  nodes.forEach(textNode => {
+    let text = textNode.textContent;
+    for (const term of sorted) {
+      const key = term.toLowerCase();
+      if (seen.has(key)) continue;
+      const regex = new RegExp(`(?<![\\w\\-])(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})(?![\\w\\-])`, 'i');
+      if (regex.test(text)) {
+        const parts = text.split(regex);
+        if (parts.length > 1) {
+          const frag = document.createDocumentFragment();
+          let matched = false;
+          parts.forEach(part => {
+            if (!matched && part.toLowerCase() === key) {
+              const span = document.createElement('span');
+              span.className = 'gl';
+              span.dataset.t = key;
+              span.textContent = part;
+              frag.appendChild(span);
+              seen.add(key);
+              matched = true;
+            } else {
+              frag.appendChild(document.createTextNode(part));
+            }
+          });
+          textNode.parentNode.replaceChild(frag, textNode);
+          break;
+        }
+      }
+    }
+  });
+
+  // Attach click handlers to all .gl spans in this el
+  el.querySelectorAll('.gl[data-t]').forEach(s => {
+    s.onclick = (e) => { e.stopPropagation(); showTermTip(s.dataset.t, s); };
+  });
+}
+
+function showTermTip(key, el) {
+  const data = TERM_MAP[key.toLowerCase()];
+  if (!data) return;
+  const tip = document.getElementById('termTooltip');
+  document.getElementById('ttTerm').textContent = data.term;
+  document.getElementById('ttDef').textContent = data.def;
+  tip.classList.add('show');
+  // position near the element
+  const r = el.getBoundingClientRect();
+  let top = r.bottom + 8;
+  let left = r.left;
+  if (left + 290 > window.innerWidth) left = window.innerWidth - 298;
+  if (left < 8) left = 8;
+  if (top + 160 > window.innerHeight) top = r.top - 160;
+  tip.style.top = top + 'px';
+  tip.style.left = left + 'px';
+}
+
+function closeTooltip() {
+  document.getElementById('termTooltip').classList.remove('show');
+}
+
+document.addEventListener('click', (e) => {
+  const tip = document.getElementById('termTooltip');
+  if (!tip.contains(e.target) && !e.target.classList.contains('gl')) closeTooltip();
+});
+
+// ══════════════════════════════════════════════
+// GLOSSARY PAGE
+// ══════════════════════════════════════════════
+function renderGlossary() {
+  const sorted = [...GLOSSARY].sort((a,b) => a.term.localeCompare(b.term));
+  const el = document.getElementById('glList');
+  if (!el) return;
+  let html = '';
+  let lastLetter = '';
+  sorted.forEach(g => {
+    const letter = g.term[0].toUpperCase();
+    if (letter !== lastLetter) {
+      html += `<div class="gl-letter">${letter}</div>`;
+      lastLetter = letter;
+    }
+    html += `<div class="gl-entry" data-term="${g.term.toLowerCase()}">
+      <h4>${g.term} <span class="gl-tag ${g.cat}">${g.cat}</span></h4>
+      <p>${g.def}</p>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function filterGlossary(q) {
+  const val = q.toLowerCase().trim();
+  document.querySelectorAll('.gl-entry').forEach(e => {
+    const match = !val || e.dataset.term.includes(val) || e.querySelector('p').textContent.toLowerCase().includes(val);
+    e.classList.toggle('hidden', !match);
+  });
+  document.querySelectorAll('.gl-letter').forEach(l => {
+    // hide letter header if no visible entries follow it
+    let sib = l.nextElementSibling;
+    let hasVisible = false;
+    while (sib && !sib.classList.contains('gl-letter')) {
+      if (!sib.classList.contains('hidden')) hasVisible = true;
+      sib = sib.nextElementSibling;
+    }
+    l.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════
+let quizState = { qs:[], idx:0, score:0, answers:[] };
+
+function buildQuizTopicChips() {
+  const el = document.getElementById('quizTopicChips');
+  if (!el) return;
+  const topicLabels = {
+    'daily-ops':'Daily Ops','edm-send':'Salesforce EDM','plain-text':'Plain Text Email',
+    'edm-reporting':'EDM Reporting','admin-files':'Admin','brand-qc':'Brand & QC',
+    'indesign':'InDesign','illustrator':'Illustrator','pdf-acrobat':'PDF & Acrobat',
+    'text-compare':'Text Compare','glossary':'Glossary Terms'
+  };
+  const done = new Set(Object.keys(progress));
+  const topics = [...new Set(QQ.map(q=>q.topic))];
+  el.innerHTML = topics.map(t => {
+    const ready = done.has(t) || t === 'glossary';
+    return `<div class="quiz-topic-chip ${ready?'ready':''}">${ready?'✓ ':''} ${topicLabels[t]||t}</div>`;
+  }).join('');
+}
+
+function startQuiz() {
+  const done = new Set(Object.keys(progress));
+  let pool = QQ.filter(q => done.has(q.topic) || q.topic === 'glossary');
+  if (pool.length < 5) pool = [...QQ]; // fallback — use all questions
+  // Shuffle
+  pool = pool.sort(() => Math.random() - 0.5);
+  quizState = { qs: pool.slice(0, 10), idx:0, score:0, answers:[] };
+  document.getElementById('quizStart').style.display = 'none';
+  document.getElementById('quizResult').style.display = 'none';
+  document.getElementById('quizRunning').style.display = 'block';
+  renderQuizQ();
+}
+
+function renderQuizQ() {
+  const s = quizState;
+  const q = s.qs[s.idx];
+  const total = s.qs.length;
+  const pct = (s.idx / total) * 100;
+  document.getElementById('qzFill').style.width = pct + '%';
+  document.getElementById('qzCounter').textContent = `Question ${s.idx+1} of ${total}`;
+  document.getElementById('qzQ').textContent = q.q;
+  const letters = ['A','B','C','D'];
+  document.getElementById('qzOpts').innerHTML = q.opts.map((o,i) =>
+    `<button class="qz-opt" onclick="answerQ(${i})"><span class="opt-letter">${letters[i]}</span>${o}</button>`
+  ).join('');
+  document.getElementById('qzFb').className = 'qz-feedback';
+  document.getElementById('qzFb').textContent = '';
+  document.getElementById('qzNext').className = 'qz-next';
+}
+
+function answerQ(idx) {
+  const q = quizState.qs[quizState.idx];
+  const correct = idx === q.ans;
+  quizState.score += correct ? 1 : 0;
+  quizState.answers.push({ q: q.q, correct, chosen: idx, right: q.ans });
+  // disable all options
+  document.querySelectorAll('.qz-opt').forEach((o,i) => {
+    o.onclick = null;
+    if (i === q.ans) o.classList.add('reveal-correct');
+  });
+  document.querySelectorAll('.qz-opt')[idx].classList.remove('reveal-correct');
+  document.querySelectorAll('.qz-opt')[idx].classList.add(correct ? 'correct' : 'wrong');
+  const fb = document.getElementById('qzFb');
+  fb.textContent = correct ? '✅ Correct!' : `❌ The correct answer is: ${q.opts[q.ans]}`;
+  fb.className = 'qz-feedback show ' + (correct ? 'good' : 'bad');
+  const nextBtn = document.getElementById('qzNext');
+  const isLast = quizState.idx === quizState.qs.length - 1;
+  nextBtn.textContent = isLast ? 'See Results →' : 'Next Question →';
+  nextBtn.className = 'qz-next show';
+}
+
+function nextQuestion() {
+  quizState.idx++;
+  if (quizState.idx >= quizState.qs.length) {
+    showQuizResult();
+  } else {
+    renderQuizQ();
+  }
+}
+
+function showQuizResult() {
+  document.getElementById('quizRunning').style.display = 'none';
+  document.getElementById('quizResult').style.display = 'block';
+  const s = quizState.score;
+  const t = quizState.qs.length;
+  const pct = Math.round((s/t)*100);
+  const medal = pct === 100 ? '🏆' : pct >= 80 ? '🥇' : pct >= 60 ? '🥈' : pct >= 40 ? '🥉' : '📚';
+  const verdict = pct === 100 ? 'Perfect score! You nailed it.' : pct >= 80 ? 'Excellent — you really know this stuff.' : pct >= 60 ? 'Good work! A little more review and you\'ll ace it.' : pct >= 40 ? 'Keep studying — go back and re-read the lessons.' : 'No worries — read through the lessons again and retry.';
+  document.getElementById('qzMedal').textContent = medal;
+  document.getElementById('qzScore').textContent = `${s}/${t}`;
+  document.getElementById('qzScoreLabel').textContent = `${pct}% correct`;
+  document.getElementById('qzVerdict').textContent = verdict;
+  const review = quizState.answers.map(a =>
+    `<div class="qz-review-item ${a.correct?'rgt':'wrg'}">${a.correct?'✅':'❌'} ${a.q}</div>`
+  ).join('');
+  document.getElementById('qzReview').innerHTML = `<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Review</div>${review}`;
+}
+
+// ══════════════════════════════════════════════
+// DAILY PROGRESS
+// ══════════════════════════════════════════════
+function renderDailyProgress() {
+  const dateEl = document.getElementById('todayDate');
+  const itemsEl = document.getElementById('dpItems');
+  if (!dateEl || !itemsEl) return;
+  const today = new Date().toDateString();
+  dateEl.textContent = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long' });
+  const lessons = [
+    { id:'daily-ops', label:'Daily Ops' },
+    { id:'edm-send', label:'EDM Send' },
+    { id:'plain-text', label:'Plain Text' },
+    { id:'edm-reporting', label:'EDM Reporting' },
+    { id:'admin-files', label:'Admin' },
+    { id:'brand-qc', label:'Brand QC' },
+    { id:'indesign', label:'InDesign' },
+    { id:'illustrator', label:'Illustrator' },
+    { id:'pdf-acrobat', label:'PDF & Acrobat' },
+    { id:'text-compare', label:'Text Compare' },
+  ];
+  const doneCount = lessons.filter(l => progress[l.id]).length;
+  if (doneCount === 0) {
+    itemsEl.innerHTML = '<span class="dp-empty">No lessons completed yet — start with Daily Ops! 👆</span>';
+    return;
+  }
+  itemsEl.innerHTML = lessons.map(l =>
+    `<span class="dp-item ${progress[l.id]?'done':'not-done'}">${progress[l.id]?'✓ ':''}${l.label}</span>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
 function updateProgress() {
   const pct = Math.round((getDone() / getTotal()) * 100);
   document.getElementById('progressFill').style.width = pct + '%';
@@ -1789,13 +2372,11 @@ function updateProgress() {
 function renderSidebar() {
   const el = document.getElementById('sidebarEl');
   el.innerHTML = NAV.map(n => {
-    if (n.type === 'header') {
-      return `<div class="nav-section-label"><span class="cat-dot" style="background:${n.color}"></span>${n.label}</div>`;
-    }
+    if (n.type === 'header') return `<div class="nav-section-label"><span class="cat-dot" style="background:${n.color}"></span>${n.label}</div>`;
     const done = progress[n.id];
     const active = currentPage === n.id;
-    return `<div class="nav-item ${active ? 'active cat-' + n.cat : ''}" onclick="showPage('${n.id}')">
-      <span class="ni-icon">${done ? '✓' : n.icon}</span>
+    return `<div class="nav-item ${active ? 'active cat-'+(n.cat||'ref') : ''}" onclick="showPage('${n.id}')">
+      <span class="ni-icon">${done?'✓':n.icon}</span>
       <span class="ni-label">${n.label}</span>
       ${done && !active ? '<span class="ni-done">✓</span>' : ''}
     </div>`;
@@ -1803,14 +2384,18 @@ function renderSidebar() {
 }
 
 function renderMobileNav() {
-  const catMap = { home: 'home', 'daily-ops': 'daily', 'edm-send': 'marketing', 'plain-text': 'marketing', 'edm-reporting': 'marketing', 'admin-files': 'admin', 'brand-qc': 'design', indesign: 'design', illustrator: 'design', 'pdf-acrobat': 'design', 'text-compare': 'design' };
+  const catMap = { home:'home','daily-ops':'daily','edm-send':'marketing','plain-text':'marketing','edm-reporting':'marketing','admin-files':'admin','brand-qc':'design',indesign:'design',illustrator:'design','pdf-acrobat':'design','text-compare':'design',glossary:'glossary',quiz:'quiz' };
   const cat = catMap[currentPage] || 'home';
   document.querySelectorAll('.mob-tab').forEach(t => {
-    t.className = 'mob-tab' + (t.dataset.mob === cat ? ' active-' + cat : '');
+    const base = t.dataset.mob;
+    t.className = 'mob-tab' + (base === cat ? ' active-' + cat : '');
   });
 }
 
+const BADGE_MAP = { 'daily-ops':'daily','edm-send':'edm','plain-text':'pt','edm-reporting':'rep','admin-files':'admin','brand-qc':'brand','indesign':'id','illustrator':'ai','pdf-acrobat':'pdf','text-compare':'tc' };
+
 function showPage(id) {
+  closeTooltip();
   currentPage = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
@@ -1818,56 +2403,51 @@ function showPage(id) {
   renderSidebar();
   renderMobileNav();
   updateProgress();
-  // restore done badges
-  PAGES.forEach(p => {
-    if (p.id && p.id !== 'home' && progress[p.id]) {
-      const db = document.getElementById('db-' + {
-        'daily-ops':'daily','edm-send':'edm','plain-text':'pt','edm-reporting':'rep',
-        'admin-files':'admin','brand-qc':'brand','indesign':'id','illustrator':'ai',
-        'pdf-acrobat':'pdf','text-compare':'tc'
-      }[p.id]);
-      if (db) db.style.display = 'inline-block';
-    }
+  // Restore completion badges
+  Object.entries(BADGE_MAP).forEach(([pid, bid]) => {
+    if (progress[pid]) { const d=document.getElementById('db-'+bid); if(d) d.style.display='inline-block'; }
   });
+  // Page-specific init
+  if (id === 'home') { renderDailyProgress(); }
+  if (id === 'glossary') { renderGlossary(); }
+  if (id === 'quiz') { document.getElementById('quizStart').style.display='block'; document.getElementById('quizRunning').style.display='none'; document.getElementById('quizResult').style.display='none'; buildQuizTopicChips(); }
+  // Highlight terms in current page (delay to let DOM settle)
+  setTimeout(() => {
+    const pg = document.querySelector(`[data-page="${id}"]`);
+    if (pg) highlightTermsInEl(pg);
+  }, 50);
 }
 
 function markDone(id) {
-  progress[id] = true;
+  progress[id] = Date.now();
   saveProgress();
-  const badgeMap = { 'daily-ops':'daily','edm-send':'edm','plain-text':'pt','edm-reporting':'rep','admin-files':'admin','brand-qc':'brand','indesign':'id','illustrator':'ai','pdf-acrobat':'pdf','text-compare':'tc' };
-  const db = document.getElementById('db-' + badgeMap[id]);
+  const db = document.getElementById('db-' + BADGE_MAP[id]);
   if (db) db.style.display = 'inline-block';
   updateProgress();
   renderSidebar();
+  renderDailyProgress();
 }
 
-function toggleAcc(head) {
-  head.closest('.accordion').classList.toggle('open');
-}
-
-function tick(li) {
-  li.classList.toggle('ticked');
-  li.querySelector('input').checked = li.classList.contains('ticked');
-}
+function toggleAcc(head) { head.closest('.accordion').classList.toggle('open'); }
+function tick(li) { li.classList.toggle('ticked'); li.querySelector('input').checked = li.classList.contains('ticked'); }
 
 function qa(el, correct, msg) {
   el.closest('.q-opts').querySelectorAll('.q-opt').forEach(o => { o.onclick = null; });
   const fb = el.closest('.quiz').querySelector('.q-fb');
-  if (correct) {
-    el.classList.add('correct');
-    fb.textContent = '✅ ' + msg;
-    fb.className = 'q-fb show good';
-  } else {
-    el.classList.add('wrong');
-    fb.textContent = '❌ ' + msg;
-    fb.className = 'q-fb show bad';
-  }
+  el.classList.add(correct ? 'correct' : 'wrong');
+  fb.textContent = (correct ? '✅ ' : '❌ ') + msg;
+  fb.className = 'q-fb show ' + (correct ? 'good' : 'bad');
 }
 
-// Init
+// ── INIT ──
 renderSidebar();
 renderMobileNav();
 updateProgress();
+renderDailyProgress();
+setTimeout(() => {
+  const pg = document.querySelector('.page.active');
+  if (pg) highlightTermsInEl(pg);
+}, 100);
 </script>
 </body>
 </html>
