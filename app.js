@@ -3464,6 +3464,124 @@ function copyFnResult() {
     .then(() => showAiToast('✓ Filename copied'));
 }
 
+// ── EDM Send QA ──────────────────────────────────────────────────
+const EDM_QA_SYSTEM = `You are an EDM send QA assistant for Assetline Capital's marketing team.
+
+Your job: compare Ben's send instructions against the actual Salesforce Sending tab configuration and identify field-by-field matches, mismatches, and items that need confirmation.
+
+SENDER TYPE RULES:
+- "Company" sender = email sends as Assetline Capital / apply@assetline.com.au (General user type in Salesforce)
+  Ben's message will show: "Assetline Capital" + "apply@assetline.com.au" as separate lines
+- "Specific User" sender = email sends as a named team member (Specific user type in Salesforce)
+  Ben's message labels it: "Sender (specific user): [Name]"
+- ALWAYS check sender type FIRST before comparing name or email values
+
+MATCH LOGIC:
+- "match" — values agree (case-insensitive, minor formatting differences OK)
+  Fuzzy list names OK: "All brokers (leads and contacts)" ≈ "All Brokers Leads and Contacts (15210)"
+  "ASAP" or "this morning ASAP" from Ben = "Send Now" in Salesforce = match
+  Day-of-week: verify both the date string AND the named day align
+- "confirm" — field is in Salesforce but absent from Ben's message (e.g. subject line), OR needs a sanity check
+- "mismatch" — values differ, or Ben specifies a value absent/different in Salesforce
+- "missing" — field is in Ben's instruction but not found in Salesforce at all
+
+FIELDS TO CHECK (skip fields with no data in either input):
+1. Sender type (company vs specific user)
+2. Sender name
+3. Sender email (company senders only)
+4. Reply-to
+5. Campaign
+6. Recipient lists (one row per list — fuzzy name match, ignore prospect counts in parentheses)
+7. Send date
+8. Send time
+9. Subject line (if not in Ben's message, mark as "confirm" with note)
+
+Return ONLY valid JSON. No text outside the JSON. Format:
+{
+  "fields": [
+    { "field": "Sender type", "instruction": "Company", "salesforce": "General user", "status": "match", "note": null },
+    { "field": "Subject line", "instruction": "Not specified", "salesforce": "Meet Margie Daep…", "status": "confirm", "note": "Not in Ben's message — confirm with Ben" }
+  ],
+  "overall": "ready",
+  "summary": "One-sentence plain-English summary of the QA result."
+}
+overall values: "ready" (all match, minor confirms only) | "review" (one or more confirm) | "issues" (any mismatch or missing)`;
+
+function switchEdmQaMode(mode) {
+  document.getElementById('edm-qa-paste-section').hidden = mode !== 'paste';
+  document.getElementById('edm-qa-manual-section').hidden = mode !== 'manual';
+  document.getElementById('edm-qa-tab-paste').classList.toggle('active', mode === 'paste');
+  document.getElementById('edm-qa-tab-manual').classList.toggle('active', mode === 'manual');
+}
+
+async function runEdmSendQA() {
+  const key = getAiKey();
+  if (!key) { aiNoKey('EDM Send QA'); return; }
+
+  const benText = document.getElementById('edm-qa-ben')?.value?.trim();
+  if (!benText) { alert("Paste Ben's instructions first."); return; }
+
+  const pasteActive = !document.getElementById('edm-qa-paste-section').hidden;
+  let sfText = '';
+  if (pasteActive) {
+    sfText = document.getElementById('edm-qa-sf')?.value?.trim();
+    if (!sfText) { alert('Paste the Salesforce Sending tab details.'); return; }
+  } else {
+    const v = id => document.getElementById(id)?.value?.trim() || '';
+    const parts = [
+      v('qa-m-sender-type') && `Sender type: ${v('qa-m-sender-type')}`,
+      v('qa-m-sender-name') && `Sender name: ${v('qa-m-sender-name')}`,
+      v('qa-m-sender-email') && `Sender email: ${v('qa-m-sender-email')}`,
+      v('qa-m-reply-to') && `Reply-to: ${v('qa-m-reply-to')}`,
+      v('qa-m-campaign') && `Campaign: ${v('qa-m-campaign')}`,
+      v('qa-m-lists') && `Recipient lists:\n${v('qa-m-lists')}`,
+      v('qa-m-date') && `Send date: ${v('qa-m-date')}`,
+      v('qa-m-time') && `Send time: ${v('qa-m-time')}`,
+      v('qa-m-subject') && `Subject line: ${v('qa-m-subject')}`,
+    ].filter(Boolean);
+    sfText = parts.join('\n');
+    if (!sfText) { alert('Fill in at least some Salesforce fields.'); return; }
+  }
+
+  aiSetBtn('edm-qa-run-btn', true, 'Compare →', 'Comparing…');
+
+  const userMsg = `=== BEN'S INSTRUCTIONS ===\n${benText}\n\n=== SALESFORCE SENDING TAB ===\n${sfText}`;
+
+  try {
+    const raw = await callClaude(EDM_QA_SYSTEM, userMsg);
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Could not parse AI response — try again.');
+    const r = JSON.parse(match[0]);
+
+    const statusLabel = { match: '✅ Match', confirm: '⚠ Confirm', mismatch: '❌ Mismatch', missing: '❌ Missing' };
+    const statusClass = { match: 'match', confirm: 'confirm', mismatch: 'mismatch', missing: 'mismatch' };
+
+    const tbody = document.getElementById('edm-qa-tbody');
+    tbody.innerHTML = r.fields.map(f => `
+      <tr class="edm-qa-tr-${statusClass[f.status] || 'confirm'}">
+        <td><strong>${escapeHtml(f.field)}</strong></td>
+        <td>${escapeHtml(f.instruction || '—')}</td>
+        <td>${escapeHtml(f.salesforce || '—')}</td>
+        <td>
+          <span class="edm-qa-status-${statusClass[f.status] || 'confirm'}">${statusLabel[f.status] || escapeHtml(f.status)}</span>
+          ${f.note ? `<div class="edm-qa-note">${escapeHtml(f.note)}</div>` : ''}
+        </td>
+      </tr>`).join('');
+
+    const overallClass = r.overall === 'ready' ? 'ready' : r.overall === 'issues' ? 'issues' : 'review';
+    const overallIcon  = r.overall === 'ready' ? '✅' : r.overall === 'issues' ? '❌' : '⚠';
+    const banner = document.getElementById('edm-qa-summary-banner');
+    banner.className = `edm-qa-summary ${overallClass}`;
+    banner.textContent = `${overallIcon}  ${r.summary || ''}`;
+
+    document.getElementById('edm-qa-result').hidden = false;
+    trackAiUsage('edm_send_qa');
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+  aiSetBtn('edm-qa-run-btn', false, 'Compare →', 'Comparing…');
+}
+
 // ── Feature 7: Instruction Analyzer ─────────────────────────────
 async function analyzeInstruction() {
   const input = document.getElementById('ia-input')?.value?.trim();

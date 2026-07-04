@@ -570,6 +570,88 @@
           </div>
         </div>
 
+        <!-- EDM Send QA -->
+        <div class="section-block" style="margin-top:8px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M3 8l3 3 7-7"/><circle cx="8" cy="8" r="7"/></svg>
+            </div>
+            <span class="sh-title">EDM Send QA — Map Instructions to Salesforce</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste Ben's Teams message and your Salesforce Sending tab details. The AI maps every field — sender, lists, schedule — and flags any mismatch before you hit send.</p>
+
+            <div class="edm-qa-grid">
+              <div class="edm-qa-col">
+                <div class="edm-qa-col-label">Ben's Instructions</div>
+                <textarea id="edm-qa-ben" class="form-textarea" rows="12" style="height:240px;resize:vertical" placeholder="Paste Ben's Teams message here…&#10;&#10;Example:&#10;Campaign: SMSF push&#10;Sender:&#10;Assetline Capital&#10;apply@assetline.com.au&#10;Reply-to:&#10;apply@assetline.com.au&#10;Recipient lists:&#10;All brokers (leads and contacts)&#10;Sending: This morning ASAP"></textarea>
+              </div>
+
+              <div class="edm-qa-col">
+                <div class="edm-qa-col-label">Salesforce — Sending Tab</div>
+                <div class="edm-qa-sf-tabbar">
+                  <button id="edm-qa-tab-paste" class="edm-qa-sf-tab active" onclick="switchEdmQaMode('paste')">Paste text</button>
+                  <button id="edm-qa-tab-manual" class="edm-qa-sf-tab" onclick="switchEdmQaMode('manual')">Manual entry</button>
+                </div>
+
+                <div id="edm-qa-paste-section">
+                  <textarea id="edm-qa-sf" class="form-textarea" rows="12" style="height:218px;resize:vertical" placeholder="Copy the Sending tab details and paste here — sender name, email, reply-to, lists, schedule…"></textarea>
+                </div>
+
+                <div id="edm-qa-manual-section" hidden>
+                  <div class="edm-qa-manual-grid">
+                    <label class="edm-qa-manual-label">Sender type</label>
+                    <select id="qa-m-sender-type" class="form-input">
+                      <option value="">— select —</option>
+                      <option value="company">Company (General user)</option>
+                      <option value="specific">Specific User</option>
+                    </select>
+                    <label class="edm-qa-manual-label">Sender name</label>
+                    <input id="qa-m-sender-name" class="form-input" type="text" placeholder="e.g. Assetline Capital"/>
+                    <label class="edm-qa-manual-label">Sender email</label>
+                    <input id="qa-m-sender-email" class="form-input" type="text" placeholder="e.g. apply@assetline.com.au"/>
+                    <label class="edm-qa-manual-label">Reply-to</label>
+                    <input id="qa-m-reply-to" class="form-input" type="text" placeholder="e.g. apply@assetline.com.au or Margie Daep"/>
+                    <label class="edm-qa-manual-label">Campaign</label>
+                    <input id="qa-m-campaign" class="form-input" type="text" placeholder="e.g. SMSF push"/>
+                    <label class="edm-qa-manual-label">Recipient lists</label>
+                    <textarea id="qa-m-lists" class="form-textarea" rows="3" placeholder="One list per line…"></textarea>
+                    <label class="edm-qa-manual-label">Send date</label>
+                    <input id="qa-m-date" class="form-input" type="text" placeholder="e.g. 2026-07-07 or Send Now"/>
+                    <label class="edm-qa-manual-label">Send time</label>
+                    <input id="qa-m-time" class="form-input" type="text" placeholder="e.g. 09:30 AM or Send Now"/>
+                    <label class="edm-qa-manual-label">Subject line</label>
+                    <input id="qa-m-subject" class="form-input" type="text" placeholder="e.g. Meet Margie Daep…"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button id="edm-qa-run-btn" class="btn-add" style="margin-top:12px" onclick="runEdmSendQA()">Compare →</button>
+
+            <div id="edm-qa-result" hidden>
+              <div id="edm-qa-summary-banner" class="edm-qa-summary"></div>
+              <table class="edm-qa-table">
+                <thead>
+                  <tr>
+                    <th>Field</th>
+                    <th>Ben's instruction</th>
+                    <th>Salesforce</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="edm-qa-tbody"></tbody>
+              </table>
+              <button class="btn-reset" style="margin-top:10px" onclick="document.getElementById('edm-qa-result').hidden=true;document.getElementById('edm-qa-ben').value='';document.getElementById('edm-qa-sf').value=''">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 106-6H4m0 0L2 4m2-2v4"/></svg>
+                Clear and reset
+              </button>
+            </div>
+
+          </div>
+        </div>
+
       </div><!-- /page-salesforce -->
 
       <!-- ── EDM REPORTING ── -->
@@ -2185,7 +2267,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';
