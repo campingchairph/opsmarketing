@@ -592,37 +592,27 @@
                 <div class="edm-qa-col-label">Salesforce — Sending Tab</div>
                 <div class="edm-qa-sf-tabbar">
                   <button id="edm-qa-tab-paste" class="edm-qa-sf-tab active" onclick="switchEdmQaMode('paste')">Paste text</button>
-                  <button id="edm-qa-tab-manual" class="edm-qa-sf-tab" onclick="switchEdmQaMode('manual')">Manual entry</button>
+                  <button id="edm-qa-tab-screenshot" class="edm-qa-sf-tab" onclick="switchEdmQaMode('screenshot')">Screenshot</button>
                 </div>
 
                 <div id="edm-qa-paste-section">
                   <textarea id="edm-qa-sf" class="form-textarea" rows="12" style="height:218px;resize:vertical" placeholder="Copy the Sending tab details and paste here — sender name, email, reply-to, lists, schedule…"></textarea>
                 </div>
 
-                <div id="edm-qa-manual-section" hidden>
-                  <div class="edm-qa-manual-grid">
-                    <label class="edm-qa-manual-label">Sender type</label>
-                    <select id="qa-m-sender-type" class="form-input">
-                      <option value="">— select —</option>
-                      <option value="company">Company (General user)</option>
-                      <option value="specific">Specific User</option>
-                    </select>
-                    <label class="edm-qa-manual-label">Sender name</label>
-                    <input id="qa-m-sender-name" class="form-input" type="text" placeholder="e.g. Assetline Capital"/>
-                    <label class="edm-qa-manual-label">Sender email</label>
-                    <input id="qa-m-sender-email" class="form-input" type="text" placeholder="e.g. apply@assetline.com.au"/>
-                    <label class="edm-qa-manual-label">Reply-to</label>
-                    <input id="qa-m-reply-to" class="form-input" type="text" placeholder="e.g. apply@assetline.com.au or Margie Daep"/>
-                    <label class="edm-qa-manual-label">Campaign</label>
-                    <input id="qa-m-campaign" class="form-input" type="text" placeholder="e.g. SMSF push"/>
-                    <label class="edm-qa-manual-label">Recipient lists</label>
-                    <textarea id="qa-m-lists" class="form-textarea" rows="3" placeholder="One list per line…"></textarea>
-                    <label class="edm-qa-manual-label">Send date</label>
-                    <input id="qa-m-date" class="form-input" type="text" placeholder="e.g. 2026-07-07 or Send Now"/>
-                    <label class="edm-qa-manual-label">Send time</label>
-                    <input id="qa-m-time" class="form-input" type="text" placeholder="e.g. 09:30 AM or Send Now"/>
-                    <label class="edm-qa-manual-label">Subject line</label>
-                    <input id="qa-m-subject" class="form-input" type="text" placeholder="e.g. Meet Margie Daep…"/>
+                <div id="edm-qa-screenshot-section" hidden>
+                  <div class="edm-qa-img-zone" id="edm-qa-img-zone"
+                       onclick="document.getElementById('edm-qa-img-input').click()"
+                       ondragover="event.preventDefault();this.classList.add('edm-qa-img-drag')"
+                       ondragleave="this.classList.remove('edm-qa-img-drag')"
+                       ondrop="event.preventDefault();this.classList.remove('edm-qa-img-drag');edmQaImgDrop(event)">
+                    <input type="file" id="edm-qa-img-input" accept="image/*" style="display:none" onchange="edmQaImgLoad(event)">
+                    <div id="edm-qa-img-placeholder">
+                      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" style="width:38px;height:38px;opacity:.3"><rect x="2" y="6" width="44" height="36" rx="3"/><polyline points="2,34 14,22 20,28 30,16 46,34"/><circle cx="14" cy="16" r="4"/></svg>
+                      <div style="margin-top:10px;font-size:12px;color:var(--text-3);font-weight:600">Upload Salesforce screenshot</div>
+                      <div style="font-size:11px;color:var(--text-3);margin-top:4px">Click or drag — Salesforce Sending tab</div>
+                    </div>
+                    <img id="edm-qa-img-preview" style="display:none;max-width:100%;max-height:210px;border-radius:6px;object-fit:contain">
+                    <div id="edm-qa-img-name" style="display:none;margin-top:6px;font-size:11px;color:var(--text-3)"></div>
                   </div>
                 </div>
               </div>
@@ -1933,6 +1923,37 @@
             </button>
             <button class="btn-reset" onclick="clearDocDiff()" style="margin-top:0">Clear</button>
           </div>
+          <div class="doc-view-bar" id="doc-view-bar" style="display:none">
+            <span class="doc-view-label">View</span>
+            <button id="doc-view-plain" class="doc-view-btn active" onclick="switchDocViewMode('plain')">Plain text diff</button>
+            <button id="doc-view-rich"  class="doc-view-btn"        onclick="switchDocViewMode('rich')">Rich text view</button>
+          </div>
+        </div>
+
+        <!-- ── RICH TEXT VIEW OUTPUT (doc mode, Word files) ── -->
+        <div id="diff-rich-output" style="display:none">
+          <div class="rich-controls">
+            <div class="rich-stats" id="rich-stats"></div>
+            <div class="rich-zoom-wrap">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><circle cx="6" cy="6" r="4"/><line x1="10" y1="10" x2="14" y2="14"/><line x1="4" y1="6" x2="8" y2="6"/><line x1="6" y1="4" x2="6" y2="8"/></svg>
+              <input type="range" id="rich-zoom" class="rich-zoom-slider" min="50" max="150" value="100" step="5" oninput="onRichZoom(this.value)">
+              <span id="rich-zoom-val" style="min-width:34px">100%</span>
+            </div>
+          </div>
+          <div class="rich-panes">
+            <div class="rich-pane-wrap">
+              <div class="rich-pane-header">Original</div>
+              <div class="rich-pane" id="rich-left-pane">
+                <div class="rich-content" id="rich-left-content"></div>
+              </div>
+            </div>
+            <div class="rich-pane-wrap">
+              <div class="rich-pane-header">Modified</div>
+              <div class="rich-pane" id="rich-right-pane">
+                <div class="rich-content" id="rich-right-content"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- ── SHARED DIFF OUTPUT (text + doc modes) ── -->
@@ -2267,7 +2288,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';

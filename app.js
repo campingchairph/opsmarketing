@@ -3507,11 +3507,67 @@ Return ONLY valid JSON. No text outside the JSON. Format:
 }
 overall values: "ready" (all match, minor confirms only) | "review" (one or more confirm) | "issues" (any mismatch or missing)`;
 
+let edmQaImageState = null; // { base64, mimeType }
+
+function edmQaImgLoad(e) {
+  const file = e.target.files[0];
+  if (file) processEdmQaImage(file);
+}
+function edmQaImgDrop(e) {
+  const file = e.dataTransfer.files[0];
+  if (file) processEdmQaImage(file);
+}
+function processEdmQaImage(file) {
+  if (!file.type.startsWith('image/')) { showAiToast('Please upload an image file.'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    edmQaImageState = { base64: dataUrl.split(',')[1], mimeType: file.type };
+    document.getElementById('edm-qa-img-placeholder').style.display = 'none';
+    const preview = document.getElementById('edm-qa-img-preview');
+    preview.src = dataUrl; preview.style.display = 'block';
+    const nm = document.getElementById('edm-qa-img-name');
+    nm.textContent = file.name; nm.style.display = 'block';
+    showAiToast('Screenshot loaded — ready to compare');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType) {
+  const key = getAiKey();
+  const body = {
+    model: 'llama-3.2-90b-vision-preview',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: userText },
+          { type: 'image_url', image_url: { url: `data:${imageMimeType};base64,${imageBase64}` } }
+        ]
+      }
+    ],
+    max_tokens: 2000,
+    temperature: 0.1
+  };
+  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Vision API error ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.choices[0].message.content;
+}
+
 function switchEdmQaMode(mode) {
   document.getElementById('edm-qa-paste-section').hidden = mode !== 'paste';
-  document.getElementById('edm-qa-manual-section').hidden = mode !== 'manual';
+  document.getElementById('edm-qa-screenshot-section').hidden = mode !== 'screenshot';
   document.getElementById('edm-qa-tab-paste').classList.toggle('active', mode === 'paste');
-  document.getElementById('edm-qa-tab-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('edm-qa-tab-screenshot').classList.toggle('active', mode === 'screenshot');
 }
 
 async function runEdmSendQA() {
@@ -3521,34 +3577,21 @@ async function runEdmSendQA() {
   const benText = document.getElementById('edm-qa-ben')?.value?.trim();
   if (!benText) { alert("Paste Ben's instructions first."); return; }
 
-  const pasteActive = !document.getElementById('edm-qa-paste-section').hidden;
-  let sfText = '';
-  if (pasteActive) {
-    sfText = document.getElementById('edm-qa-sf')?.value?.trim();
-    if (!sfText) { alert('Paste the Salesforce Sending tab details.'); return; }
-  } else {
-    const v = id => document.getElementById(id)?.value?.trim() || '';
-    const parts = [
-      v('qa-m-sender-type') && `Sender type: ${v('qa-m-sender-type')}`,
-      v('qa-m-sender-name') && `Sender name: ${v('qa-m-sender-name')}`,
-      v('qa-m-sender-email') && `Sender email: ${v('qa-m-sender-email')}`,
-      v('qa-m-reply-to') && `Reply-to: ${v('qa-m-reply-to')}`,
-      v('qa-m-campaign') && `Campaign: ${v('qa-m-campaign')}`,
-      v('qa-m-lists') && `Recipient lists:\n${v('qa-m-lists')}`,
-      v('qa-m-date') && `Send date: ${v('qa-m-date')}`,
-      v('qa-m-time') && `Send time: ${v('qa-m-time')}`,
-      v('qa-m-subject') && `Subject line: ${v('qa-m-subject')}`,
-    ].filter(Boolean);
-    sfText = parts.join('\n');
-    if (!sfText) { alert('Fill in at least some Salesforce fields.'); return; }
-  }
-
+  const screenshotMode = !document.getElementById('edm-qa-screenshot-section').hidden;
   aiSetBtn('edm-qa-run-btn', true, 'Compare →', 'Comparing…');
 
-  const userMsg = `=== BEN'S INSTRUCTIONS ===\n${benText}\n\n=== SALESFORCE SENDING TAB ===\n${sfText}`;
-
   try {
-    const raw = await callClaude(EDM_QA_SYSTEM, userMsg);
+    let raw;
+    if (screenshotMode) {
+      if (!edmQaImageState) { alert('Upload a Salesforce screenshot first.'); aiSetBtn('edm-qa-run-btn', false, 'Compare →', 'Comparing…'); return; }
+      const userMsg = `=== BEN'S INSTRUCTIONS ===\n${benText}\n\n[The attached image is a screenshot of the Salesforce Account Engagement Sending tab. Read all visible fields from the image and compare them against Ben's instructions above.]`;
+      raw = await callGroqVision(EDM_QA_SYSTEM, userMsg, edmQaImageState.base64, edmQaImageState.mimeType);
+    } else {
+      const sfText = document.getElementById('edm-qa-sf')?.value?.trim();
+      if (!sfText) { alert('Paste the Salesforce Sending tab details.'); aiSetBtn('edm-qa-run-btn', false, 'Compare →', 'Comparing…'); return; }
+      raw = await callClaude(EDM_QA_SYSTEM, `=== BEN'S INSTRUCTIONS ===\n${benText}\n\n=== SALESFORCE SENDING TAB ===\n${sfText}`);
+    }
+
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Could not parse AI response — try again.');
     const r = JSON.parse(match[0]);
@@ -5030,7 +5073,9 @@ function clearAllDiff() {
 function switchDiffMode(mode) {
   const sections = { text: 'diff-text-section', doc: 'diff-doc-section', image: 'diff-image-section' };
   const btns     = { text: 'diff-mode-text',    doc: 'diff-mode-doc',    image: 'diff-mode-image' };
-  // hide shared output when switching away from text/doc
+  if (mode === 'image' || mode === 'text') {
+    document.getElementById('diff-rich-output').style.display = 'none';
+  }
   if (mode === 'image') {
     document.getElementById('diff-stats').style.display  = 'none';
     document.getElementById('diff-output').style.display = 'none';
@@ -5064,22 +5109,35 @@ function loadDocFile(file, side) {
   const ext  = file.name.split('.').pop().toLowerCase();
   const zone = document.getElementById(`doc-zone-${side}`);
   if (!['pdf','docx','doc'].includes(ext)) { showAiToast('Only .pdf, .docx, or .doc files are supported.'); return; }
-  docState[side] = { file, ext, text: null };
+  docState[side] = { file, ext, text: null, richHtml: null };
   zone.querySelector('.img-zone-label').textContent = file.name;
   zone.querySelector('.img-zone-sub').textContent   = 'Extracting text…';
   zone.style.borderColor = 'var(--accent)';
 
   extractDocText(file, ext).then(text => {
     docState[side].text = text;
-    zone.querySelector('.img-zone-sub').textContent = `${text.split(/\s+/).length} words extracted`;
+    const wc = text.split(/\s+/).filter(Boolean).length;
+    zone.querySelector('.img-zone-sub').textContent = `${wc} words extracted`;
     if (docState.left?.text != null && docState.right?.text != null) {
       document.getElementById('doc-diff-actions').style.display = '';
+      document.getElementById('doc-view-bar').style.display = '';
     }
   }).catch(err => {
     zone.querySelector('.img-zone-sub').textContent = 'Error extracting text — try a different file';
     zone.style.borderColor = '#E4572E';
     console.error(err);
   });
+
+  // Also extract rich HTML for Word files (used by rich text view)
+  if (ext === 'docx' || ext === 'doc') {
+    extractDocHtml(file).then(html => { docState[side].richHtml = html; }).catch(() => {});
+  }
+}
+
+async function extractDocHtml(file) {
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.convertToHtml({ arrayBuffer: buf });
+  return result.value;
 }
 
 async function extractDocText(file, ext) {
@@ -5109,10 +5167,32 @@ async function runDocDiff() {
   if (!docState.left?.text || !docState.right?.text) { showAiToast('Load both files first.'); return; }
   const btn = document.getElementById('doc-compare-btn');
   btn.disabled = true; btn.textContent = 'Comparing…';
-  document.getElementById('diff-left').value  = docState.left.text;
-  document.getElementById('diff-right').value = docState.right.text;
-  runDiffCheck();
-  btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 1h5l4 4v10H4V1z"/><polyline points="9,1 9,5 13,5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg> Compare Docs →';
+
+  const richMode = document.getElementById('doc-view-rich')?.classList.contains('active');
+  if (richMode) {
+    if (docState.left?.richHtml && docState.right?.richHtml) {
+      document.getElementById('diff-rich-output').style.display = '';
+      document.getElementById('diff-stats').style.display  = 'none';
+      document.getElementById('diff-output').style.display = 'none';
+      renderRichDiff();
+    } else {
+      showAiToast('Rich text view requires Word (.docx) files — switching to plain text.');
+      document.getElementById('doc-view-plain').classList.add('active');
+      document.getElementById('doc-view-rich').classList.remove('active');
+      document.getElementById('diff-rich-output').style.display = 'none';
+      document.getElementById('diff-left').value  = docState.left.text;
+      document.getElementById('diff-right').value = docState.right.text;
+      runDiffCheck();
+    }
+  } else {
+    document.getElementById('diff-rich-output').style.display = 'none';
+    document.getElementById('diff-left').value  = docState.left.text;
+    document.getElementById('diff-right').value = docState.right.text;
+    runDiffCheck();
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 1h5l4 4v10H4V1z"/><polyline points="9,1 9,5 13,5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg> Compare Docs →';
 }
 
 function clearDocDiff() {
@@ -5125,8 +5205,155 @@ function clearDocDiff() {
     document.getElementById(`doc-input-${side}`).value = '';
   });
   document.getElementById('doc-diff-actions').style.display = 'none';
-  document.getElementById('diff-stats').style.display  = 'none';
-  document.getElementById('diff-output').style.display = 'none';
+  document.getElementById('doc-view-bar').style.display     = 'none';
+  document.getElementById('diff-stats').style.display       = 'none';
+  document.getElementById('diff-output').style.display      = 'none';
+  document.getElementById('diff-rich-output').style.display = 'none';
+  document.getElementById('doc-view-plain')?.classList.add('active');
+  document.getElementById('doc-view-rich')?.classList.remove('active');
+}
+
+// ── Rich Text Doc View ───────────────────────────────────────────
+
+function switchDocViewMode(mode) {
+  const richOut = document.getElementById('diff-rich-output');
+  document.getElementById('doc-view-plain').classList.toggle('active', mode === 'plain');
+  document.getElementById('doc-view-rich').classList.toggle('active', mode === 'rich');
+  if (mode === 'rich') {
+    richOut.style.display = '';
+    if (docState.left?.richHtml && docState.right?.richHtml) {
+      renderRichDiff();
+    } else {
+      document.getElementById('rich-left-content').innerHTML  = '<div class="rich-msg">Rich text view requires Word (.docx) files.<br>PDFs are supported in plain text diff mode only.</div>';
+      document.getElementById('rich-right-content').innerHTML = '';
+      document.getElementById('rich-stats').innerHTML = '';
+    }
+  } else {
+    richOut.style.display = 'none';
+  }
+}
+
+function getDocBlocks(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return [...doc.body.children].map(el => ({
+    text: el.textContent.trim(),
+    html: el.outerHTML,
+    tag:  el.tagName.toLowerCase()
+  })).filter(b => b.text.length > 0);
+}
+
+function lcsDiff(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0 && n === 0) return [];
+  // Cap for performance
+  if (m > 400 || n > 400) {
+    const ops = [];
+    const len = Math.max(m, n);
+    for (let i = 0; i < len; i++) {
+      if (i >= m)        ops.push({ type: 'ins', bi: i });
+      else if (i >= n)   ops.push({ type: 'del', ai: i });
+      else if (a[i] === b[i]) ops.push({ type: 'same', ai: i, bi: i });
+      else { ops.push({ type: 'del', ai: i }); ops.push({ type: 'ins', bi: i }); }
+    }
+    return ops;
+  }
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({ type: 'same', ai: i-1, bi: j-1 }); i--; j--; }
+    else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({ type: 'ins', bi: j-1 }); j--; }
+    else { ops.unshift({ type: 'del', ai: i-1 }); i--; }
+  }
+  return ops;
+}
+
+function wordDiffHtml(textA, textB) {
+  const wa = textA.match(/\S+/g) || [];
+  const wb = textB.match(/\S+/g) || [];
+  if (wa.length > 300 || wb.length > 300) {
+    return {
+      lHtml: `<mark class="rich-word-del">${escapeHtml(textA)}</mark>`,
+      rHtml: `<mark class="rich-word-ins">${escapeHtml(textB)}</mark>`
+    };
+  }
+  const ops = lcsDiff(wa, wb);
+  let lHtml = '', rHtml = '';
+  for (const op of ops) {
+    if (op.type === 'same') { const w = escapeHtml(wa[op.ai]) + ' '; lHtml += w; rHtml += w; }
+    else if (op.type === 'del') lHtml += `<mark class="rich-word-del">${escapeHtml(wa[op.ai])}</mark> `;
+    else                         rHtml += `<mark class="rich-word-ins">${escapeHtml(wb[op.bi])}</mark> `;
+  }
+  return { lHtml, rHtml };
+}
+
+function renderRichDiff() {
+  const blocksA = getDocBlocks(docState.left.richHtml);
+  const blocksB = getDocBlocks(docState.right.richHtml);
+  const rawOps  = lcsDiff(blocksA.map(b => b.text), blocksB.map(b => b.text));
+
+  // Pair adjacent del+ins as "changed" block
+  const ops = [];
+  for (let k = 0; k < rawOps.length; k++) {
+    if (rawOps[k].type === 'del' && k + 1 < rawOps.length && rawOps[k+1].type === 'ins') {
+      ops.push({ type: 'change', ai: rawOps[k].ai, bi: rawOps[k+1].bi });
+      k++;
+    } else {
+      ops.push(rawOps[k]);
+    }
+  }
+
+  let lHtml = '', rHtml = '', adds = 0, dels = 0, changes = 0;
+  for (const op of ops) {
+    if (op.type === 'same') {
+      const h = blocksA[op.ai].html;
+      lHtml += `<div class="rich-block">${h}</div>`;
+      rHtml += `<div class="rich-block">${h}</div>`;
+    } else if (op.type === 'change') {
+      changes++;
+      const a = blocksA[op.ai], b = blocksB[op.bi];
+      const { lHtml: lw, rHtml: rw } = wordDiffHtml(a.text, b.text);
+      lHtml += `<div class="rich-block rich-block-changed"><${a.tag}>${lw}</${a.tag}></div>`;
+      rHtml += `<div class="rich-block rich-block-changed"><${b.tag}>${rw}</${b.tag}></div>`;
+    } else if (op.type === 'del') {
+      dels++;
+      lHtml += `<div class="rich-block rich-block-del">${blocksA[op.ai].html}</div>`;
+      rHtml += `<div class="rich-block rich-block-empty"></div>`;
+    } else {
+      adds++;
+      lHtml += `<div class="rich-block rich-block-empty"></div>`;
+      rHtml += `<div class="rich-block rich-block-ins">${blocksB[op.bi].html}</div>`;
+    }
+  }
+
+  document.getElementById('rich-left-content').innerHTML  = lHtml;
+  document.getElementById('rich-right-content').innerHTML = rHtml;
+  document.getElementById('rich-stats').innerHTML =
+    `<span class="rs-del">${dels} removed</span>` +
+    `<span class="rs-ins">${adds} added</span>` +
+    `<span class="rs-chg">${changes} changed</span>`;
+
+  // Sync scroll between panes
+  const lPane = document.getElementById('rich-left-pane');
+  const rPane = document.getElementById('rich-right-pane');
+  let syncing = false;
+  lPane.onscroll = () => { if (!syncing) { syncing = true; rPane.scrollTop = lPane.scrollTop; syncing = false; } };
+  rPane.onscroll = () => { if (!syncing) { syncing = true; lPane.scrollTop = rPane.scrollTop; syncing = false; } };
+}
+
+function onRichZoom(val) {
+  document.getElementById('rich-zoom-val').textContent = val + '%';
+  const scale = val / 100;
+  ['rich-left-content', 'rich-right-content'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.transform       = `scale(${scale})`;
+    el.style.transformOrigin = 'top left';
+    // Adjust pane scroll height to match scaled content
+    el.parentElement.style.minHeight = '';
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════
