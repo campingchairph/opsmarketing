@@ -3261,12 +3261,24 @@ STYLE RULES:
 - Short paragraphs. Active voice. 50–120 words for most emails.
 - Assume the recipient already knows the context unless told otherwise.
 
+SENTENCE STRUCTURE — THIS IS CRITICAL:
+Specifications and preferences are stated as facts, not as requests.
+Use "We'd like to use X." or "Please use Y." to communicate specs and preferences.
+Reserve "Could you..." for the single action you need the recipient to take (e.g. "Could you send through mockups for review?").
+Do NOT frame specs as requests. Do NOT start a sentence about a spec with "Could you please use...".
+
+CORRECT EXAMPLE:
+  For the artwork, we'd like to use the attached SVG version of the Assetline logo.
+  We'd also like the table cloth in our primary black, #292929.
+  Could you prepare design mockups and send them through for review before production?
+
+INCORRECT EXAMPLE:
+  Could you please use the SVG logo I'm attaching for the design? We'd like to use our primary black colour, which is #292929, for the table cloth.
+
 NEVER USE:
 "I hope you're doing well" / "I trust you're doing well" / "I've been looped into" / "I wanted to reach out" / "I just wanted to" / "To ensure the best possible outcome" / "This will provide the highest quality" / "Before we move forward" / "Everything is just right" / "Looking forward to" / "Thank you in advance" / "Please don't hesitate" / "Kindly"
 
-PREFERRED LANGUAGE:
-- Start with: Hi [Name],
-- Use: We'd like to / Could you / Please / Thanks.
+CLOSING:
 - Close simply: Thanks. — or — Thanks, Joseph — or — Regards,\nJoseph
 - Never write a closing paragraph. Never add filler.
 
