@@ -6610,20 +6610,15 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   font-family: 'JetBrains Mono', monospace;
   line-height: 1.45;
 }
-.wp-parse-btns { display: flex; flex-direction: column; gap: 6px; }
 .wp-parse-btn {
   display: flex; align-items: center; gap: 5px;
-  padding: 7px 12px; font-size: 11px; font-weight: 600;
+  padding: 8px 14px; font-size: 11px; font-weight: 600;
   border-radius: 6px; cursor: pointer; white-space: nowrap;
   border: 1px solid var(--accent); background: var(--accent); color: #fff;
-  transition: opacity .15s;
+  transition: opacity .15s; align-self: flex-start;
 }
 .wp-parse-btn:hover { opacity: .85; }
 .wp-parse-btn:disabled { opacity: .5; cursor: not-allowed; }
-.wp-parse-btn-last {
-  background: transparent; color: var(--accent);
-}
-.wp-parse-btn-last:hover { background: var(--accent-soft, rgba(99,102,241,.08)); opacity: 1; }
 
 .wp-table-wrap { overflow-x: auto; }
 .wp-table {
@@ -6662,6 +6657,7 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
 .wp-mom-up      { font-size: 12px; font-weight: 600; color: #16a34a; padding: 4px 10px; white-space: nowrap; }
 .wp-mom-down    { font-size: 12px; font-weight: 600; color: #dc2626; padding: 4px 10px; white-space: nowrap; }
 .wp-mom-neutral { font-size: 12px; color: var(--text-3); padding: 4px 10px; }
+.wp-mom-new     { font-size: 11px; font-weight: 600; color: #7c3aed; padding: 4px 10px; white-space: nowrap; }
 
 .wp-skip-note { font-size: 12px; color: var(--text-3); font-style: italic; padding: 2px 0 0 34px; }
 

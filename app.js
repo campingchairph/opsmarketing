@@ -7345,52 +7345,138 @@ const WP_FIXED_ROWS = {
   7: ['Desktop Share', 'Mobile Share', 'Returning Users'],
 };
 
-const WP_PARSE_PROMPTS = {
-  1: `You are parsing raw text copied from a Google Analytics 4 report to extract Executive KPI values.
-Extract these 6 metrics:
-1. Users (total users in the period)
-2. Sessions
-3. Engaged Sessions (also called "Engaged sessions")
-4. Engagement Rate (as a percentage, e.g. "52.7%")
-5. Average Engagement Time (in format like "2m 34s" or "1m 02s")
-6. Website Conversion Rate (also called Key event rate, as a percentage)
+// Per-section MoM metric type for the main users/value column
+// 'count' = % change, 'rate' = pts change, 'time' = % change
+// Sections 2/3/4/6: main MoM column is always user counts
+const WP_MOM_TYPES = {
+  1: ['count', 'count', 'count', 'rate', 'time', 'rate'],
+  7: ['rate', 'rate', 'rate'],
+};
 
-The pasted text may be messy — tab-separated values, extra columns, commas in numbers. Extract just the values.
+const WP_PARSE_PROMPTS = {
+  1: `You parse a raw GA4 Acquisition export that contains TWO comparison blocks (two months).
+
+FINDING THE BLOCKS:
+- Each block starts with a comment line like: # Start date: YYYYMMDD
+- The block with the LATER Start date = This Month
+- The block with the EARLIER Start date = Last Month
+- Do NOT assume paste order = month order — always compare the actual date values.
+
+WHAT TO EXTRACT from each block (site-wide totals):
+- users: "Total users" or "Users"
+- sessions: "Sessions"
+- engagedSessions: "Engaged sessions"
+- engagementRate: "Engagement rate" — keep as shown, e.g. "52.71%"
+- avgEngagementTime: "Average engagement time per session" — format as "Xm Ys" (e.g. "2m 34s"). If shown as HH:MM:SS, convert (00:02:34 → "2m 34s").
+- conversionRate: "Session key event rate" or "User key event rate" or "Key event rate" — keep as shown, e.g. "1.24%"
+
+Keep numbers with their commas exactly as shown in the export.
 
 Return ONLY valid JSON, no other text:
-{"users":"12,345","sessions":"18,000","engagedSessions":"9,500","engagementRate":"52.7%","avgEngagementTime":"2m 34s","conversionRate":"1.2%"}`,
+{"thisMonth":{"users":"12,345","sessions":"18,000","engagedSessions":"9,500","engagementRate":"52.7%","avgEngagementTime":"2m 34s","conversionRate":"1.2%"},"lastMonth":{"users":"11,234","sessions":"16,800","engagedSessions":"8,900","engagementRate":"51.3%","avgEngagementTime":"2m 15s","conversionRate":"1.0%"}}`,
 
-  2: `You are parsing raw text copied from a Google Analytics 4 Pages and screens report (filtered to product pages).
-Extract the top 5 rows (by users). Each row has a product/page name, active users count, and optionally a conversion/key event rate.
-Return ONLY valid JSON:
-{"rows":[{"label":"Horizon Mortgages","users":"2,345","extra":"1.2%"},{"label":"Private Lending","users":"1,890","extra":"0.8%"},...]}
-Use empty string "" if conversion rate not visible. Max 5 rows.`,
+  2: `You parse a raw GA4 Pages and Screens export that contains TWO comparison blocks (two months).
 
-  3: `You are parsing raw text from a Google Analytics 4 Traffic Acquisition report.
-Extract the top 5 channel rows (Organic Search, Direct, Email, Referral, etc.) with their user counts and optional conversion rate.
-Return ONLY valid JSON:
-{"rows":[{"label":"Organic Search","users":"5,432","extra":"1.4%"},{"label":"Direct","users":"3,210","extra":"0.9%"},...]}
-Max 5 rows.`,
+FINDING THE BLOCKS:
+- Each block starts with: # Start date: YYYYMMDD
+- LATER Start date = This Month, EARLIER Start date = Last Month
+- Do NOT assume paste order = month order.
 
-  4: `You are parsing raw text from a Google Analytics 4 Landing page report.
-Extract the top 5 landing pages with user counts and average engagement time.
-Return ONLY valid JSON:
-{"rows":[{"label":"/","users":"4,321","extra":"2m 15s"},{"label":"/product/horizon-mortgages","users":"1,234","extra":"3m 42s"},...]}
-Use the page path or title as label. Max 5 rows.`,
+WHAT TO EXTRACT:
+Look ONLY for these four specific product pages (ignore all other pages):
+1. Horizon Mortgages
+2. Private Lending
+3. Bridging Finance
+4. Development Finance
+Match by partial title — e.g. "Horizon" matches "Horizon Mortgages | Assetline Capital".
 
-  6: `You are parsing raw text from a Google Analytics 4 Pages and screens report (filtered to /news/ blog articles).
-Extract the top 5 article rows with user counts and optional conversion rate.
-Return ONLY valid JSON:
-{"rows":[{"label":"Why property developers choose Assetline","users":"876","extra":"0.5%"},{"label":"Bridging finance explained","users":"654","extra":"0.3%"},...]}
-Max 5 rows.`,
+For each product page found, extract from both blocks:
+- label: simplified name (e.g. "Horizon Mortgages")
+- thisUsers: Active users from the This Month block
+- lastUsers: Active users from the Last Month block
+- convRate: If "Key events" and "Active users" columns exist, calculate Key events ÷ Active users × 100 and format as "X.X%". If a direct "Key event rate" column is present, use that value. Use "" if neither is available.
+Use This Month values for convRate.
 
-  7: `You are parsing raw text from Google Analytics 4 reports about audience/device breakdown.
-Extract:
-1. Desktop Share (as percentage, e.g. "78.3%")
-2. Mobile Share (as percentage, e.g. "18.6%")
-3. Returning Users (as percentage of total users, e.g. "34.2%")
 Return ONLY valid JSON:
-{"desktopShare":"78.3%","mobileShare":"18.6%","returningUsers":"34.2%"}`
+{"rows":[{"label":"Horizon Mortgages","thisUsers":"2,345","lastUsers":"2,100","convRate":"1.2%"},{"label":"Private Lending","thisUsers":"1,890","lastUsers":"1,650","convRate":"0.8%"},{"label":"Bridging Finance","thisUsers":"1,234","lastUsers":"1,100","convRate":"0.5%"},{"label":"Development Finance","thisUsers":"890","lastUsers":"780","convRate":"0.3%"}]}`,
+
+  3: `You parse a raw GA4 User Acquisition or Traffic Acquisition export that contains TWO comparison blocks (two months).
+
+FINDING THE BLOCKS:
+- Each block starts with: # Start date: YYYYMMDD
+- LATER Start date = This Month, EARLIER Start date = Last Month
+
+WHAT TO EXTRACT:
+Top 5 channels by "Total users" or "Users" in the This Month block (re-rank each month — channels can move).
+Common channel names: Organic Search, Direct, Email, Referral, Paid Social, Organic Social, Display, etc.
+
+For each top-5 channel:
+- label: channel name
+- thisUsers: Users from the This Month block
+- lastUsers: Users from the Last Month block (use "0" if the channel doesn't appear in Last Month)
+- convRate: "User key event rate" or "Session key event rate" from the This Month block, e.g. "1.4%". Use "" if not present.
+
+Return ONLY valid JSON:
+{"rows":[{"label":"Organic Search","thisUsers":"5,432","lastUsers":"4,890","convRate":"1.4%"},{"label":"Direct","thisUsers":"3,210","lastUsers":"3,100","convRate":"0.9%"}]}
+Max 5 rows, ranked by This Month users descending.`,
+
+  4: `You parse a raw GA4 Landing Page export that contains TWO comparison blocks (two months).
+
+FINDING THE BLOCKS:
+- Each block starts with: # Start date: YYYYMMDD
+- LATER Start date = This Month, EARLIER Start date = Last Month
+
+WHAT TO EXTRACT:
+Top 5 landing pages by "Active users" in the This Month block.
+
+For each landing page:
+- label: Page path or title (e.g. "/" or "/product/horizon-mortgages")
+- thisUsers: Active users from This Month
+- lastUsers: Active users from Last Month (use "0" if not present)
+- avgEngagement: "Average engagement time per session" from the This Month block, formatted as "Xm Ys". Use "" if not present.
+
+Return ONLY valid JSON:
+{"rows":[{"label":"/","thisUsers":"4,321","lastUsers":"3,980","avgEngagement":"2m 15s"},{"label":"/product/horizon-mortgages","thisUsers":"1,234","lastUsers":"1,100","avgEngagement":"3m 42s"}]}
+Max 5 rows, ranked by This Month users descending.`,
+
+  6: `You parse a raw GA4 Pages and Screens export (filtered to /news/ blog articles) that contains TWO comparison blocks (two months).
+
+FINDING THE BLOCKS:
+- Each block starts with: # Start date: YYYYMMDD
+- LATER Start date = This Month, EARLIER Start date = Last Month
+
+WHAT TO EXTRACT:
+Top 5 articles/news pages by "Active users" in the This Month block. Pages will have "/news/" in their path.
+
+For each article:
+- label: Article title or page path
+- thisUsers: Active users from This Month
+- lastUsers: Active users from Last Month (use "0" if the article is new/not present)
+- convRate: Key events ÷ Active users × 100 from the This Month block, formatted as "X.X%". Use "" if Key events column not present.
+
+Tie-break equal Active users by Views count.
+
+Return ONLY valid JSON:
+{"rows":[{"label":"Article title here","thisUsers":"876","lastUsers":"654","convRate":"0.5%"},{"label":"Another article","thisUsers":"543","lastUsers":"0","convRate":"0.3%"}]}
+Max 5 rows, ranked by This Month users descending.`,
+
+  7: `You parse a raw GA4 Tech Details / Platform export that contains TWO comparison blocks (two months).
+
+FINDING THE BLOCKS:
+- Each block starts with: # Start date: YYYYMMDD
+- LATER Start date = This Month, EARLIER Start date = Last Month
+
+WHAT TO EXTRACT from each block:
+The export has device rows (Desktop, Mobile, Tablet) each with "Active users" and "New users" columns.
+
+For each block, calculate:
+1. desktopShare: desktop Active users ÷ (desktop + mobile + tablet Active users) × 100, format as "X.X%"
+2. mobileShare: mobile Active users ÷ total Active users × 100, format as "X.X%"
+3. returningUsers: (total Active users − total New users) ÷ total Active users × 100, format as "X.X%"
+   where "total" = sum of all device rows
+
+Return ONLY valid JSON:
+{"thisMonth":{"desktopShare":"78.3%","mobileShare":"18.6%","returningUsers":"34.2%"},"lastMonth":{"desktopShare":"76.1%","mobileShare":"20.4%","returningUsers":"32.8%"}}`
 };
 
 function loadWPData() {
@@ -7414,21 +7500,34 @@ function wpParseMetric(str) {
   return isNaN(num) ? null : { val: num };
 }
 
-function wpCalcMoM(thisVal, lastVal) {
+function wpCalcMoM(thisVal, lastVal, type = 'count') {
   const a = wpParseMetric(thisVal);
   const b = wpParseMetric(lastVal);
-  if (!a || !b || b.val === 0) return '—';
-  if (a.isPct && b.isPct) {
-    const diff = (a.val - b.val).toFixed(1);
-    return (diff > 0 ? '+' : '') + diff + 'pp';
+  if (!a || !b) return '—';
+  if (b.val === 0) return a.val > 0 ? 'New' : '—';
+  const isRate = type === 'rate' || (a.isPct && b.isPct);
+  let diff, suffix;
+  if (isRate) {
+    diff = a.val - b.val;
+    suffix = ' pts';
+  } else {
+    diff = (a.val - b.val) / b.val * 100;
+    suffix = '%';
   }
-  const pct = ((a.val - b.val) / b.val * 100);
-  return (pct > 0 ? '+' : '') + pct.toFixed(1) + '%';
+  if (Math.abs(diff) < 0.05) return '—';
+  const arrow = diff > 0 ? '▲' : '▼';
+  return `${arrow} ${Math.abs(diff).toFixed(1)}${suffix}`;
 }
 
 function wpMoMClass(mom) {
   if (!mom || mom === '—') return 'wp-mom-neutral';
-  return mom.startsWith('+') ? 'wp-mom-up' : 'wp-mom-down';
+  if (mom === 'New') return 'wp-mom-new';
+  return mom.startsWith('▲') ? 'wp-mom-up' : 'wp-mom-down';
+}
+
+function wpGetMomType(sectionNum, rowIdx) {
+  const types = WP_MOM_TYPES[sectionNum];
+  return types ? (types[rowIdx] || 'count') : 'count';
 }
 
 function wpFormatMonth(val) {
@@ -7456,24 +7555,24 @@ function wpUpdateCell(sectionNum, rowIdx, field, value) {
   saveWPData(d);
   if (field === 'thisVal' || field === 'lastVal') {
     const row = d[key].rows[rowIdx];
-    const mom = wpCalcMoM(row.thisVal, row.lastVal);
+    const type = wpGetMomType(sectionNum, rowIdx);
+    const mom = wpCalcMoM(row.thisVal, row.lastVal, type);
     const el = document.getElementById(`wp-s${sectionNum}-r${rowIdx}-mom`);
     if (el) { el.textContent = mom; el.className = wpMoMClass(mom); }
   }
 }
 
-async function parseWPSection(num, month) {
+async function parseWPSection(num) {
   if (!getAiKey()) { aiNoKey(); return; }
   const pasteEl = document.getElementById(`wp-s${num}-paste`);
   const rawText = pasteEl ? pasteEl.value.trim() : '';
-  if (!rawText) { showAiToast('Paste some GA4 data first.'); return; }
+  if (!rawText) { showAiToast('Paste the GA4 export first.'); return; }
 
-  const btnId = `wp-s${num}-parse-${month}`;
+  const btnId = `wp-s${num}-parse-btn`;
   aiSetBtn(btnId, true);
 
   try {
-    const systemPrompt = WP_PARSE_PROMPTS[num];
-    const result = await callClaude(systemPrompt, `Parse this GA4 data:\n\n${rawText}`);
+    const result = await callClaude(WP_PARSE_PROMPTS[num], `Parse this GA4 export:\n\n${rawText}`);
     trackAiUsage('webperf-parse');
 
     let parsed;
@@ -7481,7 +7580,7 @@ async function parseWPSection(num, month) {
       const jsonMatch = result.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : result);
     } catch {
-      showAiToast('Could not parse AI response. Try again.');
+      showAiToast('Could not read AI response — check the paste and try again.');
       aiSetBtn(btnId, false);
       return;
     }
@@ -7501,31 +7600,41 @@ async function parseWPSection(num, month) {
       }
       mapping.forEach(([jsonKey, label], i) => {
         if (!d[key].rows[i]) d[key].rows[i] = { label, thisVal: '', lastVal: '', extra: '' };
-        if (parsed[jsonKey] !== undefined) d[key].rows[i][month === 'this' ? 'thisVal' : 'lastVal'] = parsed[jsonKey];
+        const tm = parsed.thisMonth || {};
+        const lm = parsed.lastMonth || {};
+        if (tm[jsonKey] !== undefined) d[key].rows[i].thisVal = tm[jsonKey];
+        if (lm[jsonKey] !== undefined) d[key].rows[i].lastVal = lm[jsonKey];
       });
     } else if (num === 7) {
       if (!d[key].rows.length) {
         d[key].rows = WP_FIXED_ROWS[7].map(l => ({ label: l, thisVal: '', lastVal: '', extra: '' }));
       }
-      const vals = [parsed.desktopShare, parsed.mobileShare, parsed.returningUsers];
-      vals.forEach((v, i) => {
+      const keys7 = ['desktopShare', 'mobileShare', 'returningUsers'];
+      const tm = parsed.thisMonth || {};
+      const lm = parsed.lastMonth || {};
+      keys7.forEach((k, i) => {
         if (!d[key].rows[i]) d[key].rows[i] = { label: WP_FIXED_ROWS[7][i], thisVal: '', lastVal: '', extra: '' };
-        if (v !== undefined) d[key].rows[i][month === 'this' ? 'thisVal' : 'lastVal'] = v;
+        if (tm[k] !== undefined) d[key].rows[i].thisVal = tm[k];
+        if (lm[k] !== undefined) d[key].rows[i].lastVal = lm[k];
       });
     } else {
       const incoming = (parsed.rows || []).slice(0, 5);
+      // For sections 2/3: label + thisUsers + lastUsers + convRate
+      // For section 4: label + thisUsers + lastUsers + avgEngagement
       incoming.forEach((r, i) => {
         if (!d[key].rows[i]) d[key].rows[i] = { label: '', thisVal: '', lastVal: '', extra: '' };
         if (r.label) d[key].rows[i].label = r.label;
-        d[key].rows[i][month === 'this' ? 'thisVal' : 'lastVal'] = r.users || '';
-        if (r.extra) d[key].rows[i].extra = r.extra;
+        if (r.thisUsers !== undefined) d[key].rows[i].thisVal = r.thisUsers;
+        if (r.lastUsers !== undefined) d[key].rows[i].lastVal = r.lastUsers;
+        const extraVal = r.convRate || r.avgEngagement || '';
+        if (extraVal) d[key].rows[i].extra = extraVal;
       });
     }
 
     saveWPData(d);
     wpRefreshSection(num, d);
     if (pasteEl) pasteEl.value = '';
-    showAiToast('Data mapped ✓');
+    showAiToast('Mapped ✓');
   } catch (e) {
     showAiToast('AI error: ' + (e.message || 'Unknown'));
   }
@@ -7546,7 +7655,8 @@ function wpRefreshSection(num, d) {
     : rows.concat(Array.from({ length: Math.max(0, 5 - rows.length) }, () => ({ label: '', thisVal: '', lastVal: '', extra: '' })));
 
   tbody.innerHTML = allRows.map((r, i) => {
-    const mom = wpCalcMoM(r.thisVal, r.lastVal);
+    const type = wpGetMomType(num, i);
+    const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
     const labelCell = isFixed
       ? `<td class="wp-fixed-label">${escapeHtml(r.label || '')}</td>`
       : `<td><input class="wp-cell-input" value="${escapeHtml(r.label || '')}" oninput="wpUpdateCell(${num},${i},'label',this.value)" placeholder="—"></td>`;
@@ -7621,7 +7731,8 @@ function renderWebPerfPage() {
       : rows.concat(Array.from({ length: Math.max(0, 5 - rows.length) }, () => ({ label: '', thisVal: '', lastVal: '', extra: '' })));
 
     const tableRows = allRows.map((r, i) => {
-      const mom = wpCalcMoM(r.thisVal, r.lastVal);
+      const type = wpGetMomType(num, i);
+      const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
       const labelCell = fixedRows
         ? `<td class="wp-fixed-label">${escapeHtml(r.label || '')}</td>`
         : `<td><input class="wp-cell-input" value="${escapeHtml(r.label || '')}" oninput="wpUpdateCell(${num},${i},'label',this.value)" placeholder="—"></td>`;
@@ -7654,17 +7765,11 @@ function renderWebPerfPage() {
         </div>
       </details>
       <div class="wp-paste-row">
-        <textarea id="wp-s${num}-paste" class="wp-paste-input" rows="4" placeholder="Paste raw GA4 data here — copied table text, number rows, whatever is shown. AI extracts the right values."></textarea>
-        <div class="wp-parse-btns">
-          <button class="wp-parse-btn" id="wp-s${num}-parse-this" onclick="parseWPSection(${num},'this')">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><polygon points="3,2 13,8 3,14"/></svg>
-            Set as This Month
-          </button>
-          <button class="wp-parse-btn wp-parse-btn-last" id="wp-s${num}-parse-last" onclick="parseWPSection(${num},'last')">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><polygon points="3,2 13,8 3,14"/></svg>
-            Set as Last Month
-          </button>
-        </div>
+        <textarea id="wp-s${num}-paste" class="wp-paste-input" rows="4" placeholder="Paste the full GA4 export here — both date blocks included. AI reads the Start date values to identify This Month vs Last Month automatically."></textarea>
+        <button class="wp-parse-btn" id="wp-s${num}-parse-btn" onclick="parseWPSection(${num})">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><polygon points="3,2 13,8 3,14"/></svg>
+          Parse Export →
+        </button>
       </div>
       <div class="wp-table-wrap">
         <table class="wp-table">
