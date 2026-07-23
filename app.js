@@ -7306,8 +7306,8 @@ const WP_KEY = 'msc_webperf_v1';
 
 const WP_GUIDES = {
   1: {
-    loc: 'Reports → Life cycle → Acquisition → <strong>User Acquisition</strong> or <strong>Traffic Acquisition</strong>',
-    tip: 'Set the date range to this reporting month. Summary metrics (Users, Sessions, Engaged Sessions, Engagement Rate, Avg Engagement Time) appear in the header cards or the Acquisition overview. Website Conversion Rate = the <strong>Key event rate</strong> column in the same report.'
+    loc: '<strong>User Acquisition</strong> (for Users) + <strong>Traffic Acquisition</strong> (for Sessions, Engagement Rate, Avg Time, Conversion Rate)',
+    tip: 'These metrics come from two different exports. Export both with a date comparison enabled, then paste them together in one go. <strong>User Acquisition</strong> → Reports → Acquisition → User Acquisition → Export CSV. <strong>Traffic Acquisition</strong> → same location → Traffic Acquisition → Export CSV. Neither has a Total row — the AI sums all channel rows itself. Avg Engagement Time is stored as raw seconds in the export (e.g. 44.24), the AI converts it to Xm Ys format automatically.'
   },
   2: {
     loc: 'Reports → Engagement → <strong>Pages and screens</strong>',
@@ -7354,26 +7354,28 @@ const WP_MOM_TYPES = {
 };
 
 const WP_PARSE_PROMPTS = {
-  1: `You parse a raw GA4 Acquisition export that contains TWO comparison blocks (two months).
+  1: `You parse one or two raw GA4 exports pasted together for Executive KPIs. The paste may contain:
+- TYPE A: User Acquisition export — first column is "First user primary channel group", has "Total users" column
+- TYPE B: Traffic Acquisition export — first column is "Session primary channel group", has "Sessions" column
+Both types may be present. Each has TWO date blocks. Within each type: LATER Start date = This Month, EARLIER = Last Month.
 
-FINDING THE BLOCKS:
-- Each block starts with a comment line like: # Start date: YYYYMMDD
-- The block with the LATER Start date = This Month
-- The block with the EARLIER Start date = Last Month
-- Do NOT assume paste order = month order — always compare the actual date values.
+IMPORTANT: There is NO Total row in these exports. You must SUM all channel rows yourself.
 
-WHAT TO EXTRACT from each block (site-wide totals):
-- users: "Total users" or "Users"
-- sessions: "Sessions"
-- engagedSessions: "Engaged sessions"
-- engagementRate: "Engagement rate" — keep as shown, e.g. "52.71%"
-- avgEngagementTime: "Average engagement time per session" — format as "Xm Ys" (e.g. "2m 34s"). If shown as HH:MM:SS, convert (00:02:34 → "2m 34s").
-- conversionRate: "Session key event rate" or "User key event rate" or "Key event rate" — keep as shown, e.g. "1.24%"
+FROM TYPE A (User Acquisition) — sum all channel rows per date block:
+- users: SUM of "Total users" column
 
-Keep numbers with their commas exactly as shown in the export.
+FROM TYPE B (Traffic Acquisition) — sum all channel rows per date block:
+- sessions: SUM of "Sessions" column
+- engagedSessions: SUM of "Engaged sessions" column
+- engagementRate: (SUM engagedSessions / SUM sessions) × 100, format as "X.X%"
+- avgEngagementTime: weighted average in seconds = SUM(sessions_i × avgTime_i) / SUM(sessions_i)
+  NOTE: "Average engagement time per session" in this export is in RAW SECONDS as a decimal (e.g. 44.24 means 44.24 seconds, NOT 44 minutes). Convert the weighted average to "Xm Ys" (e.g. 96.5 seconds → "1m 37s", 44.3 seconds → "0m 44s")
+- conversionRate: SUM("Key events") / SUM("Sessions") × 100, format as "X.X%"
+
+If only one export type is pasted, extract what you can and use "" for the rest.
 
 Return ONLY valid JSON, no other text:
-{"thisMonth":{"users":"12,345","sessions":"18,000","engagedSessions":"9,500","engagementRate":"52.7%","avgEngagementTime":"2m 34s","conversionRate":"1.2%"},"lastMonth":{"users":"11,234","sessions":"16,800","engagedSessions":"8,900","engagementRate":"51.3%","avgEngagementTime":"2m 15s","conversionRate":"1.0%"}}`,
+{"thisMonth":{"users":"3,323","sessions":"6,267","engagedSessions":"3,520","engagementRate":"56.2%","avgEngagementTime":"0m 37s","conversionRate":"31.1%"},"lastMonth":{"users":"3,104","sessions":"5,670","engagedSessions":"2,819","engagementRate":"49.7%","avgEngagementTime":"0m 28s","conversionRate":"4.3%"}}`,
 
   2: `You parse a raw GA4 Pages and Screens export that contains TWO comparison blocks (two months).
 
