@@ -273,6 +273,7 @@ function navigate(pageId) {
   if (pageId === 'salesforce')  { setEdmSidebarVisible(true);  renderEdmCampaignCard(); renderEdmPhases(); renderEdmQA(); }
   else                          { setEdmSidebarVisible(false); }
   if (pageId === 'edmreport')   { renderEdmReportPage(); }
+  if (pageId === 'webperf')     { renderWebPerfPage(); }
   if (pageId === 'plaintext')   { renderPlainTextPage(); }
 
   // Task reminder panel — show on task pages, hide everywhere else
@@ -7295,4 +7296,423 @@ function renderEdmReportPage() {
   renderEdmReportEntries();
   updateEdmReportPreview();
   renderEdmSnapshotPanel();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WEBSITE PERFORMANCE DASHBOARD
+// ══════════════════════════════════════════════════════════════════
+
+const WP_KEY = 'msc_webperf_v1';
+
+const WP_GUIDES = {
+  1: {
+    loc: 'Reports → Life cycle → Acquisition → <strong>User Acquisition</strong> or <strong>Traffic Acquisition</strong>',
+    tip: 'Set the date range to this reporting month. Summary metrics (Users, Sessions, Engaged Sessions, Engagement Rate, Avg Engagement Time) appear in the header cards or the Acquisition overview. Website Conversion Rate = the <strong>Key event rate</strong> column in the same report.'
+  },
+  2: {
+    loc: 'Reports → Engagement → <strong>Pages and screens</strong>',
+    tip: 'Search or filter for product page titles (Horizon Mortgages, Private Lending, Bridging Finance, Development Finance, etc.). Sort by <strong>Active users</strong>, take the top 5. Add <strong>Key event rate</strong> via the column selector (pencil icon) if not already shown.'
+  },
+  3: {
+    loc: 'Reports → Life cycle → Acquisition → <strong>Traffic Acquisition</strong>',
+    tip: 'Breaks sessions down by Default Channel Group (Organic Search, Direct, Email, Referral, Paid Social, etc.). Sort by Users and take the top 5. Key event rate column = conversion rate.'
+  },
+  4: {
+    loc: 'Reports → Engagement → <strong>Landing page</strong>',
+    tip: 'If not in the left menu, add it via Reports Library. Sort by Users, take the top 5 landing pages. Grab the <strong>Average engagement time per session</strong> column from the same table.'
+  },
+  6: {
+    loc: 'Reports → Engagement → <strong>Pages and screens</strong> — filter by <code>/news/</code>',
+    tip: 'In the Pages and screens report, use the search bar to filter for <code>/news/</code>. This shows all blog/article pages. Sort by Users, take the top 5. Key event rate = conversion rate.'
+  },
+  7: {
+    loc: 'Reports → User → Tech → <strong>Tech overview</strong> (device breakdown) + Reports → User → <strong>Retention</strong> (returning users)',
+    tip: 'Tech overview shows the Desktop / Mobile / Tablet device split as a donut — grab Desktop % and Mobile %. For Returning Users %, go to the Retention report which shows New vs Returning users breakdown as a percentage.'
+  }
+};
+
+const WP_COLS = {
+  1: ['KPI', 'This Month', 'Last Month', 'MoM Change'],
+  2: ['Product Page', 'Users (This)', 'Users (Last)', 'MoM', 'Conv. Rate'],
+  3: ['Channel', 'Users (This)', 'Users (Last)', 'MoM', 'Conv. Rate'],
+  4: ['Landing Page', 'Users (This)', 'Users (Last)', 'MoM', 'Avg Engagement'],
+  6: ['Article', 'Users (This)', 'Users (Last)', 'MoM', 'Conv. Rate'],
+  7: ['Metric', 'This Month', 'Last Month', 'MoM Change'],
+};
+
+const WP_FIXED_ROWS = {
+  1: ['Users', 'Sessions', 'Engaged Sessions', 'Engagement Rate', 'Avg Engagement Time', 'Website Conversion Rate'],
+  7: ['Desktop Share', 'Mobile Share', 'Returning Users'],
+};
+
+const WP_PARSE_PROMPTS = {
+  1: `You are parsing raw text copied from a Google Analytics 4 report to extract Executive KPI values.
+Extract these 6 metrics:
+1. Users (total users in the period)
+2. Sessions
+3. Engaged Sessions (also called "Engaged sessions")
+4. Engagement Rate (as a percentage, e.g. "52.7%")
+5. Average Engagement Time (in format like "2m 34s" or "1m 02s")
+6. Website Conversion Rate (also called Key event rate, as a percentage)
+
+The pasted text may be messy — tab-separated values, extra columns, commas in numbers. Extract just the values.
+
+Return ONLY valid JSON, no other text:
+{"users":"12,345","sessions":"18,000","engagedSessions":"9,500","engagementRate":"52.7%","avgEngagementTime":"2m 34s","conversionRate":"1.2%"}`,
+
+  2: `You are parsing raw text copied from a Google Analytics 4 Pages and screens report (filtered to product pages).
+Extract the top 5 rows (by users). Each row has a product/page name, active users count, and optionally a conversion/key event rate.
+Return ONLY valid JSON:
+{"rows":[{"label":"Horizon Mortgages","users":"2,345","extra":"1.2%"},{"label":"Private Lending","users":"1,890","extra":"0.8%"},...]}
+Use empty string "" if conversion rate not visible. Max 5 rows.`,
+
+  3: `You are parsing raw text from a Google Analytics 4 Traffic Acquisition report.
+Extract the top 5 channel rows (Organic Search, Direct, Email, Referral, etc.) with their user counts and optional conversion rate.
+Return ONLY valid JSON:
+{"rows":[{"label":"Organic Search","users":"5,432","extra":"1.4%"},{"label":"Direct","users":"3,210","extra":"0.9%"},...]}
+Max 5 rows.`,
+
+  4: `You are parsing raw text from a Google Analytics 4 Landing page report.
+Extract the top 5 landing pages with user counts and average engagement time.
+Return ONLY valid JSON:
+{"rows":[{"label":"/","users":"4,321","extra":"2m 15s"},{"label":"/product/horizon-mortgages","users":"1,234","extra":"3m 42s"},...]}
+Use the page path or title as label. Max 5 rows.`,
+
+  6: `You are parsing raw text from a Google Analytics 4 Pages and screens report (filtered to /news/ blog articles).
+Extract the top 5 article rows with user counts and optional conversion rate.
+Return ONLY valid JSON:
+{"rows":[{"label":"Why property developers choose Assetline","users":"876","extra":"0.5%"},{"label":"Bridging finance explained","users":"654","extra":"0.3%"},...]}
+Max 5 rows.`,
+
+  7: `You are parsing raw text from Google Analytics 4 reports about audience/device breakdown.
+Extract:
+1. Desktop Share (as percentage, e.g. "78.3%")
+2. Mobile Share (as percentage, e.g. "18.6%")
+3. Returning Users (as percentage of total users, e.g. "34.2%")
+Return ONLY valid JSON:
+{"desktopShare":"78.3%","mobileShare":"18.6%","returningUsers":"34.2%"}`
+};
+
+function loadWPData() {
+  try { return JSON.parse(localStorage.getItem(WP_KEY) || '{}'); } catch { return {}; }
+}
+
+function saveWPData(data) {
+  try { localStorage.setItem(WP_KEY, JSON.stringify(data)); } catch {}
+}
+
+function wpParseMetric(str) {
+  if (!str) return null;
+  const clean = (str + '').replace(/,/g, '').trim();
+  const timeM = clean.match(/^(\d+)m\s*(\d+)s?$/);
+  if (timeM) return { val: parseInt(timeM[1]) * 60 + parseInt(timeM[2]), isTime: true };
+  const timeS = clean.match(/^(\d+)\s*s$/i);
+  if (timeS) return { val: parseInt(timeS[1]), isTime: true };
+  const pct = clean.match(/^([\d.]+)\s*%$/);
+  if (pct) return { val: parseFloat(pct[1]), isPct: true };
+  const num = parseFloat(clean.replace(/[^\d.]/g, ''));
+  return isNaN(num) ? null : { val: num };
+}
+
+function wpCalcMoM(thisVal, lastVal) {
+  const a = wpParseMetric(thisVal);
+  const b = wpParseMetric(lastVal);
+  if (!a || !b || b.val === 0) return '—';
+  if (a.isPct && b.isPct) {
+    const diff = (a.val - b.val).toFixed(1);
+    return (diff > 0 ? '+' : '') + diff + 'pp';
+  }
+  const pct = ((a.val - b.val) / b.val * 100);
+  return (pct > 0 ? '+' : '') + pct.toFixed(1) + '%';
+}
+
+function wpMoMClass(mom) {
+  if (!mom || mom === '—') return 'wp-mom-neutral';
+  return mom.startsWith('+') ? 'wp-mom-up' : 'wp-mom-down';
+}
+
+function wpFormatMonth(val) {
+  if (!val) return '';
+  const [y, m] = val.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m) - 1]} ${y}`;
+}
+
+function wpSaveMonth(which, value) {
+  const d = loadWPData();
+  if (which === 'this') d.thisMonth = value;
+  else d.lastMonth = value;
+  saveWPData(d);
+  const el = document.getElementById(`wp-${which}-month-label`);
+  if (el) el.textContent = wpFormatMonth(value) || (which === 'this' ? 'This month' : 'Last month');
+}
+
+function wpUpdateCell(sectionNum, rowIdx, field, value) {
+  const d = loadWPData();
+  const key = `s${sectionNum}`;
+  if (!d[key]) d[key] = { rows: [] };
+  while (d[key].rows.length <= rowIdx) d[key].rows.push({ label: '', thisVal: '', lastVal: '', extra: '' });
+  d[key].rows[rowIdx][field] = value;
+  saveWPData(d);
+  if (field === 'thisVal' || field === 'lastVal') {
+    const row = d[key].rows[rowIdx];
+    const mom = wpCalcMoM(row.thisVal, row.lastVal);
+    const el = document.getElementById(`wp-s${sectionNum}-r${rowIdx}-mom`);
+    if (el) { el.textContent = mom; el.className = wpMoMClass(mom); }
+  }
+}
+
+async function parseWPSection(num, month) {
+  if (!getAiKey()) { aiNoKey(); return; }
+  const pasteEl = document.getElementById(`wp-s${num}-paste`);
+  const rawText = pasteEl ? pasteEl.value.trim() : '';
+  if (!rawText) { showAiToast('Paste some GA4 data first.'); return; }
+
+  const btnId = `wp-s${num}-parse-${month}`;
+  aiSetBtn(btnId, true);
+
+  try {
+    const systemPrompt = WP_PARSE_PROMPTS[num];
+    const result = await callClaude(systemPrompt, `Parse this GA4 data:\n\n${rawText}`);
+    trackAiUsage('webperf-parse');
+
+    let parsed;
+    try {
+      const jsonMatch = result.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : result);
+    } catch {
+      showAiToast('Could not parse AI response. Try again.');
+      aiSetBtn(btnId, false);
+      return;
+    }
+
+    const d = loadWPData();
+    const key = `s${num}`;
+    if (!d[key]) d[key] = { rows: [] };
+
+    if (num === 1) {
+      const mapping = [
+        ['users', 'Users'], ['sessions', 'Sessions'], ['engagedSessions', 'Engaged Sessions'],
+        ['engagementRate', 'Engagement Rate'], ['avgEngagementTime', 'Avg Engagement Time'],
+        ['conversionRate', 'Website Conversion Rate']
+      ];
+      if (!d[key].rows.length) {
+        d[key].rows = WP_FIXED_ROWS[1].map(l => ({ label: l, thisVal: '', lastVal: '', extra: '' }));
+      }
+      mapping.forEach(([jsonKey, label], i) => {
+        if (!d[key].rows[i]) d[key].rows[i] = { label, thisVal: '', lastVal: '', extra: '' };
+        if (parsed[jsonKey] !== undefined) d[key].rows[i][month === 'this' ? 'thisVal' : 'lastVal'] = parsed[jsonKey];
+      });
+    } else if (num === 7) {
+      if (!d[key].rows.length) {
+        d[key].rows = WP_FIXED_ROWS[7].map(l => ({ label: l, thisVal: '', lastVal: '', extra: '' }));
+      }
+      const vals = [parsed.desktopShare, parsed.mobileShare, parsed.returningUsers];
+      vals.forEach((v, i) => {
+        if (!d[key].rows[i]) d[key].rows[i] = { label: WP_FIXED_ROWS[7][i], thisVal: '', lastVal: '', extra: '' };
+        if (v !== undefined) d[key].rows[i][month === 'this' ? 'thisVal' : 'lastVal'] = v;
+      });
+    } else {
+      const incoming = (parsed.rows || []).slice(0, 5);
+      incoming.forEach((r, i) => {
+        if (!d[key].rows[i]) d[key].rows[i] = { label: '', thisVal: '', lastVal: '', extra: '' };
+        if (r.label) d[key].rows[i].label = r.label;
+        d[key].rows[i][month === 'this' ? 'thisVal' : 'lastVal'] = r.users || '';
+        if (r.extra) d[key].rows[i].extra = r.extra;
+      });
+    }
+
+    saveWPData(d);
+    wpRefreshSection(num, d);
+    if (pasteEl) pasteEl.value = '';
+    showAiToast('Data mapped ✓');
+  } catch (e) {
+    showAiToast('AI error: ' + (e.message || 'Unknown'));
+  }
+  aiSetBtn(btnId, false);
+}
+
+function wpRefreshSection(num, d) {
+  const key = `s${num}`;
+  const sData = d[key] || {};
+  const rows = sData.rows || [];
+  const isFixed = !!WP_FIXED_ROWS[num];
+  const hasExtra = (WP_COLS[num] || []).length > 4;
+  const tbody = document.getElementById(`wp-s${num}-tbody`);
+  if (!tbody) return;
+
+  const allRows = isFixed
+    ? WP_FIXED_ROWS[num].map((label, i) => ({ label, ...(rows[i] || {}), label }))
+    : rows.concat(Array.from({ length: Math.max(0, 5 - rows.length) }, () => ({ label: '', thisVal: '', lastVal: '', extra: '' })));
+
+  tbody.innerHTML = allRows.map((r, i) => {
+    const mom = wpCalcMoM(r.thisVal, r.lastVal);
+    const labelCell = isFixed
+      ? `<td class="wp-fixed-label">${escapeHtml(r.label || '')}</td>`
+      : `<td><input class="wp-cell-input" value="${escapeHtml(r.label || '')}" oninput="wpUpdateCell(${num},${i},'label',this.value)" placeholder="—"></td>`;
+    const extraCell = hasExtra
+      ? `<td><input class="wp-cell-input wp-cell-extra" value="${escapeHtml(r.extra || '')}" oninput="wpUpdateCell(${num},${i},'extra',this.value)" placeholder="—"></td>`
+      : '';
+    return `<tr>
+      ${labelCell}
+      <td><input class="wp-cell-input wp-cell-num" value="${escapeHtml(r.thisVal || '')}" oninput="wpUpdateCell(${num},${i},'thisVal',this.value)" placeholder="—"></td>
+      <td><input class="wp-cell-input wp-cell-num" value="${escapeHtml(r.lastVal || '')}" oninput="wpUpdateCell(${num},${i},'lastVal',this.value)" placeholder="—"></td>
+      <td class="${wpMoMClass(mom)}" id="wp-s${num}-r${i}-mom">${mom}</td>
+      ${extraCell}
+    </tr>`;
+  }).join('');
+
+  const badge = document.getElementById(`wp-s${num}-badge`);
+  if (badge) {
+    const hasSome = allRows.some(r => r.thisVal || r.lastVal);
+    badge.className = hasSome ? 'wp-badge wp-badge-filled' : 'wp-badge wp-badge-empty';
+    badge.textContent = hasSome ? '● Filled' : '○ Empty';
+  }
+}
+
+function wpClearAll() {
+  if (!confirm('Clear all Website Performance data? This cannot be undone.')) return;
+  try { localStorage.removeItem(WP_KEY); } catch {}
+  const root = document.getElementById('wp-root');
+  if (root) { delete root.dataset.rendered; renderWebPerfPage(); }
+}
+
+function wpToggleGuide(num) {
+  const el = document.getElementById(`wp-guide-${num}`);
+  if (!el) return;
+  const isOpen = el.open;
+  el.open = !isOpen;
+}
+
+function renderWebPerfPage() {
+  const root = document.getElementById('wp-root');
+  if (!root) return;
+  if (root.dataset.rendered) return;
+  root.dataset.rendered = '1';
+
+  const d = loadWPData();
+  const thisMonthLabel = wpFormatMonth(d.thisMonth) || 'This month';
+  const lastMonthLabel = wpFormatMonth(d.lastMonth) || 'Last month';
+
+  const buildSection = (num, title, skipped = false) => {
+    const guide = WP_GUIDES[num];
+    const cols = WP_COLS[num] || [];
+    const fixedRows = WP_FIXED_ROWS[num];
+    const sData = d[`s${num}`] || {};
+    const rows = sData.rows || (fixedRows ? fixedRows.map(l => ({ label: l, thisVal: '', lastVal: '', extra: '' })) : []);
+    const hasSome = rows.some(r => r.thisVal || r.lastVal);
+    const hasExtra = cols.length > 4;
+
+    if (skipped) {
+      return `<div class="wp-section wp-section-skipped">
+        <div class="wp-section-head">
+          <span class="wp-section-num">${num}</span>
+          <span class="wp-section-title">${title}</span>
+          <span class="wp-badge wp-badge-skip">⏸ On hold</span>
+        </div>
+        <p class="wp-skip-note">GA hasn't populated these custom events yet. Structure is in place — will switch on once broker intent tracking is confirmed.</p>
+      </div>`;
+    }
+
+    const colHeaders = cols.map(c => `<th>${c}</th>`).join('');
+
+    const allRows = fixedRows
+      ? fixedRows.map((label, i) => ({ label, ...(rows[i] || {}), label }))
+      : rows.concat(Array.from({ length: Math.max(0, 5 - rows.length) }, () => ({ label: '', thisVal: '', lastVal: '', extra: '' })));
+
+    const tableRows = allRows.map((r, i) => {
+      const mom = wpCalcMoM(r.thisVal, r.lastVal);
+      const labelCell = fixedRows
+        ? `<td class="wp-fixed-label">${escapeHtml(r.label || '')}</td>`
+        : `<td><input class="wp-cell-input" value="${escapeHtml(r.label || '')}" oninput="wpUpdateCell(${num},${i},'label',this.value)" placeholder="—"></td>`;
+      const extraCell = hasExtra
+        ? `<td><input class="wp-cell-input wp-cell-extra" value="${escapeHtml(r.extra || '')}" oninput="wpUpdateCell(${num},${i},'extra',this.value)" placeholder="—"></td>`
+        : '';
+      return `<tr>
+        ${labelCell}
+        <td><input class="wp-cell-input wp-cell-num" value="${escapeHtml(r.thisVal || '')}" oninput="wpUpdateCell(${num},${i},'thisVal',this.value)" placeholder="—"></td>
+        <td><input class="wp-cell-input wp-cell-num" value="${escapeHtml(r.lastVal || '')}" oninput="wpUpdateCell(${num},${i},'lastVal',this.value)" placeholder="—"></td>
+        <td class="${wpMoMClass(mom)}" id="wp-s${num}-r${i}-mom">${mom}</td>
+        ${extraCell}
+      </tr>`;
+    }).join('');
+
+    return `<div class="wp-section" id="wp-s${num}">
+      <div class="wp-section-head">
+        <span class="wp-section-num">${num}</span>
+        <span class="wp-section-title">${title}</span>
+        <span class="wp-badge ${hasSome ? 'wp-badge-filled' : 'wp-badge-empty'}" id="wp-s${num}-badge">${hasSome ? '● Filled' : '○ Empty'}</span>
+      </div>
+      <details class="wp-guide" id="wp-guide-${num}">
+        <summary>Where to find it in GA4</summary>
+        <div class="wp-guide-body">
+          <div class="wp-guide-loc">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px;flex-shrink:0;margin-top:1px"><path d="M7 1C4.2 1 2 3.2 2 6c0 3.3 5 7 5 7s5-3.7 5-7c0-2.8-2.2-5-5-5z"/><circle cx="7" cy="6" r="1.5"/></svg>
+            ${guide.loc}
+          </div>
+          <p class="wp-guide-tip">${guide.tip}</p>
+        </div>
+      </details>
+      <div class="wp-paste-row">
+        <textarea id="wp-s${num}-paste" class="wp-paste-input" rows="4" placeholder="Paste raw GA4 data here — copied table text, number rows, whatever is shown. AI extracts the right values."></textarea>
+        <div class="wp-parse-btns">
+          <button class="wp-parse-btn" id="wp-s${num}-parse-this" onclick="parseWPSection(${num},'this')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><polygon points="3,2 13,8 3,14"/></svg>
+            Set as This Month
+          </button>
+          <button class="wp-parse-btn wp-parse-btn-last" id="wp-s${num}-parse-last" onclick="parseWPSection(${num},'last')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><polygon points="3,2 13,8 3,14"/></svg>
+            Set as Last Month
+          </button>
+        </div>
+      </div>
+      <div class="wp-table-wrap">
+        <table class="wp-table">
+          <thead><tr>${colHeaders}</tr></thead>
+          <tbody id="wp-s${num}-tbody">${tableRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  };
+
+  root.innerHTML = `
+    <div class="wp-header">
+      <div class="wp-header-title">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:17px;height:17px;flex-shrink:0"><polyline points="2,12 5,7 8,10 11,5 14,8"/><line x1="2" y1="14" x2="14" y2="14"/></svg>
+        Website Performance Dashboard
+      </div>
+      <div class="wp-header-controls">
+        <div class="wp-month-group">
+          <span class="wp-month-chip wp-chip-this">
+            <label class="wp-month-lbl">This month</label>
+            <input type="month" class="wp-month-input" id="wp-this-month" value="${d.thisMonth || ''}" onchange="wpSaveMonth('this',this.value)">
+          </span>
+          <span class="wp-vs">vs</span>
+          <span class="wp-month-chip wp-chip-last">
+            <label class="wp-month-lbl">Last month</label>
+            <input type="month" class="wp-month-input" id="wp-last-month" value="${d.lastMonth || ''}" onchange="wpSaveMonth('last',this.value)">
+          </span>
+        </div>
+        <button class="wp-clear-btn" onclick="wpClearAll()">Clear all</button>
+      </div>
+    </div>
+
+    <div class="alert-box info" style="margin-bottom:16px">
+      <div class="alert-title">Monthly GA4 data collection</div>
+      <p>For each section, paste raw data copied from GA4, then click <strong>Set as This Month</strong> or <strong>Set as Last Month</strong>. AI maps the numbers into the table and MoM change is calculated automatically. Section 5 is on hold pending event tracking.</p>
+    </div>
+
+    ${buildSection(1, 'Executive KPIs')}
+    ${buildSection(2, 'Product Page Performance')}
+    ${buildSection(3, 'Traffic Sources')}
+    ${buildSection(4, 'Top Landing Pages')}
+    ${buildSection(5, 'Broker Intent Actions', true)}
+    ${buildSection(6, 'Content Performance')}
+    ${buildSection(7, 'Audience Overview')}
+
+    <div class="wp-commentary-box">
+      <div class="wp-commentary-title">Executive Commentary</div>
+      <p class="wp-commentary-note">3–5 bullet summary written by Petro covering what changed, why, and recommended actions. Leave blank until review.</p>
+    </div>
+  `;
 }
