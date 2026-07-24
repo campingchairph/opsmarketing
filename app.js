@@ -7385,22 +7385,18 @@ FINDING THE BLOCKS:
 - Do NOT assume paste order = month order.
 
 WHAT TO EXTRACT:
-Look ONLY for these four specific product pages (ignore all other pages):
-1. Horizon Mortgages
-2. Private Lending
-3. Bridging Finance
-4. Development Finance
-Match by partial title — e.g. "Horizon" matches "Horizon Mortgages | Assetline Capital".
+Top 5 pages by "Active users" in the This Month block. Take whatever rows appear — do not filter by name.
 
-For each product page found, extract from both blocks:
-- label: simplified name (e.g. "Horizon Mortgages")
+For each of the top 5:
+- label: page path or title as shown in the export (e.g. "/product/horizon-mortgages" or "Horizon Mortgages | Assetline")
 - thisUsers: Active users from the This Month block
-- lastUsers: Active users from the Last Month block
-- convRate: If "Key events" and "Active users" columns exist, calculate Key events ÷ Active users × 100 and format as "X.X%". If a direct "Key event rate" column is present, use that value. Use "" if neither is available.
+- lastUsers: Active users from the Last Month block (use "0" if the page doesn't appear in Last Month)
+- convRate: If "Key events" and "Active users" columns both exist, calculate Key events ÷ Active users × 100 and format as "X.X%". If a direct "Key event rate" or "Session key event rate" column exists, use that value. Use "" if neither available.
 Use This Month values for convRate.
 
 Return ONLY valid JSON:
-{"rows":[{"label":"Horizon Mortgages","thisUsers":"2,345","lastUsers":"2,100","convRate":"1.2%"},{"label":"Private Lending","thisUsers":"1,890","lastUsers":"1,650","convRate":"0.8%"},{"label":"Bridging Finance","thisUsers":"1,234","lastUsers":"1,100","convRate":"0.5%"},{"label":"Development Finance","thisUsers":"890","lastUsers":"780","convRate":"0.3%"}]}`,
+{"rows":[{"label":"/product/horizon-mortgages","thisUsers":"2,345","lastUsers":"2,100","convRate":"1.2%"},{"label":"/product/private-lending","thisUsers":"1,890","lastUsers":"1,650","convRate":"0.8%"}]}
+Max 5 rows, ranked by This Month Active users descending.`,
 
   3: `You parse a raw GA4 User Acquisition or Traffic Acquisition export that contains TWO comparison blocks (two months).
 
