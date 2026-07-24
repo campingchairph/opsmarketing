@@ -7796,6 +7796,10 @@ function renderWebPerfPage() {
             <input type="month" class="wp-month-input" id="wp-last-month" value="${d.lastMonth || ''}" onchange="wpSaveMonth('last',this.value)">
           </span>
         </div>
+        <button class="edr-print-btn" onclick="printWPReport()" title="Export as PDF">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><path d="M4 6V2h8v4M4 11H2V7h12v4h-2M4 11v3h8v-3H4z"/></svg>
+          Export
+        </button>
         <button class="wp-clear-btn" onclick="wpClearAll()">Clear all</button>
       </div>
     </div>
@@ -7818,4 +7822,99 @@ function renderWebPerfPage() {
       <p class="wp-commentary-note">3–5 bullet summary written by Petro covering what changed, why, and recommended actions. Leave blank until review.</p>
     </div>
   `;
+}
+
+function printWPReport() {
+  const d = loadWPData();
+  const thisLabel = wpFormatMonth(d.thisMonth) || 'This Month';
+  const lastLabel = wpFormatMonth(d.lastMonth) || 'Last Month';
+  const compLabel = d.thisMonth || d.lastMonth ? `${thisLabel} vs ${lastLabel}` : '';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const hasSomeData = [1,2,3,4,6,7].some(n => (d[`s${n}`]?.rows || []).some(r => r.thisVal || r.lastVal));
+  if (!hasSomeData) { showAiToast('No data to export yet.'); return; }
+
+  const buildSectionBlock = (num, title) => {
+    const cols = WP_COLS[num] || [];
+    const fixedRows = WP_FIXED_ROWS[num];
+    const rows = d[`s${num}`]?.rows || [];
+    const allRows = fixedRows
+      ? fixedRows.map((label, i) => ({ label, ...(rows[i] || {}), label }))
+      : rows.slice(0, 5);
+    if (!allRows.some(r => r.thisVal || r.lastVal)) return '';
+    const hasExtra = cols.length > 4;
+    const headers = cols.map(c => `<th>${escapeHtml(c)}</th>`).join('');
+    const rowsHtml = allRows.filter(r => r.label || r.thisVal || r.lastVal).map((r, i) => {
+      const type = wpGetMomType(num, i);
+      const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
+      const mc = mom === 'New' ? 'mom-new' : mom.startsWith('▲') ? 'mom-up' : mom.startsWith('▼') ? 'mom-down' : '';
+      return `<tr>
+        <td class="lc">${escapeHtml(r.label || '—')}</td>
+        <td class="nc">${escapeHtml(r.thisVal || '—')}</td>
+        <td class="nc">${escapeHtml(r.lastVal || '—')}</td>
+        <td class="mc ${mc}">${escapeHtml(mom)}</td>
+        ${hasExtra ? `<td class="nc">${escapeHtml(r.extra || '—')}</td>` : ''}
+      </tr>`;
+    }).join('');
+    return `<div class="sb">
+      <div class="sh"><span class="sn">${num}</span><span class="st">${escapeHtml(title)}</span></div>
+      <table><thead><tr>${headers}</tr></thead><tbody>${rowsHtml}</tbody></table>
+    </div>`;
+  };
+
+  const SECTIONS = [[1,'Executive KPIs'],[2,'Product Page Performance'],[3,'Traffic Sources'],[4,'Top Landing Pages'],[6,'Content Performance'],[7,'Audience Overview']];
+  const sectionsHtml = SECTIONS.map(([n, t]) => buildSectionBlock(n, t)).filter(Boolean).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Website Performance${compLabel ? ' — ' + compLabel : ''}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+@page{size:A4 portrait;margin:.75in .5in .45in .5in}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
+.title-page{min-height:calc(297mm - 1.2in);display:flex;flex-direction:column;justify-content:flex-start;padding-top:1.6in;page-break-after:always}
+.tl{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#E4572E}
+.tp{font-family:'Playfair Display',Georgia,serif;font-size:52px;font-weight:700;color:#191919;line-height:1.05;margin-top:8px}
+.td{font-size:11px;color:#aaa;margin-top:4px}
+.tr{width:48px;height:3px;background:#E4572E;margin-top:20px}
+.content{display:flex;flex-direction:column;gap:0}
+.sb{break-inside:avoid;margin-bottom:28px}
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:7px;border-bottom:2px solid #E4572E;margin-bottom:9px}
+.sn{width:20px;height:20px;border-radius:50%;background:#E4572E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.st{font-size:12px;font-weight:700;color:#191919;letter-spacing:.01em}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:5px 8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;border-bottom:1px solid #e8e8e4}
+td{padding:5px 8px;border-bottom:1px solid #f0f0ee;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.lc{color:#191919;font-weight:500}
+.nc{font-variant-numeric:tabular-nums;color:#555;text-align:right}
+.mc{font-weight:700;text-align:right;white-space:nowrap;color:#999}
+.mom-up{color:#16a34a}
+.mom-down{color:#dc2626}
+.mom-new{color:#7c3aed}
+.footer{position:fixed;bottom:.15in;left:0;right:0;border-top:1px solid #e8e8e4;padding:4px .5in 0;font-size:8pt;color:#bbb;letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div class="footer">Website Performance Dashboard${compLabel ? ' | ' + escapeHtml(compLabel) : ''}</div>
+<div class="title-page">
+  <div class="tl">Website Performance Dashboard</div>
+  <div class="tp">${escapeHtml(compLabel || dateStr)}</div>
+  <div class="td">Generated ${escapeHtml(dateStr)}</div>
+  <div class="tr"></div>
+</div>
+<div class="content">${sectionsHtml}</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body>
+</html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) { showAiToast('Pop-up blocked — allow pop-ups for this page.'); return; }
+  w.document.write(html);
+  w.document.close();
 }
