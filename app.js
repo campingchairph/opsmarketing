@@ -7889,6 +7889,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#191919;background:#fff;-w
 .st{font-size:12px;font-weight:700;color:#191919;letter-spacing:.01em}
 table{width:100%;border-collapse:collapse;font-size:11px}
 th{text-align:left;padding:5px 8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;border-bottom:1px solid #e8e8e4}
+th:not(:first-child){text-align:right}
 td{padding:5px 8px;border-bottom:1px solid #f0f0ee;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 .lc{color:#191919;font-weight:500}
