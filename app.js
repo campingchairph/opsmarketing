@@ -7503,6 +7503,18 @@ function wpCalcMoM(thisVal, lastVal, type = 'count') {
   const b = wpParseMetric(lastVal);
   if (!a || !b) return '—';
   if (b.val === 0) return a.val > 0 ? 'New' : '—';
+
+  if (type === 'time') {
+    const diffSec = Math.round(a.val - b.val);
+    if (Math.abs(diffSec) < 1) return '—';
+    const arrow = diffSec > 0 ? '▲' : '▼';
+    const abs = Math.abs(diffSec);
+    const m = Math.floor(abs / 60);
+    const s = abs % 60;
+    const label = m > 0 ? (s > 0 ? `${m}m ${s}s` : `${m}m`) : `${s}s`;
+    return `${arrow} ${label}`;
+  }
+
   const isRate = type === 'rate' || (a.isPct && b.isPct);
   let diff, suffix;
   if (isRate) {

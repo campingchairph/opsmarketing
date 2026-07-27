@@ -26,7 +26,8 @@
       "Bash(git -C \"C:/Users/josep/OneDrive/Documents/GitHub/opsMarketing\" add learn.html)",
       "Bash(git -C \"C:/Users/josep/OneDrive/Documents/GitHub/opsMarketing\" commit -m \"Add glossary, quiz, term tooltips, daily progress\")",
       "Bash(git -C \"C:/Users/josep/OneDrive/Documents/GitHub/opsMarketing\" push)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('C:/Users/Josep/OneDrive/Documents/GitHub/opsMarketing/app.js','utf8'\\);try{new Function\\(c\\);console.log\\('syntax OK'\\);}catch\\(e\\){console.log\\('ERROR:',e.message\\);}\")"
     ]
   }
 }
