@@ -6667,5 +6667,12 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   background: var(--bg-2); border: 1px solid var(--border);
   border-radius: 10px;
 }
-.wp-commentary-title { font-size: 13px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
-.wp-commentary-note { font-size: 12px; color: var(--text-3); font-style: italic; }
+.wp-commentary-title { font-size: 13px; font-weight: 600; color: var(--text-1); margin-bottom: 10px; }
+.wp-commentary-input {
+  width: 100%; resize: vertical; min-height: 100px;
+  padding: 10px 12px; font-size: 12px; line-height: 1.65;
+  border: 1px solid var(--border); border-radius: 7px;
+  background: var(--bg-1); color: var(--text-1);
+  font-family: var(--font-body);
+}
+.wp-commentary-input:focus { outline: none; border-color: var(--accent); }

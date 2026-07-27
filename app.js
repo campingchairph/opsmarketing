@@ -7547,6 +7547,12 @@ function wpFormatMonth(val) {
   return `${months[parseInt(m) - 1]} ${y}`;
 }
 
+function wpSaveCommentary(value) {
+  const d = loadWPData();
+  d.commentary = value;
+  saveWPData(d);
+}
+
 function wpSaveMonth(which, value) {
   const d = loadWPData();
   if (which === 'this') d.thisMonth = value;
@@ -7831,7 +7837,9 @@ function renderWebPerfPage() {
 
     <div class="wp-commentary-box">
       <div class="wp-commentary-title">Executive Commentary</div>
-      <p class="wp-commentary-note">3–5 bullet summary written by Petro covering what changed, why, and recommended actions. Leave blank until review.</p>
+      <textarea id="wp-commentary" class="wp-commentary-input" rows="5"
+        placeholder="3–5 bullet summary covering what changed, why, and recommended actions."
+        oninput="wpSaveCommentary(this.value)">${escapeHtml(d.commentary || '')}</textarea>
     </div>
   `;
 }
@@ -7911,6 +7919,10 @@ tr:last-child td{border-bottom:none}
 .mom-down{color:#dc2626}
 .mom-new{color:#7c3aed}
 .footer{position:fixed;bottom:.15in;left:0;right:0;border-top:1px solid #e8e8e4;padding:4px .5in 0;font-size:8pt;color:#bbb;letter-spacing:.03em}
+.commentary{break-inside:avoid;margin-top:12px;padding-top:20px;border-top:1px solid #e8e8e4}
+.commentary-title{font-size:12px;font-weight:700;color:#191919;margin-bottom:10px}
+.commentary-body{font-size:11px;color:#333;line-height:1.7;white-space:pre-wrap}
+.commentary-empty{font-size:11px;color:#bbb;font-style:italic}
 </style>
 </head>
 <body>
@@ -7921,7 +7933,13 @@ tr:last-child td{border-bottom:none}
   <div class="td">Generated ${escapeHtml(dateStr)}</div>
   <div class="tr"></div>
 </div>
-<div class="content">${sectionsHtml}</div>
+<div class="content">
+  ${sectionsHtml}
+  <div class="commentary">
+    <div class="commentary-title">Executive Commentary</div>
+    ${d.commentary ? `<div class="commentary-body">${escapeHtml(d.commentary)}</div>` : '<div class="commentary-empty">No commentary added.</div>'}
+  </div>
+</div>
 <script>window.onload=function(){window.print();}<\/script>
 </body>
 </html>`;
