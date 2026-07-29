@@ -27,7 +27,12 @@
       "Bash(git -C \"C:/Users/josep/OneDrive/Documents/GitHub/opsMarketing\" commit -m \"Add glossary, quiz, term tooltips, daily progress\")",
       "Bash(git -C \"C:/Users/josep/OneDrive/Documents/GitHub/opsMarketing\" push)",
       "Bash(node -e ' *)",
-      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('C:/Users/Josep/OneDrive/Documents/GitHub/opsMarketing/app.js','utf8'\\);try{new Function\\(c\\);console.log\\('syntax OK'\\);}catch\\(e\\){console.log\\('ERROR:',e.message\\);}\")"
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('C:/Users/Josep/OneDrive/Documents/GitHub/opsMarketing/app.js','utf8'\\);try{new Function\\(c\\);console.log\\('syntax OK'\\);}catch\\(e\\){console.log\\('ERROR:',e.message\\);}\")",
+      "Bash(python -c ' *)",
+      "Bash(python)",
+      "Bash(python -)",
+      "Bash(python font_escape.py)",
+      "Bash(python patch_app.py)"
     ]
   }
 }
