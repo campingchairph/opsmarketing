@@ -6432,19 +6432,9 @@ body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAF
 .cover-avg{display:flex;flex-direction:column;gap:5px;border-left:3px solid #E4572E;padding-left:14px}
 .cover-avg-val{font-family:'ABCDiatype',sans-serif;font-size:26pt;font-weight:400;color:#E4572E;letter-spacing:0.01em;line-height:1}
 .cover-avg-lbl{font-size:8pt;font-weight:500;color:#8C8A85;text-transform:uppercase;letter-spacing:0.06em}
-.brand-header{position:fixed;top:0;left:0;right:0;height:15mm;display:flex;align-items:center;justify-content:flex-end;padding:0 13mm}
-.brand-name{font-family:'SilvanaText',serif;font-size:13px;letter-spacing:0.08em;color:#191919}
-.brand-footer{position:fixed;bottom:0;left:0;right:0;background:#191919;display:flex;align-items:center;justify-content:space-between;padding:8mm 13mm}
-.brand-tagline{font-family:'SilvanaText',serif;font-size:13px;color:#FAFAF2;line-height:1.4}
-.brand-contact{font-family:'ABCDiatype',sans-serif;font-size:8.5px;color:#8C8A85;letter-spacing:0.04em}
 </style>
 </head>
 <body>
-<div class="brand-header"><span class="brand-name">Assetline Capital</span></div>
-<div class="brand-footer">
-  <div class="brand-tagline">Capital moves <em>differently</em> here.</div>
-  <div class="brand-contact">assetline.com.au &nbsp;|&nbsp; 1300 370 821 &nbsp;|&nbsp; apply@assetline.com.au</div>
-</div>
 ${titlePage}
 ${pages.join('\n')}
 <script>window.onload=function(){window.print();}<\/script>
@@ -7931,19 +7921,9 @@ tr:last-child td{border-bottom:none}
 .commentary-title{font-family:'SilvanaText',serif;font-size:13px;font-weight:400;color:#191919;margin-bottom:10px}
 .commentary-body{font-size:10px;color:#292929;line-height:1.7;white-space:pre-wrap}
 .commentary-empty{font-size:11px;color:#8C8A85;font-style:italic}
-.brand-header{position:fixed;top:0;left:0;right:0;height:15mm;display:flex;align-items:center;justify-content:flex-end;padding:0 13mm}
-.brand-name{font-family:'SilvanaText',serif;font-size:13px;letter-spacing:0.08em;color:#191919}
-.brand-footer{position:fixed;bottom:0;left:0;right:0;background:#191919;display:flex;align-items:center;justify-content:space-between;padding:8mm 13mm}
-.brand-tagline{font-family:'SilvanaText',serif;font-size:13px;color:#FAFAF2;line-height:1.4}
-.brand-contact{font-family:'ABCDiatype',sans-serif;font-size:8.5px;color:#8C8A85;letter-spacing:0.04em}
 </style>
 </head>
 <body>
-<div class="brand-header"><span class="brand-name">Assetline Capital</span></div>
-<div class="brand-footer">
-  <div class="brand-tagline">Capital moves <em>differently</em> here.</div>
-  <div class="brand-contact">assetline.com.au &nbsp;|&nbsp; 1300 370 821 &nbsp;|&nbsp; apply@assetline.com.au</div>
-</div>
 <div class="title-page">
   <div class="tl">Website Performance Dashboard</div>
   <div class="tp">${escapeHtml(compLabel || dateStr)}</div>
