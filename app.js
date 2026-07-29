@@ -6388,7 +6388,7 @@ function printEdmReport() {
 <meta charset="utf-8">
 <title>eDM Report${monthLabel ? ' — ' + monthLabel : ''}</title>
 <style>${BRAND_FONT_CSS}
-@page { size: A4 portrait; margin: 18mm 13mm 9mm 13mm; }
+@page { size: A4 portrait; margin: 31mm 13mm 28mm 13mm; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAFAF2;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
 .page{min-height:calc(297mm - 1.1in);page-break-after:always;display:flex;flex-direction:column;gap:32px}
@@ -6409,13 +6409,13 @@ body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAF
 .stat-group-label{font-family:'SilvanaText',serif;font-size:11pt;font-weight:400;letter-spacing:0.06em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{display:flex;flex-direction:column;gap:2px}
-.stat-val{font-family:'ABCDiatype',sans-serif;font-size:25pt;font-weight:400;letter-spacing:-0.03em;line-height:1}
+.stat-val{font-family:'ABCDiatype',sans-serif;font-size:25pt;font-weight:400;letter-spacing:0.02em;line-height:1}
 .stat-lbl{font-family:'ABCDiatype',sans-serif;font-size:8pt;font-weight:500;color:#8C8A85;letter-spacing:0.04em}
 .page-monthly{min-height:auto}
 .mo-badge{background:#E4572E}
 .mo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:24px 0}
 .mo-stat{display:flex;flex-direction:column;gap:4px;border-left:3px solid #E4572E;padding-left:12px}
-.mo-val{font-family:'SilvanaText',serif;font-size:32px;font-weight:400;color:#E4572E;letter-spacing:-0.04em}
+.mo-val{font-family:'ABCDiatype',sans-serif;font-size:32px;font-weight:400;color:#E4572E;letter-spacing:0.01em}
 .mo-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.08em}
 .mo-count{font-size:10px;color:#aaa}
 .page-title{display:flex;align-items:flex-start;justify-content:flex-start;min-height:calc(297mm - 1in);padding-top:1.4in;position:relative}
@@ -6426,15 +6426,25 @@ body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAF
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
-.cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #e8e8e4;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
-.cover-avgs-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:14px}
+.cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #DBDAD0;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
+.cover-avgs-title{font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#8C8A85;margin-bottom:14px}
 .cover-avgs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .cover-avg{display:flex;flex-direction:column;gap:5px;border-left:3px solid #E4572E;padding-left:14px}
-.cover-avg-val{font-family:'SilvanaText',serif;font-size:26pt;font-weight:400;color:#E4572E;letter-spacing:-0.04em;line-height:1}
-.cover-avg-lbl{font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em}
+.cover-avg-val{font-family:'ABCDiatype',sans-serif;font-size:26pt;font-weight:400;color:#E4572E;letter-spacing:0.01em;line-height:1}
+.cover-avg-lbl{font-size:8pt;font-weight:500;color:#8C8A85;text-transform:uppercase;letter-spacing:0.06em}
+.brand-header{position:fixed;top:0;left:0;right:0;height:15mm;display:flex;align-items:center;justify-content:flex-end;padding:0 13mm}
+.brand-name{font-family:'SilvanaText',serif;font-size:13px;letter-spacing:0.08em;color:#191919}
+.brand-footer{position:fixed;bottom:0;left:0;right:0;background:#191919;display:flex;align-items:center;justify-content:space-between;padding:8mm 13mm}
+.brand-tagline{font-family:'SilvanaText',serif;font-size:13px;color:#FAFAF2;line-height:1.4}
+.brand-contact{font-family:'ABCDiatype',sans-serif;font-size:8.5px;color:#8C8A85;letter-spacing:0.04em}
 </style>
 </head>
 <body>
+<div class="brand-header"><span class="brand-name">Assetline Capital</span></div>
+<div class="brand-footer">
+  <div class="brand-tagline">Capital moves <em>differently</em> here.</div>
+  <div class="brand-contact">assetline.com.au &nbsp;|&nbsp; 1300 370 821 &nbsp;|&nbsp; apply@assetline.com.au</div>
+</div>
 ${titlePage}
 ${pages.join('\n')}
 <script>window.onload=function(){window.print();}<\/script>
@@ -7893,13 +7903,13 @@ function printWPReport() {
 <meta charset="utf-8">
 <title>Website Performance${compLabel ? ' — ' + compLabel : ''}</title>
 <style>${BRAND_FONT_CSS}
-@page{size:A4 portrait;margin:18mm 13mm 9mm 13mm}
+@page{size:A4 portrait;margin:31mm 13mm 28mm 13mm}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAFAF2;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
 .title-page{min-height:calc(297mm - 1.2in);display:flex;flex-direction:column;justify-content:flex-start;padding-top:1.6in;page-break-after:always}
 .tl{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#E4572E}
 .tp{font-family:'SilvanaText',serif;font-size:52px;font-weight:400;color:#191919;line-height:1.05;margin-top:8px}
-.td{font-size:11px;color:#aaa;margin-top:4px}
+.td{font-size:11px;color:#8C8A85;margin-top:4px}
 .tr{width:48px;height:3px;background:#E4572E;margin-top:20px}
 .content{display:flex;flex-direction:column;gap:0}
 .sb{break-inside:avoid;margin-bottom:28px}
@@ -7913,17 +7923,27 @@ td{padding:6px 8px;border-bottom:1px solid #EBEBE1;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 .lc{color:#191919;font-weight:500}
 .nc{font-variant-numeric:tabular-nums;color:#191919;text-align:right}
-.mc{font-weight:700;text-align:right;white-space:nowrap;color:#999}
+.mc{font-weight:500;text-align:right;white-space:nowrap;color:#999}
 .mom-up{color:#E4572E;font-weight:500}
 .mom-down{color:#8C8A85;font-weight:500}
 .mom-new{color:#E4572E;font-weight:500}
 .commentary{break-inside:avoid;margin-top:12px;padding-top:20px;border-top:1px solid #DBDAD0}
 .commentary-title{font-family:'SilvanaText',serif;font-size:13px;font-weight:400;color:#191919;margin-bottom:10px}
 .commentary-body{font-size:10px;color:#292929;line-height:1.7;white-space:pre-wrap}
-.commentary-empty{font-size:11px;color:#bbb;font-style:italic}
+.commentary-empty{font-size:11px;color:#8C8A85;font-style:italic}
+.brand-header{position:fixed;top:0;left:0;right:0;height:15mm;display:flex;align-items:center;justify-content:flex-end;padding:0 13mm}
+.brand-name{font-family:'SilvanaText',serif;font-size:13px;letter-spacing:0.08em;color:#191919}
+.brand-footer{position:fixed;bottom:0;left:0;right:0;background:#191919;display:flex;align-items:center;justify-content:space-between;padding:8mm 13mm}
+.brand-tagline{font-family:'SilvanaText',serif;font-size:13px;color:#FAFAF2;line-height:1.4}
+.brand-contact{font-family:'ABCDiatype',sans-serif;font-size:8.5px;color:#8C8A85;letter-spacing:0.04em}
 </style>
 </head>
 <body>
+<div class="brand-header"><span class="brand-name">Assetline Capital</span></div>
+<div class="brand-footer">
+  <div class="brand-tagline">Capital moves <em>differently</em> here.</div>
+  <div class="brand-contact">assetline.com.au &nbsp;|&nbsp; 1300 370 821 &nbsp;|&nbsp; apply@assetline.com.au</div>
+</div>
 <div class="title-page">
   <div class="tl">Website Performance Dashboard</div>
   <div class="tp">${escapeHtml(compLabel || dateStr)}</div>
