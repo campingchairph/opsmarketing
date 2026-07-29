@@ -6388,7 +6388,7 @@ function printEdmReport() {
 <meta charset="utf-8">
 <title>eDM Report${monthLabel ? ' — ' + monthLabel : ''}</title>
 <style>${BRAND_FONT_CSS}
-@page { size: A4 portrait; margin: 0.75in 0.5in 0.35in 0.5in; }
+@page { size: A4 portrait; margin: 18mm 13mm 9mm 13mm; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAFAF2;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
 .page{min-height:calc(297mm - 1.1in);page-break-after:always;display:flex;flex-direction:column;gap:32px}
@@ -6406,11 +6406,11 @@ body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAF
 .img-col{overflow:hidden;max-height:calc(297mm - 1.8in)}
 .stats-col{display:flex;flex-direction:column;gap:44px}
 .stat-group{display:flex;flex-direction:column;gap:6px}
-.stat-group-label{font-size:10pt;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
+.stat-group-label{font-family:'SilvanaText',serif;font-size:11pt;font-weight:400;letter-spacing:0.06em;text-transform:uppercase;color:var(--gc);border-bottom:1px solid var(--gc);padding-bottom:3px;margin-bottom:2px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{display:flex;flex-direction:column;gap:2px}
-.stat-val{font-family:'SilvanaText',serif;font-size:25pt;font-weight:400;letter-spacing:-0.03em;line-height:1}
-.stat-lbl{font-size:8pt;color:#888}
+.stat-val{font-family:'ABCDiatype',sans-serif;font-size:25pt;font-weight:400;letter-spacing:-0.03em;line-height:1}
+.stat-lbl{font-family:'ABCDiatype',sans-serif;font-size:8pt;font-weight:500;color:#8C8A85;letter-spacing:0.04em}
 .page-monthly{min-height:auto}
 .mo-badge{background:#E4572E}
 .mo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:24px 0}
@@ -6426,8 +6426,6 @@ body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAF
 .title-pg-rule{width:48px;height:3px;background:#E4572E;margin:18px 0 12px}
 .title-pg-count{font-size:12px;color:#666}
 .delivery-grid{grid-template-columns:repeat(2,1fr)}
-.page-footer{position:fixed;bottom:0.12in;left:0;right:0;border-top:1px solid #e8e8e4}
-.page-footer-inner{padding:5px 0.5in 0;font-size:8pt;color:#bbb;letter-spacing:0.03em}
 .cover-avgs{width:100%;margin-top:auto;padding-top:28px;border-top:1px solid #e8e8e4;position:absolute;bottom:0.5in;left:0.5in;right:0.5in}
 .cover-avgs-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:14px}
 .cover-avgs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -6437,7 +6435,6 @@ body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAF
 </style>
 </head>
 <body>
-<div class="page-footer"><div class="page-footer-inner">eDM Performance Report${monthLabel ? ' | ' + escapeHtml(monthLabel) : ''}</div></div>
 ${titlePage}
 ${pages.join('\n')}
 <script>window.onload=function(){window.print();}<\/script>
@@ -7896,7 +7893,7 @@ function printWPReport() {
 <meta charset="utf-8">
 <title>Website Performance${compLabel ? ' — ' + compLabel : ''}</title>
 <style>${BRAND_FONT_CSS}
-@page{size:A4 portrait;margin:.75in .5in .45in .5in}
+@page{size:A4 portrait;margin:18mm 13mm 9mm 13mm}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'ABCDiatype',system-ui,sans-serif;color:#191919;background:#FAFAF2;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
 .title-page{min-height:calc(297mm - 1.2in);display:flex;flex-direction:column;justify-content:flex-start;padding-top:1.6in;page-break-after:always}
@@ -7919,8 +7916,7 @@ tr:last-child td{border-bottom:none}
 .mc{font-weight:700;text-align:right;white-space:nowrap;color:#999}
 .mom-up{color:#E4572E;font-weight:500}
 .mom-down{color:#8C8A85;font-weight:500}
-.mom-new{color:#7C3AEF;font-weight:500}
-.footer{position:fixed;bottom:.15in;left:0;right:0;border-top:1px solid #DBDAD0;padding:4px .5in 0;font-size:8pt;color:#8C8A85;letter-spacing:.03em}
+.mom-new{color:#E4572E;font-weight:500}
 .commentary{break-inside:avoid;margin-top:12px;padding-top:20px;border-top:1px solid #DBDAD0}
 .commentary-title{font-family:'SilvanaText',serif;font-size:13px;font-weight:400;color:#191919;margin-bottom:10px}
 .commentary-body{font-size:10px;color:#292929;line-height:1.7;white-space:pre-wrap}
@@ -7928,7 +7924,6 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-<div class="footer">Website Performance Dashboard${compLabel ? ' | ' + escapeHtml(compLabel) : ''}</div>
 <div class="title-page">
   <div class="tl">Website Performance Dashboard</div>
   <div class="tp">${escapeHtml(compLabel || dateStr)}</div>
