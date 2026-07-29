@@ -7289,6 +7289,10 @@ function renderEdmReportPage() {
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><path d="M4 6V2h8v4M4 11H2V7h12v4h-2M4 11v3h8v-3H4z"/></svg>
             Print
           </button>
+          <button class="edr-print-btn" onclick="exportEdmData()" title="Export raw data as Excel">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/><line x1="6" y1="2" x2="6" y2="14"/></svg>
+            Data
+          </button>
         </div>
         <div id="edr-report-preview"></div>
       </div>
@@ -7815,9 +7819,13 @@ function renderWebPerfPage() {
             <input type="month" class="wp-month-input" id="wp-last-month" value="${d.lastMonth || ''}" onchange="wpSaveMonth('last',this.value)">
           </span>
         </div>
-        <button class="edr-print-btn" onclick="printWPReport()" title="Export as PDF">
+        <button class="edr-print-btn" onclick="printWPReport()" title="Print report">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><path d="M4 6V2h8v4M4 11H2V7h12v4h-2M4 11v3h8v-3H4z"/></svg>
-          Export
+          Print
+        </button>
+        <button class="edr-print-btn" onclick="exportWPData()" title="Export raw data as Excel">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:13px;height:13px"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/><line x1="6" y1="2" x2="6" y2="14"/></svg>
+          Data
         </button>
         <button class="wp-clear-btn" onclick="wpClearAll()">Clear all</button>
       </div>
@@ -7945,4 +7953,94 @@ tr:last-child td{border-bottom:none}
   if (!w) { showAiToast('Pop-up blocked — allow pop-ups for this page.'); return; }
   w.document.write(html);
   w.document.close();
+}
+
+function exportEdmData() {
+  if (typeof XLSX === 'undefined') { showAiToast('Excel library not loaded yet — try again in a moment.'); return; }
+  const d = loadEdmReportData();
+  if (!d.entries.length) { showAiToast('No eDM data to export.'); return; }
+  const monthLabel = computeMonthLabel(d);
+
+  const headers = [
+    'Email Name', 'Subject', 'Send Date', 'Report Link',
+    'Total Delivered', 'Unique Opens',
+    'HTML Open Rate (%)', 'Click-to-Open Ratio (%)',
+    'Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)',
+    'Read Rate (%)', 'Skim Rate (%)',
+    'Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'
+  ];
+  const rows = d.entries.map(e => [
+    e.email_name || '',
+    e.subject || '',
+    e.started_at ? edrDate(e.started_at) : '',
+    e.report_link || '',
+    e.total_delivered || '',
+    e.unique_opens || '',
+    e.html_open_rate || '',
+    e.click_to_open_ratio || '',
+    e.total_clicks || '',
+    e.total_ctr || '',
+    e.unique_clicks || '',
+    e.unique_ctr || '',
+    e.read_rate || '',
+    e.skim_rate || '',
+    e.total_opt_outs || '',
+    e.opt_out_rate || '',
+    e.total_spam || '',
+    e.spam_rate || ''
+  ]);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, 'eDM Data');
+  const fname = 'eDM-Data' + (monthLabel ? '-' + monthLabel.replace(/\s/g, '-') : '') + '.xlsx';
+  XLSX.writeFile(wb, fname);
+}
+
+function exportWPData() {
+  if (typeof XLSX === 'undefined') { showAiToast('Excel library not loaded yet — try again in a moment.'); return; }
+  const d = loadWPData();
+  const hasSomeData = [1,2,3,4,6,7].some(n => (d[`s${n}`]?.rows || []).some(r => r.thisVal || r.lastVal));
+  if (!hasSomeData) { showAiToast('No website performance data to export.'); return; }
+
+  const thisLabel = wpFormatMonth(d.thisMonth) || 'This Month';
+  const lastLabel = wpFormatMonth(d.lastMonth) || 'Last Month';
+  const compLabel = d.thisMonth ? `${thisLabel} vs ${lastLabel}` : '';
+
+  const wb = XLSX.utils.book_new();
+
+  const addSheet = (num, sheetName) => {
+    const cols = WP_COLS[num] || [];
+    const fixedLabels = WP_FIXED_ROWS[num];
+    const rows = d[`s${num}`]?.rows || [];
+    const allRows = fixedLabels
+      ? fixedLabels.map((label, i) => ({ label, ...(rows[i] || {}), label }))
+      : rows.slice(0, 5);
+    if (!allRows.some(r => r.thisVal || r.lastVal)) return;
+    const hasExtra = cols.length > 4;
+    const dataRows = allRows.filter(r => r.label || r.thisVal || r.lastVal).map((r, i) => {
+      const type = wpGetMomType(num, i);
+      const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
+      const row = [r.label || '', r.thisVal || '', r.lastVal || '', mom === '—' ? '' : mom];
+      if (hasExtra) row.push(r.extra || '');
+      return row;
+    });
+    const ws = XLSX.utils.aoa_to_sheet([cols, ...dataRows]);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  };
+
+  addSheet(1, 'Executive KPIs');
+  addSheet(2, 'Product Pages');
+  addSheet(3, 'Traffic Sources');
+  addSheet(4, 'Landing Pages');
+  addSheet(6, 'Content');
+  addSheet(7, 'Audience');
+
+  if (d.commentary) {
+    const ws = XLSX.utils.aoa_to_sheet([['Executive Commentary'], [d.commentary]]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Commentary');
+  }
+
+  const fname = 'Website-Performance' + (compLabel ? '-' + compLabel.replace(/\s/g, '-') : '') + '.xlsx';
+  XLSX.writeFile(wb, fname);
 }
