@@ -7958,6 +7958,17 @@ tr:last-child td{border-bottom:none}
 function toExcelVal(v) {
   return (v === null || v === undefined) ? '' : String(v);
 }
+function exPct(v) {
+  const s = String(v ?? '').trim();
+  if (s === '') return '';
+  return s.endsWith('%') ? s : s + '%';
+}
+function exNum(v) {
+  const s = String(v ?? '').trim().replace(/,/g, '');
+  if (s === '') return '';
+  const n = Number(s);
+  return isNaN(n) ? s : n.toLocaleString('en-AU');
+}
 
 function exportEdmData() {
   if (typeof XLSX === 'undefined') { showAiToast('Excel library not loaded yet — try again in a moment.'); return; }
@@ -7991,11 +8002,11 @@ function exportEdmData() {
         [],
         ['KEY METRICS'],
         ['HTML Open Rate (%)', 'Click-to-Open Ratio (%)'],
-        [toExcelVal(e.html_open_rate), toExcelVal(e.click_to_open_ratio)],
+        [exPct(e.html_open_rate), exPct(e.click_to_open_ratio)],
         [],
         ['VOLUME'],
         ['Total Delivered', 'Unique Opens'],
-        [toExcelVal(e.total_delivered), toExcelVal(e.unique_opens)],
+        [exNum(e.total_delivered), exNum(e.unique_opens)],
       ];
 
       if (hasClicks) {
@@ -8003,7 +8014,7 @@ function exportEdmData() {
           [],
           ['CLICKS'],
           ['Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)', 'Read Rate (%)', 'Skim Rate (%)'],
-          [toExcelVal(e.total_clicks), toExcelVal(e.total_ctr), toExcelVal(e.unique_clicks), toExcelVal(e.unique_ctr), toExcelVal(e.read_rate), toExcelVal(e.skim_rate)]
+          [exNum(e.total_clicks), exPct(e.total_ctr), exNum(e.unique_clicks), exPct(e.unique_ctr), exPct(e.read_rate), exPct(e.skim_rate)]
         );
       }
 
@@ -8011,7 +8022,7 @@ function exportEdmData() {
         [],
         ['OPT-OUTS & SPAM'],
         ['Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'],
-        [toExcelVal(e.total_opt_outs), toExcelVal(e.opt_out_rate), toExcelVal(e.total_spam), toExcelVal(e.spam_rate)]
+        [exNum(e.total_opt_outs), exPct(e.opt_out_rate), exNum(e.total_spam), exPct(e.spam_rate)]
       );
 
       const ws = XLSX.utils.aoa_to_sheet(aoa);
