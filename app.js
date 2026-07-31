@@ -7961,51 +7961,66 @@ function exportEdmData() {
   if (!d.entries.length) { showAiToast('No eDM data to export.'); return; }
   const monthLabel = computeMonthLabel(d);
 
-  const wb = XLSX.utils.book_new();
+  try {
+    const wb = XLSX.utils.book_new();
+    const usedNames = {};
 
-  d.entries.forEach((e, idx) => {
-    const name = e.email_name || `Email ${idx + 1}`;
-    const sheetName = name.slice(0, 31).replace(/[:\\\/\?\*\[\]]/g, '-');
-    const hasClicks = e.total_clicks || e.unique_clicks || e.total_ctr || e.unique_ctr || e.read_rate || e.skim_rate;
+    d.entries.forEach((e, idx) => {
+      const name = e.email_name || `Email ${idx + 1}`;
+      let base = name.slice(0, 28).replace(/[:\\\/\?\*\[\]]/g, '-').trim() || `Email ${idx + 1}`;
+      // deduplicate sheet names (Excel disallows duplicates)
+      if (usedNames[base]) {
+        usedNames[base]++;
+        base = base.slice(0, 25) + ' ' + usedNames[base];
+      } else {
+        usedNames[base] = 1;
+      }
+      const sheetName = base;
 
-    const aoa = [
-      ['Email Name',   name],
-      ['Report Link',  e.report_link || ''],
-      ['Subject',      e.subject || ''],
-      ['Started Date', e.started_at ? edrDate(e.started_at) : ''],
-      [],
-      ['KEY METRICS'],
-      ['HTML Open Rate (%)', 'Click-to-Open Ratio (%)'],
-      [e.html_open_rate || '', e.click_to_open_ratio || ''],
-      [],
-      ['VOLUME'],
-      ['Total Delivered', 'Unique Opens'],
-      [e.total_delivered || '', e.unique_opens || ''],
-    ];
+      const hasClicks = e.total_clicks || e.unique_clicks || e.total_ctr || e.unique_ctr || e.read_rate || e.skim_rate;
 
-    if (hasClicks) {
+      const aoa = [
+        ['Email Name',   name],
+        ['Report Link',  e.report_link || ''],
+        ['Subject',      e.subject || ''],
+        ['Started Date', e.started_at ? edrDate(e.started_at) : ''],
+        [],
+        ['KEY METRICS'],
+        ['HTML Open Rate (%)', 'Click-to-Open Ratio (%)'],
+        [e.html_open_rate || '', e.click_to_open_ratio || ''],
+        [],
+        ['VOLUME'],
+        ['Total Delivered', 'Unique Opens'],
+        [e.total_delivered || '', e.unique_opens || ''],
+      ];
+
+      if (hasClicks) {
+        aoa.push(
+          [],
+          ['CLICKS'],
+          ['Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)', 'Read Rate (%)', 'Skim Rate (%)'],
+          [e.total_clicks || '', e.total_ctr || '', e.unique_clicks || '', e.unique_ctr || '', e.read_rate || '', e.skim_rate || '']
+        );
+      }
+
       aoa.push(
         [],
-        ['CLICKS'],
-        ['Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)', 'Read Rate (%)', 'Skim Rate (%)'],
-        [e.total_clicks || '', e.total_ctr || '', e.unique_clicks || '', e.unique_ctr || '', e.read_rate || '', e.skim_rate || '']
+        ['OPT-OUTS & SPAM'],
+        ['Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'],
+        [e.total_opt_outs || '', e.opt_out_rate || '', e.total_spam || '', e.spam_rate || '']
       );
-    }
 
-    aoa.push(
-      [],
-      ['OPT-OUTS & SPAM'],
-      ['Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'],
-      [e.total_opt_outs || '', e.opt_out_rate || '', e.total_spam || '', e.spam_rate || '']
-    );
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{ wch: 28 }, { wch: 22 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 18 }];
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
 
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [{ wch: 28 }, { wch: 22 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 18 }];
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  });
-
-  const fname = 'eDM-Data' + (monthLabel ? '-' + monthLabel.replace(/\s/g, '-') : '') + '.xlsx';
-  XLSX.writeFile(wb, fname);
+    const fname = 'eDM-Data' + (monthLabel ? '-' + monthLabel.replace(/\s/g, '-') : '') + '.xlsx';
+    XLSX.writeFile(wb, fname);
+  } catch (err) {
+    console.error('exportEdmData error:', err);
+    showAiToast('Export failed: ' + (err.message || err));
+  }
 }
 
 function exportWPData() {
@@ -8018,40 +8033,48 @@ function exportWPData() {
   const lastLabel = wpFormatMonth(d.lastMonth) || 'Last Month';
   const compLabel = d.thisMonth ? `${thisLabel} vs ${lastLabel}` : '';
 
-  const wb = XLSX.utils.book_new();
+  try {
+    const wb = XLSX.utils.book_new();
 
-  const addSheet = (num, sheetName) => {
-    const cols = WP_COLS[num] || [];
-    const fixedLabels = WP_FIXED_ROWS[num];
-    const rows = d[`s${num}`]?.rows || [];
-    const allRows = fixedLabels
-      ? fixedLabels.map((label, i) => ({ label, ...(rows[i] || {}), label }))
-      : rows.slice(0, 5);
-    if (!allRows.some(r => r.thisVal || r.lastVal)) return;
-    const hasExtra = cols.length > 4;
-    const dataRows = allRows.filter(r => r.label || r.thisVal || r.lastVal).map((r, i) => {
-      const type = wpGetMomType(num, i);
-      const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
-      const row = [r.label || '', r.thisVal || '', r.lastVal || '', mom === '—' ? '' : mom];
-      if (hasExtra) row.push(r.extra || '');
-      return row;
-    });
-    const ws = XLSX.utils.aoa_to_sheet([cols, ...dataRows]);
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  };
+    const addSheet = (num, sheetName) => {
+      const cols = WP_COLS[num] || [];
+      const fixedLabels = WP_FIXED_ROWS[num];
+      const rows = d[`s${num}`]?.rows || [];
+      const allRows = fixedLabels
+        ? fixedLabels.map((label, i) => ({ label, ...(rows[i] || {}), label }))
+        : rows.slice(0, 5);
+      if (!allRows.some(r => r.thisVal || r.lastVal)) return;
+      const hasExtra = cols.length > 4;
+      const dataRows = allRows.filter(r => r.label || r.thisVal || r.lastVal).map((r, i) => {
+        const type = wpGetMomType(num, i);
+        const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
+        const row = [r.label || '', r.thisVal || '', r.lastVal || '', mom === '—' ? '' : mom];
+        if (hasExtra) row.push(r.extra || '');
+        return row;
+      });
+      const ws = XLSX.utils.aoa_to_sheet([cols, ...dataRows]);
+      ws['!cols'] = cols.map(() => ({ wch: 22 }));
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    };
 
-  addSheet(1, 'Executive KPIs');
-  addSheet(2, 'Product Pages');
-  addSheet(3, 'Traffic Sources');
-  addSheet(4, 'Landing Pages');
-  addSheet(6, 'Content');
-  addSheet(7, 'Audience');
+    addSheet(1, 'Executive KPIs');
+    addSheet(2, 'Product Pages');
+    addSheet(3, 'Traffic Sources');
+    addSheet(4, 'Landing Pages');
+    addSheet(6, 'Content');
+    addSheet(7, 'Audience');
 
-  if (d.commentary) {
-    const ws = XLSX.utils.aoa_to_sheet([['Executive Commentary'], [d.commentary]]);
-    XLSX.utils.book_append_sheet(wb, ws, 'Commentary');
+    if (d.commentary) {
+      const ws = XLSX.utils.aoa_to_sheet([['Executive Commentary'], [d.commentary]]);
+      XLSX.utils.book_append_sheet(wb, ws, 'Commentary');
+    }
+
+    if (wb.SheetNames.length === 0) { showAiToast('No data to export yet.'); return; }
+
+    const fname = 'Website-Performance' + (compLabel ? '-' + compLabel.replace(/\s/g, '-') : '') + '.xlsx';
+    XLSX.writeFile(wb, fname);
+  } catch (err) {
+    console.error('exportWPData error:', err);
+    showAiToast('Export failed: ' + (err.message || err));
   }
-
-  const fname = 'Website-Performance' + (compLabel ? '-' + compLabel.replace(/\s/g, '-') : '') + '.xlsx';
-  XLSX.writeFile(wb, fname);
 }
