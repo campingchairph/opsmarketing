@@ -7961,38 +7961,49 @@ function exportEdmData() {
   if (!d.entries.length) { showAiToast('No eDM data to export.'); return; }
   const monthLabel = computeMonthLabel(d);
 
-  const headers = [
-    'Email Name', 'Subject', 'Send Date', 'Report Link',
-    'Total Delivered', 'Unique Opens',
-    'HTML Open Rate (%)', 'Click-to-Open Ratio (%)',
-    'Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)',
-    'Read Rate (%)', 'Skim Rate (%)',
-    'Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'
-  ];
-  const rows = d.entries.map(e => [
-    e.email_name || '',
-    e.subject || '',
-    e.started_at ? edrDate(e.started_at) : '',
-    e.report_link || '',
-    e.total_delivered || '',
-    e.unique_opens || '',
-    e.html_open_rate || '',
-    e.click_to_open_ratio || '',
-    e.total_clicks || '',
-    e.total_ctr || '',
-    e.unique_clicks || '',
-    e.unique_ctr || '',
-    e.read_rate || '',
-    e.skim_rate || '',
-    e.total_opt_outs || '',
-    e.opt_out_rate || '',
-    e.total_spam || '',
-    e.spam_rate || ''
-  ]);
-
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  XLSX.utils.book_append_sheet(wb, ws, 'eDM Data');
+
+  d.entries.forEach((e, idx) => {
+    const name = e.email_name || `Email ${idx + 1}`;
+    const sheetName = name.slice(0, 31).replace(/[:\\\/\?\*\[\]]/g, '-');
+    const hasClicks = e.total_clicks || e.unique_clicks || e.total_ctr || e.unique_ctr || e.read_rate || e.skim_rate;
+
+    const aoa = [
+      ['Email Name',   name],
+      ['Report Link',  e.report_link || ''],
+      ['Subject',      e.subject || ''],
+      ['Started Date', e.started_at ? edrDate(e.started_at) : ''],
+      [],
+      ['KEY METRICS'],
+      ['HTML Open Rate (%)', 'Click-to-Open Ratio (%)'],
+      [e.html_open_rate || '', e.click_to_open_ratio || ''],
+      [],
+      ['VOLUME'],
+      ['Total Delivered', 'Unique Opens'],
+      [e.total_delivered || '', e.unique_opens || ''],
+    ];
+
+    if (hasClicks) {
+      aoa.push(
+        [],
+        ['CLICKS'],
+        ['Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)', 'Read Rate (%)', 'Skim Rate (%)'],
+        [e.total_clicks || '', e.total_ctr || '', e.unique_clicks || '', e.unique_ctr || '', e.read_rate || '', e.skim_rate || '']
+      );
+    }
+
+    aoa.push(
+      [],
+      ['OPT-OUTS & SPAM'],
+      ['Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'],
+      [e.total_opt_outs || '', e.opt_out_rate || '', e.total_spam || '', e.spam_rate || '']
+    );
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{ wch: 28 }, { wch: 22 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+
   const fname = 'eDM-Data' + (monthLabel ? '-' + monthLabel.replace(/\s/g, '-') : '') + '.xlsx';
   XLSX.writeFile(wb, fname);
 }
