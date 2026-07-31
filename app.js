@@ -7955,11 +7955,8 @@ tr:last-child td{border-bottom:none}
   w.document.close();
 }
 
-function toExcelNum(v) {
-  if (v === null || v === undefined || v === '') return '';
-  const s = String(v).trim().replace(/,/g, '').replace(/%$/, '');
-  const n = parseFloat(s);
-  return isNaN(n) ? v : n;
+function toExcelVal(v) {
+  return (v === null || v === undefined) ? '' : String(v);
 }
 
 function exportEdmData() {
@@ -7994,11 +7991,11 @@ function exportEdmData() {
         [],
         ['KEY METRICS'],
         ['HTML Open Rate (%)', 'Click-to-Open Ratio (%)'],
-        [toExcelNum(e.html_open_rate), toExcelNum(e.click_to_open_ratio)],
+        [toExcelVal(e.html_open_rate), toExcelVal(e.click_to_open_ratio)],
         [],
         ['VOLUME'],
         ['Total Delivered', 'Unique Opens'],
-        [toExcelNum(e.total_delivered), toExcelNum(e.unique_opens)],
+        [toExcelVal(e.total_delivered), toExcelVal(e.unique_opens)],
       ];
 
       if (hasClicks) {
@@ -8006,7 +8003,7 @@ function exportEdmData() {
           [],
           ['CLICKS'],
           ['Total Clicks', 'Total CTR (%)', 'Unique Clicks', 'Unique CTR (%)', 'Read Rate (%)', 'Skim Rate (%)'],
-          [toExcelNum(e.total_clicks), toExcelNum(e.total_ctr), toExcelNum(e.unique_clicks), toExcelNum(e.unique_ctr), toExcelNum(e.read_rate), toExcelNum(e.skim_rate)]
+          [toExcelVal(e.total_clicks), toExcelVal(e.total_ctr), toExcelVal(e.unique_clicks), toExcelVal(e.unique_ctr), toExcelVal(e.read_rate), toExcelVal(e.skim_rate)]
         );
       }
 
@@ -8014,7 +8011,7 @@ function exportEdmData() {
         [],
         ['OPT-OUTS & SPAM'],
         ['Total Opt-outs', 'Opt-out Rate (%)', 'Total Spam', 'Spam Rate (%)'],
-        [toExcelNum(e.total_opt_outs), toExcelNum(e.opt_out_rate), toExcelNum(e.total_spam), toExcelNum(e.spam_rate)]
+        [toExcelVal(e.total_opt_outs), toExcelVal(e.opt_out_rate), toExcelVal(e.total_spam), toExcelVal(e.spam_rate)]
       );
 
       const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -8055,7 +8052,7 @@ function exportWPData() {
       const dataRows = allRows.filter(r => r.label || r.thisVal || r.lastVal).map((r, i) => {
         const type = wpGetMomType(num, i);
         const mom = wpCalcMoM(r.thisVal, r.lastVal, type);
-        const row = [r.label || '', toExcelNum(r.thisVal), toExcelNum(r.lastVal), mom === '—' ? '' : toExcelNum(mom)];
+        const row = [r.label || '', toExcelVal(r.thisVal), toExcelVal(r.lastVal), mom === '—' ? '' : toExcelVal(mom)];
         if (hasExtra) row.push(r.extra || '');
         return row;
       });
