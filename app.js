@@ -5035,6 +5035,88 @@ function dEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ── Event Summariser ─────────────────────────────────────────────
+const EVCAL_SYSTEM = `You are a calendar event assistant. Convert raw event information into clean, structured calendar entries.
+
+Rules:
+- No marketing language, no emoji, no filler phrases ("Join us", "Don't miss", "We're excited")
+- Titles: short and specific, 5–8 words max
+- Descriptions: 1–2 sentences, factual, plain English
+- Extract only what is actually stated — never invent details
+- If the event has different details per state or city (different date, time, or venue), return one entry per state
+- If it's a single event with no state variation, return one entry with "state": null
+
+Return ONLY valid JSON — no other text:
+[
+  {
+    "state": "NSW",
+    "title": "Broker Breakfast — Sydney",
+    "description": "Morning briefing for brokers covering Q2 market outlook and product updates.",
+    "details": [
+      { "label": "Date", "value": "Thursday 22 August 2024" },
+      { "label": "Time", "value": "7:30am – 9:00am" },
+      { "label": "Location", "value": "Four Seasons Hotel, 199 George St, Sydney" },
+      { "label": "RSVP by", "value": "15 August 2024" }
+    ]
+  }
+]
+
+Only include detail rows that are explicitly stated in the input. Omit any field not mentioned.`;
+
+async function summariseEventCal() {
+  const input = document.getElementById('evcal-input').value.trim();
+  if (!input) { showAiToast('Paste some event info first.'); return; }
+  aiSetBtn('evcal-btn', true, 'Summarise →', 'Summarising…');
+  const out = document.getElementById('evcal-output');
+  out.hidden = true;
+  out.innerHTML = '';
+  try {
+    const raw = await callClaude(EVCAL_SYSTEM, input);
+    const json = raw.match(/\[[\s\S]*\]/)?.[0];
+    if (!json) throw new Error('Unexpected response — try again');
+    const events = JSON.parse(json);
+    if (!events.length) { showAiToast('No events found in that text.'); return; }
+    out.innerHTML = events.map((e, i) => `
+      <div class="evcal-card" id="evcal-card-${i}">
+        ${e.state ? `<div class="evcal-state-tag">${escapeHtml(e.state)}</div>` : ''}
+        <div class="evcal-title">${escapeHtml(e.title)}</div>
+        <div class="evcal-desc">${escapeHtml(e.description)}</div>
+        ${e.details?.length ? `<ul class="evcal-details">${e.details.map(d =>
+          `<li><span class="evcal-lbl">${escapeHtml(d.label)}</span><span>${escapeHtml(d.value)}</span></li>`
+        ).join('')}</ul>` : ''}
+        <button class="ai-copy-btn" onclick="copyEvCalCard(${i})">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+          Copy
+        </button>
+      </div>`).join('');
+    out.hidden = false;
+  } catch (err) {
+    if (err.message === 'NO_KEY') showAiToast('Set your Groq API key in AI Settings first.');
+    else showAiToast('Error: ' + (err.message || err));
+  } finally {
+    aiSetBtn('evcal-btn', false, 'Summarise →', '');
+  }
+}
+
+function copyEvCalCard(i) {
+  const card = document.getElementById(`evcal-card-${i}`);
+  if (!card) return;
+  const parts = [];
+  const state = card.querySelector('.evcal-state-tag')?.textContent?.trim();
+  const title = card.querySelector('.evcal-title')?.textContent?.trim();
+  const desc  = card.querySelector('.evcal-desc')?.textContent?.trim();
+  const rows  = [...card.querySelectorAll('.evcal-details li')].map(li => {
+    const lbl = li.querySelector('.evcal-lbl')?.textContent?.trim() || '';
+    const val = li.querySelector('span:last-child')?.textContent?.trim() || '';
+    return `${lbl}: ${val}`;
+  });
+  if (state) parts.push(state);
+  if (title) parts.push(title);
+  if (desc)  parts.push(desc);
+  if (rows.length) parts.push(rows.join('\n'));
+  navigator.clipboard.writeText(parts.join('\n\n')).then(() => showAiToast('✓ Copied'));
+}
+
 function runDiffCheck() {
   const t1 = document.getElementById('diff-left')?.value  ?? '';
   const t2 = document.getElementById('diff-right')?.value ?? '';
