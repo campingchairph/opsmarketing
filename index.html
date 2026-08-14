@@ -670,29 +670,6 @@
 
       <!-- ── EVENTS ── -->
       <div id="page-events" class="page">
-
-        <!-- ── Event Summariser ── -->
-        <div class="ai-feature-block" style="margin-bottom:16px">
-          <div class="section-block-header ai-feature-header">
-            <div class="sh-icon" style="background:var(--accent-dim)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/></svg>
-            </div>
-            <span class="sh-title">Event Summariser</span>
-            <span class="ai-badge">AI</span>
-          </div>
-          <div class="ai-feature-body">
-            <p class="ai-feature-desc">Paste raw event info — brief, email, invite. Gets you a clean calendar-ready summary. If the event runs across multiple states with different times or venues, you get one card per state.</p>
-            <div class="ai-controls">
-              <div class="ai-field-row">
-                <label class="ai-label">Paste event info</label>
-                <textarea id="evcal-input" class="form-textarea" rows="6" style="height:140px" placeholder="Paste invite text, email, event brief — any format"></textarea>
-              </div>
-              <button id="evcal-btn" class="btn-add" onclick="summariseEventCal()">Summarise →</button>
-            </div>
-            <div id="evcal-output" hidden></div>
-          </div>
-        </div>
-
         <div class="alert-box warn">
           <div class="alert-title">Detail is everything in finance events</div>
           <p>Wrong name on a badge, missed RSVP, wrong room — small errors reflect directly on the brand in front of clients. Over-communicate and over-prepare.</p>
@@ -1783,6 +1760,28 @@
                 <div id="cc-result"></div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ── Event Summariser ── -->
+        <div class="ai-feature-block" style="margin-top:16px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="1"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/></svg>
+            </div>
+            <span class="sh-title">Event Summariser</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste raw event info — brief, email, invite. Gets you a clean calendar-ready summary. If the event runs across multiple states with different times or venues, you get one card per state.</p>
+            <div class="ai-controls">
+              <div class="ai-field-row">
+                <label class="ai-label">Paste event info</label>
+                <textarea id="evcal-input" class="form-textarea" rows="6" style="height:140px" placeholder="Paste invite text, email, event brief — any format"></textarea>
+              </div>
+              <button id="evcal-btn" class="btn-add" onclick="summariseEventCal()">Summarise →</button>
+            </div>
+            <div id="evcal-output" hidden></div>
           </div>
         </div>
 
