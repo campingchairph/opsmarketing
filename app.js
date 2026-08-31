@@ -3197,8 +3197,8 @@ async function callClaude(systemPrompt, userMessage) {
       'authorization': `Bearer ${key}`
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 1024,
+      model: 'groq/compound-mini',
+      max_tokens: 4096,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userMessage }
@@ -7286,7 +7286,7 @@ async function sendSkillsMessage() {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'groq/compound-mini',
         max_tokens: 512,
         messages: [{ role: 'system', content: buildSkillsSystemPrompt() }, ...apiMessages]
       })
