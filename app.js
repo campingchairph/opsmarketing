@@ -3197,7 +3197,7 @@ async function callClaude(systemPrompt, userMessage) {
       'authorization': `Bearer ${key}`
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant',
       max_tokens: 1024,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -7286,7 +7286,7 @@ async function sendSkillsMessage() {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         max_tokens: 512,
         messages: [{ role: 'system', content: buildSkillsSystemPrompt() }, ...apiMessages]
       })
