@@ -5122,11 +5122,85 @@ function convertMergeFields() {
   showAiToast(`Done — ${changes.length} field${changes.length !== 1 ? 's' : ''} converted`);
 }
 
+let _edmPreviewTimer;
+function updateEdmPreviewDebounced() {
+  clearTimeout(_edmPreviewTimer);
+  _edmPreviewTimer = setTimeout(updateEdmPreview, 400);
+}
+
 function updateEdmPreview() {
   const iframe = document.getElementById('edm-preview-frame');
   if (!iframe) return;
   const html = document.getElementById('mfc-input')?.value || '';
   iframe.srcdoc = html || '<p style="padding:32px;color:#aaa;font-family:sans-serif;font-size:13px">Paste HTML to see a preview</p>';
+  iframe.onload = () => {
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    doc.designMode = 'on';
+    doc.execCommand('styleWithCSS', false, true);
+    doc.addEventListener('input', markPreviewDirty);
+  };
+  const btn = document.getElementById('edm-update-html-btn');
+  if (btn) btn.disabled = true;
+}
+
+function markPreviewDirty() {
+  const btn = document.getElementById('edm-update-html-btn');
+  if (btn) btn.disabled = false;
+}
+
+function edmFmt(cmd) {
+  const iframe = document.getElementById('edm-preview-frame');
+  const doc = iframe?.contentDocument;
+  if (!doc) return;
+  iframe.contentWindow.focus();
+  doc.execCommand('styleWithCSS', false, true);
+  doc.execCommand(cmd, false, null);
+  markPreviewDirty();
+}
+
+function edmFmtSize(size) {
+  if (!size) return;
+  const iframe = document.getElementById('edm-preview-frame');
+  const win = iframe?.contentWindow;
+  const doc = iframe?.contentDocument;
+  if (!doc) return;
+  win.focus();
+  doc.execCommand('styleWithCSS', false, true);
+  // Insert a span with exact pixel size around the selection
+  const sel = win.getSelection();
+  if (sel && sel.rangeCount && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const span = doc.createElement('span');
+    span.style.fontSize = size + 'px';
+    range.surroundContents(span);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  document.getElementById('edm-fmt-size').value = '';
+  markPreviewDirty();
+}
+
+function edmFmtColor(color) {
+  const iframe = document.getElementById('edm-preview-frame');
+  const win = iframe?.contentWindow;
+  const doc = iframe?.contentDocument;
+  if (!doc) return;
+  win.focus();
+  doc.execCommand('styleWithCSS', false, true);
+  doc.execCommand('foreColor', false, color);
+  markPreviewDirty();
+}
+
+function updateHtmlFromPreview() {
+  const iframe = document.getElementById('edm-preview-frame');
+  const doc = iframe?.contentDocument;
+  if (!doc) return;
+  const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+  document.getElementById('mfc-input').value = html;
+  const btn = document.getElementById('edm-update-html-btn');
+  if (btn) btn.disabled = true;
+  showAiToast('✓ HTML updated from preview edits');
 }
 
 function copyEdmHtml() {

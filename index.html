@@ -1729,14 +1729,49 @@
         <div class="edm-ed-split">
           <div class="edm-ed-pane">
             <div class="edm-ed-pane-label">HTML Code</div>
-            <textarea id="mfc-input" class="edm-ed-code" placeholder="Paste full HTML email here…" oninput="updateEdmPreview()"></textarea>
+            <textarea id="mfc-input" class="edm-ed-code" placeholder="Paste full HTML email here…" oninput="updateEdmPreviewDebounced()"></textarea>
           </div>
           <div class="edm-ed-pane">
             <div class="edm-ed-pane-label">
               Preview
-              <span class="edm-ed-preview-note">rendered in a sandboxed frame — links are inactive</span>
+              <span class="edm-ed-preview-note">click to edit text</span>
             </div>
-            <iframe id="edm-preview-frame" class="edm-ed-preview" sandbox="allow-same-origin" title="HTML Preview"></iframe>
+
+            <!-- Formatting toolbar -->
+            <div class="edm-fmt-bar" id="edm-fmt-bar">
+              <button class="edm-fmt-btn" onclick="edmFmt('bold')" title="Bold"><b>B</b></button>
+              <button class="edm-fmt-btn edm-fmt-btn-i" onclick="edmFmt('italic')" title="Italic"><i>I</i></button>
+              <button class="edm-fmt-btn edm-fmt-btn-u" onclick="edmFmt('underline')" title="Underline"><u>U</u></button>
+              <div class="edm-fmt-sep"></div>
+              <select class="edm-fmt-select" id="edm-fmt-size" onchange="edmFmtSize(this.value)" title="Font size">
+                <option value="">px</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+                <option value="18">18</option>
+                <option value="20">20</option>
+                <option value="22">22</option>
+                <option value="24">24</option>
+                <option value="28">28</option>
+                <option value="32">32</option>
+                <option value="36">36</option>
+                <option value="40">40</option>
+                <option value="48">48</option>
+              </select>
+              <label class="edm-fmt-color-wrap" title="Font colour">
+                <input type="color" id="edm-fmt-color" value="#000000" onchange="edmFmtColor(this.value)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 14h12M8 2l4 9H4z"/></svg>
+              </label>
+              <div class="edm-fmt-sep"></div>
+              <button class="edm-fmt-btn edm-fmt-btn-update" id="edm-update-html-btn" disabled onclick="updateHtmlFromPreview()">
+                ↑ Update HTML
+              </button>
+            </div>
+
+            <iframe id="edm-preview-frame" class="edm-ed-preview" sandbox="allow-same-origin allow-scripts" title="HTML Preview"></iframe>
           </div>
         </div>
 
@@ -2360,7 +2395,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';

@@ -6885,3 +6885,105 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   border-top: 1px solid var(--border);
   padding-top: 10px;
 }
+
+/* EDM Formatting Toolbar */
+.edm-fmt-bar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.edm-fmt-btn {
+  min-width: 28px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-1);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s;
+}
+.edm-fmt-btn:hover { background: var(--bg-3, var(--border)); border-color: var(--border); }
+.edm-fmt-btn b { font-size: 14px; }
+.edm-fmt-btn-i i { font-size: 13px; }
+.edm-fmt-btn-u u { text-decoration-thickness: 1.5px; font-size: 13px; }
+.edm-fmt-btn-update {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 10px;
+  color: var(--accent);
+  border-color: var(--accent);
+  white-space: nowrap;
+}
+.edm-fmt-btn-update:not(:disabled):hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.edm-fmt-btn-update:disabled {
+  color: var(--text-3);
+  border-color: var(--border);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.edm-fmt-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 3px;
+  flex-shrink: 0;
+}
+.edm-fmt-select {
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-1);
+  color: var(--text-1);
+  font-size: 11px;
+  cursor: pointer;
+}
+.edm-fmt-select:focus { outline: none; border-color: var(--accent); }
+.edm-fmt-color-wrap {
+  position: relative;
+  width: 28px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.edm-fmt-color-wrap:hover { border-color: var(--accent); }
+.edm-fmt-color-wrap input[type=color] {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  opacity: 0;
+  cursor: pointer;
+  top: -50%;
+  left: -50%;
+}
+.edm-fmt-color-wrap svg {
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  color: var(--text-1);
+}
+/* iframe sits flush under toolbar */
+.edm-ed-preview {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
