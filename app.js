@@ -3190,19 +3190,13 @@ function renderAiMeter() {
 async function callClaude(systemPrompt, userMessage) {
   const key = getAiKey();
   if (!key) throw new Error('NO_KEY');
-  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`, {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'authorization': `Bearer ${key}`
-    },
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      model: 'gemini-2.0-flash',
-      max_tokens: 4096,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userMessage }
-      ]
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+      generationConfig: { maxOutputTokens: 4096 }
     })
   });
   if (!res.ok) {
@@ -3210,10 +3204,9 @@ async function callClaude(systemPrompt, userMessage) {
     throw new Error(err?.error?.message || `API error ${res.status}`);
   }
   const data = await res.json();
-  // Track usage from response
-  const used = data.usage?.total_tokens || 0;
+  const used = data.usageMetadata?.totalTokenCount || 0;
   if (used) trackAiUsage(used);
-  return data.choices?.[0]?.message?.content ?? 'No response received.';
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received.';
 }
 
 // ── Shared UI helpers ────────────────────────────────────────────
@@ -3578,23 +3571,16 @@ function processEdmQaImage(file) {
 async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType) {
   const key = getAiKey();
   const body = {
-    model: 'gemini-2.0-flash',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      {
-        role: 'user',
-        content: [
-          { type: 'text', text: userText },
-          { type: 'image_url', image_url: { url: `data:${imageMimeType};base64,${imageBase64}` } }
-        ]
-      }
-    ],
-    max_tokens: 2000,
-    temperature: 0.1
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: 'user', parts: [
+      { text: userText },
+      { inline_data: { mime_type: imageMimeType, data: imageBase64 } }
+    ]}],
+    generationConfig: { maxOutputTokens: 2000 }
   };
-  const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
   if (!resp.ok) {
@@ -3602,7 +3588,7 @@ async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType
     throw new Error(err.error?.message || `Vision API error ${resp.status}`);
   }
   const data = await resp.json();
-  return data.choices[0].message.content;
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received.';
 }
 
 function switchEdmQaMode(mode) {
@@ -7282,19 +7268,19 @@ async function sendSkillsMessage() {
     const apiMessages = [
       ...skillsChatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }))
     ];
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: 'gemini-2.0-flash',
-        max_tokens: 512,
-        messages: [{ role: 'system', content: buildSkillsSystemPrompt() }, ...apiMessages]
+        system_instruction: { parts: [{ text: buildSkillsSystemPrompt() }] },
+        contents: apiMessages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
+        generationConfig: { maxOutputTokens: 512 }
       })
     });
     const data = await res.json();
-    const used = data.usage?.total_tokens || 0;
+    const used = data.usageMetadata?.totalTokenCount || 0;
     if (used) trackAiUsage(used);
-    const reply = data.choices?.[0]?.message?.content || 'No response received.';
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
     skillsChatHistory.push({ role: 'assistant', content: reply.replace(/\n/g, '<br>') });
   } catch (e) {
     skillsChatHistory.push({ role: 'assistant', content: 'Error: ' + e.message });
