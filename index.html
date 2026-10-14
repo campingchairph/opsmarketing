@@ -1763,6 +1763,39 @@
           </div>
         </div>
 
+        <!-- ── EDM Merge Field Converter ── -->
+        <div class="ai-feature-block" style="margin-top:16px">
+          <div class="section-block-header ai-feature-header">
+            <div class="sh-icon" style="background:var(--accent-dim)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 5h5M2 8h4M2 11h3"/><rect x="9" y="3" width="5" height="10" rx="1"/><line x1="11" y1="6" x2="13" y2="6"/><line x1="11" y1="9" x2="13" y2="9"/></svg>
+            </div>
+            <span class="sh-title">EDM Merge Field Converter</span>
+          </div>
+          <div class="ai-feature-body">
+            <p class="ai-feature-desc">Paste your HTML email — all merge fields are converted to the correct Salesforce Account Engagement syntax. Nothing else in the HTML is touched.</p>
+            <div class="ai-controls">
+              <div class="ai-field-row">
+                <label class="ai-label">HTML Input</label>
+                <textarea id="mfc-input" class="form-textarea" rows="8" style="height:160px;font-family:var(--font-mono);font-size:11px" placeholder="Paste full HTML email here…"></textarea>
+              </div>
+              <button class="btn-add" onclick="convertMergeFields()">Convert →</button>
+            </div>
+            <div id="mfc-output" hidden>
+              <div class="ai-output" style="display:flex;flex-direction:column;gap:12px">
+                <div>
+                  <div class="ai-output-label" style="margin-bottom:6px">Converted HTML</div>
+                  <textarea id="mfc-result" class="ai-result-text" rows="10" style="font-family:var(--font-mono);font-size:11px" readonly></textarea>
+                  <button class="ai-copy-btn" style="margin-top:6px" onclick="copyAiOutput('mfc-result')">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+                    Copy HTML
+                  </button>
+                </div>
+                <div id="mfc-report"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── Event Summariser ── -->
         <div class="ai-feature-block" style="margin-top:16px">
           <div class="section-block-header ai-feature-header">

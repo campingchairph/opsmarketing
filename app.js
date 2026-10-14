@@ -5021,6 +5021,99 @@ function dEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ── EDM Merge Field Converter ────────────────────────────────────
+const MFC_MAP = [
+  ['{{Recipient.FirstName}}',  '{!$recipient.FirstName}'],
+  ['{{$recipient.FirstName}}', '{!$recipient.FirstName}'],
+  ['{{Sender.Phone}}',         '{!$sender.Phone}'],
+  ['{{$sender.Phone}}',        '{!$sender.Phone}'],
+  ['{{$sender.FirstName}}',    '{!$sender.FirstName}'],
+  ['{{Sender.FirstName}}',     '{!$sender.FirstName}'],
+  ['{{$sender.LastName}}',     '{!$sender.LastName}'],
+  ['{{Sender.LastName}}',      '{!$sender.LastName}'],
+  ['{{$sender.Title}}',        '{!$sender.Title}'],
+  ['{{Sender.Title}}',         '{!$sender.Title}'],
+  ['{{$sender.Email}}',        '{!$sender.Email}'],
+  ['{{Sender.Email}}',         '{!$sender.Email}'],
+  ['{{$other.Unsubscribe}}',   '{!$other.Unsubscribe}'],
+  ['{{Unsubscribe}}',          '{!$other.Unsubscribe}'],
+];
+const MFC_NEVER_TOUCH = '{{$link.OpenTrackUrl}}';
+
+function convertMergeFields() {
+  const input = document.getElementById('mfc-input').value;
+  if (!input.trim()) { showAiToast('Paste some HTML first.'); return; }
+
+  const lines = input.split('\n');
+  const changes = [];
+
+  // Apply substitutions line by line (for line-number tracking)
+  const convertedLines = lines.map((line, lineIdx) => {
+    let out = line;
+    MFC_MAP.forEach(([find, replace]) => {
+      if (!out.includes(find)) return;
+      // Escape find string for use in RegExp
+      const escaped = find.replace(/[{}$!.]/g, c => '\\' + c);
+      out = out.replace(new RegExp(escaped, 'g'), () => {
+        changes.push({ line: lineIdx + 1, before: find, after: replace });
+        return replace;
+      });
+    });
+    // Fix missing space between first and last name
+    out = out.replace(/\{!\$sender\.FirstName\}\{!\$sender\.LastName\}/g, m => {
+      changes.push({ line: lineIdx + 1, before: m, after: '{!$sender.FirstName} {!$sender.LastName}' });
+      return '{!$sender.FirstName} {!$sender.LastName}';
+    });
+    return out;
+  });
+
+  const converted = convertedLines.join('\n');
+
+  // Detect any remaining {{...}} fields (excluding the open-track pixel)
+  const unmapped = [];
+  const remainRe = /\{\{[^}]+\}\}/g;
+  convertedLines.forEach((line, i) => {
+    let m;
+    while ((m = remainRe.exec(line)) !== null) {
+      if (m[0] !== MFC_NEVER_TOUCH) unmapped.push({ line: i + 1, field: m[0] });
+    }
+  });
+
+  // Checks
+  const openTrackOk = converted.includes(MFC_NEVER_TOUCH);
+  const noDoubleBrace = !converted.replace(new RegExp(MFC_NEVER_TOUCH.replace(/[{}$!.]/g, c => '\\' + c), 'g'), '').match(/\{\{[^}]+\}\}/);
+  const signoffOk = !converted.match(/\{!\$sender\.FirstName\}\{!\$sender\.LastName\}/);
+  const unsubOk = !converted.match(/href=["'][^"']*\{\{[Uu]nsubscribe[^}]*\}\}/);
+
+  // Build report HTML
+  const changeRows = changes.length
+    ? `<table class="mfc-table"><thead><tr><th>Line</th><th>Before</th><th>After</th></tr></thead><tbody>
+        ${changes.map(c => `<tr><td>${c.line}</td><td><code>${escapeHtml(c.before)}</code></td><td><code>${escapeHtml(c.after)}</code></td></tr>`).join('')}
+       </tbody></table>`
+    : '<p class="mfc-none">No changes made.</p>';
+
+  const unmappedHtml = unmapped.length
+    ? `<ul class="mfc-unmapped">${unmapped.map(u => `<li>Line ${u.line}: <code>${escapeHtml(u.field)}</code></li>`).join('')}</ul>`
+    : '<p class="mfc-none">None</p>';
+
+  const check = ok => ok ? '<span class="mfc-pass">✓ Pass</span>' : '<span class="mfc-fail">✗ Fail</span>';
+
+  document.getElementById('mfc-result').value = converted;
+  document.getElementById('mfc-report').innerHTML = `
+    <div class="mfc-section"><div class="mfc-section-title">Change report (${changes.length} change${changes.length !== 1 ? 's' : ''})</div>${changeRows}</div>
+    <div class="mfc-section"><div class="mfc-section-title">Unmapped fields</div>${unmappedHtml}</div>
+    <div class="mfc-section"><div class="mfc-section-title">Checks</div>
+      <ul class="mfc-checks">
+        <li>${check(openTrackOk)} <code>{{$link.OpenTrackUrl}}</code> unchanged</li>
+        <li>${check(noDoubleBrace)} No <code>{{"{{"}}...{{"}}"}}</code>-style fields remain (except open-track pixel)</li>
+        <li>${check(signoffOk)} Sign-off has space between first and last name</li>
+        <li>${check(unsubOk)} Unsubscribe <code>href</code> converted</li>
+      </ul>
+    </div>`;
+  document.getElementById('mfc-output').hidden = false;
+  showAiToast(`Done — ${changes.length} field${changes.length !== 1 ? 's' : ''} converted`);
+}
+
 // ── Event Summariser ─────────────────────────────────────────────
 const EVCAL_SYSTEM = `You are a calendar event assistant. Convert raw event information into clean, structured calendar entries.
 
