@@ -3190,13 +3190,16 @@ function renderAiMeter() {
 async function callClaude(systemPrompt, userMessage) {
   const key = getAiKey();
   if (!key) throw new Error('NO_KEY');
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
     body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig: { maxOutputTokens: 4096 }
+      model: 'openai/gpt-oss-20b',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage }
+      ],
+      max_tokens: 4096
     })
   });
   if (!res.ok) {
@@ -3204,9 +3207,9 @@ async function callClaude(systemPrompt, userMessage) {
     throw new Error(err?.error?.message || `API error ${res.status}`);
   }
   const data = await res.json();
-  const used = data.usageMetadata?.totalTokenCount || 0;
+  const used = data.usage?.total_tokens || 0;
   if (used) trackAiUsage(used);
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received.';
+  return data.choices?.[0]?.message?.content ?? 'No response received.';
 }
 
 // ── Shared UI helpers ────────────────────────────────────────────
@@ -3233,7 +3236,7 @@ function aiSetBtn(btnId, loading, defaultLabel, loadingLabel) {
 }
 
 function aiNoKey(featureName) {
-  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Gemini API key, and click Save.\n\nGet a free key at: aistudio.google.com → Get API Key (no credit card needed).`);
+  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Groq API key, and click Save.\n\nGet a key at: console.groq.com → API Keys`);
 }
 
 // ── Feature 1: AI Email Drafter ──────────────────────────────────
@@ -3571,16 +3574,19 @@ function processEdmQaImage(file) {
 async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType) {
   const key = getAiKey();
   const body = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: [{ role: 'user', parts: [
-      { text: userText },
-      { inline_data: { mime_type: imageMimeType, data: imageBase64 } }
-    ]}],
-    generationConfig: { maxOutputTokens: 2000 }
+    model: 'openai/gpt-oss-120b',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: [
+        { type: 'text', text: userText },
+        { type: 'image_url', image_url: { url: `data:${imageMimeType};base64,${imageBase64}` } }
+      ]}
+    ],
+    max_tokens: 2000
   };
-  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
+  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'authorization': `Bearer ${key}` },
     body: JSON.stringify(body)
   });
   if (!resp.ok) {
@@ -3588,7 +3594,7 @@ async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType
     throw new Error(err.error?.message || `Vision API error ${resp.status}`);
   }
   const data = await resp.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received.';
+  return data.choices?.[0]?.message?.content ?? 'No response received.';
 }
 
 function switchEdmQaMode(mode) {
@@ -7361,19 +7367,22 @@ async function sendSkillsMessage() {
     const apiMessages = [
       ...skillsChatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }))
     ];
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: buildSkillsSystemPrompt() }] },
-        contents: apiMessages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
-        generationConfig: { maxOutputTokens: 512 }
+        model: 'openai/gpt-oss-20b',
+        messages: [
+          { role: 'system', content: buildSkillsSystemPrompt() },
+          ...apiMessages
+        ],
+        max_tokens: 512
       })
     });
     const data = await res.json();
-    const used = data.usageMetadata?.totalTokenCount || 0;
+    const used = data.usage?.total_tokens || 0;
     if (used) trackAiUsage(used);
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+    const reply = data.choices?.[0]?.message?.content || 'No response received.';
     skillsChatHistory.push({ role: 'assistant', content: reply.replace(/\n/g, '<br>') });
   } catch (e) {
     skillsChatHistory.push({ role: 'assistant', content: 'Error: ' + e.message });
