@@ -5139,6 +5139,13 @@ function updateEdmPreview() {
     doc.designMode = 'on';
     doc.execCommand('styleWithCSS', false, true);
     doc.addEventListener('input', markPreviewDirty);
+    // Strip Word/external formatting on paste — insert plain text only so it inherits the element's existing styles
+    doc.addEventListener('paste', e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      doc.execCommand('insertText', false, text);
+      markPreviewDirty();
+    });
   };
   const btn = document.getElementById('edm-update-html-btn');
   if (btn) btn.disabled = true;
