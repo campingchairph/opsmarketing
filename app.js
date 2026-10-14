@@ -253,6 +253,7 @@ function navigate(pageId) {
     glossary:     ['Finance Glossary', 'Financial services terms explained'],
     goodlooks:    ['What Good Looks Like', 'Pass vs Good vs Impressive'],
     diffcheck:    ['Text Compare', 'Spot differences between two versions of any text'],
+    edmeditor:    ['EDM HTML Editor', 'Code editor + live preview with merge field converter'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -268,6 +269,7 @@ function navigate(pageId) {
   updateAllStats();
 
   // Init calendar if needed
+  if (pageId === 'edmeditor')   { setTimeout(initEdmCodeEditor, 50); }
   if (pageId === 'timesheet')   { setTimeout(initCalendar, 50); }
   if (pageId === 'intake')      { renderIntakeSaved(); }
   if (pageId === 'salesforce')  { setEdmSidebarVisible(true);  renderEdmCampaignCard(); renderEdmPhases(); renderEdmQA(); }
@@ -5046,8 +5048,69 @@ const MFC_MAP = [
 ];
 const MFC_NEVER_TOUCH = '{{$link.OpenTrackUrl}}';
 
+// ── EDM Code Editor (CodeMirror) ─────────────────────────────────
+let edmCodeEditor = null;
+
+function initEdmCodeEditor() {
+  const ta = document.getElementById('mfc-input');
+  if (!ta || edmCodeEditor) return;
+  edmCodeEditor = CodeMirror.fromTextArea(ta, {
+    mode: 'htmlmixed',
+    lineNumbers: true,
+    lineWrapping: true,
+    extraKeys: {
+      'Ctrl-F': 'findPersistent',
+      'Cmd-F': 'findPersistent',
+      'Ctrl-H': 'replace',
+      'Cmd-H': 'replace',
+    }
+  });
+  edmCodeEditor.setSize('100%', '100%');
+  edmCodeEditor.on('change', () => updateEdmPreviewDebounced());
+}
+
+function getEdmHtml() {
+  return edmCodeEditor ? edmCodeEditor.getValue() : (document.getElementById('mfc-input')?.value || '');
+}
+
+function setEdmHtml(html) {
+  if (edmCodeEditor) {
+    edmCodeEditor.setValue(html);
+  } else {
+    const ta = document.getElementById('mfc-input');
+    if (ta) ta.value = html;
+  }
+}
+
+function edmOpenSearch() {
+  if (!edmCodeEditor) return;
+  CodeMirror.commands.findPersistent(edmCodeEditor);
+  edmCodeEditor.focus();
+}
+
+function edmSyncSelection(text) {
+  if (!edmCodeEditor || !text) return;
+  // Take first line of selection, trim, max 80 chars
+  const needle = text.split('\n').find(l => l.trim().length > 2)?.trim().slice(0, 80);
+  if (!needle) return;
+  const content = edmCodeEditor.getValue();
+  const idx = content.indexOf(needle);
+  if (idx === -1) return;
+  const pos = edmCodeEditor.posFromIndex(idx);
+  const endPos = edmCodeEditor.posFromIndex(idx + needle.length);
+  edmCodeEditor.setSelection(pos, endPos);
+  edmCodeEditor.scrollIntoView({ from: pos, to: endPos }, 80);
+  // Show line indicator
+  const ind = document.getElementById('edm-sync-indicator');
+  if (ind) {
+    ind.textContent = `→ line ${pos.line + 1}`;
+    clearTimeout(ind._t);
+    ind._t = setTimeout(() => { ind.textContent = ''; }, 2500);
+  }
+}
+
 function convertMergeFields() {
-  const input = document.getElementById('mfc-input').value;
+  const input = getEdmHtml();
   if (!input.trim()) { showAiToast('Paste some HTML first.'); return; }
 
   const lines = input.split('\n');
@@ -5104,7 +5167,7 @@ function convertMergeFields() {
 
   const check = ok => ok ? '<span class="mfc-pass">✓ Pass</span>' : '<span class="mfc-fail">✗ Fail</span>';
 
-  document.getElementById('mfc-input').value = converted;
+  setEdmHtml(converted);
   updateEdmPreview();
   const report = document.getElementById('mfc-report');
   report.innerHTML = `
@@ -5131,7 +5194,7 @@ function updateEdmPreviewDebounced() {
 function updateEdmPreview() {
   const iframe = document.getElementById('edm-preview-frame');
   if (!iframe) return;
-  const html = document.getElementById('mfc-input')?.value || '';
+  const html = getEdmHtml();
   iframe.srcdoc = html || '<p style="padding:32px;color:#aaa;font-family:sans-serif;font-size:13px">Paste HTML to see a preview</p>';
   iframe.onload = () => {
     const doc = iframe.contentDocument;
@@ -5139,6 +5202,12 @@ function updateEdmPreview() {
     doc.designMode = 'on';
     doc.execCommand('styleWithCSS', false, true);
     doc.addEventListener('input', markPreviewDirty);
+    // Preview → code sync: selecting text in preview jumps to that line in the editor
+    doc.addEventListener('mouseup', () => {
+      const sel = iframe.contentWindow.getSelection();
+      if (!sel || sel.isCollapsed) return;
+      edmSyncSelection(sel.toString());
+    });
     // Strip Word/external formatting on paste — insert plain text only so it inherits the element's existing styles
     doc.addEventListener('paste', e => {
       e.preventDefault();
@@ -5204,21 +5273,20 @@ function updateHtmlFromPreview() {
   const doc = iframe?.contentDocument;
   if (!doc) return;
   const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-  document.getElementById('mfc-input').value = html;
+  setEdmHtml(html);
   const btn = document.getElementById('edm-update-html-btn');
   if (btn) btn.disabled = true;
   showAiToast('✓ HTML updated from preview edits');
 }
 
 function copyEdmHtml() {
-  const el = document.getElementById('mfc-input');
-  if (!el?.value) { showAiToast('Nothing to copy'); return; }
-  navigator.clipboard.writeText(el.value).then(() => showAiToast('✓ HTML copied'));
+  const html = getEdmHtml();
+  if (!html) { showAiToast('Nothing to copy'); return; }
+  navigator.clipboard.writeText(html).then(() => showAiToast('✓ HTML copied'));
 }
 
 function clearEdmEditor() {
-  const inp = document.getElementById('mfc-input');
-  if (inp) inp.value = '';
+  setEdmHtml('');
   const report = document.getElementById('mfc-report');
   if (report) { report.innerHTML = ''; report.hidden = true; }
   updateEdmPreview();
