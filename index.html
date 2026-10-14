@@ -1751,6 +1751,16 @@
               <button class="edm-fmt-btn edm-fmt-btn-i" onclick="edmFmt('italic')" title="Italic"><i>I</i></button>
               <button class="edm-fmt-btn edm-fmt-btn-u" onclick="edmFmt('underline')" title="Underline"><u>U</u></button>
               <div class="edm-fmt-sep"></div>
+              <select class="edm-fmt-select edm-fmt-select-font" id="edm-fmt-font" onchange="edmFmtFont(this.value)" title="Font family">
+                <option value="">Font</option>
+                <option value="Arial, Helvetica, sans-serif">Arial</option>
+                <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+                <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+                <option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+              </select>
               <select class="edm-fmt-select" id="edm-fmt-size" onchange="edmFmtSize(this.value)" title="Font size">
                 <option value="">px</option>
                 <option value="10">10</option>
@@ -1779,6 +1789,7 @@
               </button>
             </div>
 
+            <div id="edm-fonts-used" class="edm-fonts-used" hidden></div>
             <iframe id="edm-preview-frame" class="edm-ed-preview" sandbox="allow-same-origin allow-scripts" title="HTML Preview"></iframe>
           </div>
         </div>
@@ -2411,7 +2422,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/dialog/dialog.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/searchcursor.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/search.min.js"></script>
-<script src="app.js?v=18"></script>
+<script src="app.js?v=20"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';

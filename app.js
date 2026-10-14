@@ -5195,6 +5195,7 @@ function updateEdmPreview() {
   const iframe = document.getElementById('edm-preview-frame');
   if (!iframe) return;
   const html = getEdmHtml();
+  edmUpdateFontsUsed(html);
   iframe.srcdoc = html || '<p style="padding:32px;color:#aaa;font-family:sans-serif;font-size:13px">Paste HTML to see a preview</p>';
   iframe.onload = () => {
     const doc = iframe.contentDocument;
@@ -5202,12 +5203,15 @@ function updateEdmPreview() {
     doc.designMode = 'on';
     doc.execCommand('styleWithCSS', false, true);
     doc.addEventListener('input', markPreviewDirty);
-    // Preview → code sync: selecting text in preview jumps to that line in the editor
+    // Preview → code sync: selecting text jumps to that line in the editor
     doc.addEventListener('mouseup', () => {
       const sel = iframe.contentWindow.getSelection();
       if (!sel || sel.isCollapsed) return;
       edmSyncSelection(sel.toString());
     });
+    // Font dropdown: update to reflect font at cursor position
+    doc.addEventListener('click', edmSyncFontDropdown);
+    doc.addEventListener('keyup', edmSyncFontDropdown);
     // Strip Word/external formatting on paste — insert plain text only so it inherits the element's existing styles
     doc.addEventListener('paste', e => {
       e.preventDefault();
@@ -5239,28 +5243,93 @@ function edmFmt(cmd) {
   // execCommand normalises bold state across the whole containing block and can
   // strip <strong> tags outside the selection. extractContents only ever touches
   // the selected range — nothing outside it is affected.
-  const styleMap = {
-    bold:      { fontWeight: 'bold' },
-    italic:    { fontStyle: 'italic' },
-    underline: { textDecoration: 'underline' },
-  };
-  const css = styleMap[cmd];
-  if (!css) return;
+  // Use semantic tags (<strong>, <em>) to stay consistent with the email HTML.
+  const tagMap = { bold: 'strong', italic: 'em', underline: 'u' };
+  const tag = tagMap[cmd];
+  if (!tag) return;
+
+  const range = sel.getRangeAt(0);
+  const frag = range.extractContents();
+  const wrapper = doc.createElement(tag);
+  wrapper.appendChild(frag);
+  range.insertNode(wrapper);
+
+  // Keep the new element selected so the user can see what was formatted
+  const newRange = doc.createRange();
+  newRange.selectNodeContents(wrapper);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+
+  markPreviewDirty();
+}
+
+function edmFmtFont(fontFamily) {
+  if (!fontFamily) return;
+  const iframe = document.getElementById('edm-preview-frame');
+  const win = iframe?.contentWindow;
+  const doc = iframe?.contentDocument;
+  if (!doc) return;
+  win.focus();
+
+  const sel = win.getSelection();
+  if (!sel || !sel.rangeCount || sel.isCollapsed) {
+    document.getElementById('edm-fmt-font').value = '';
+    return;
+  }
 
   const range = sel.getRangeAt(0);
   const frag = range.extractContents();
   const span = doc.createElement('span');
-  Object.assign(span.style, css);
+  span.style.fontFamily = fontFamily;
   span.appendChild(frag);
   range.insertNode(span);
 
-  // Keep the new span selected so the user can see what was formatted
   const newRange = doc.createRange();
   newRange.selectNodeContents(span);
   sel.removeAllRanges();
   sel.addRange(newRange);
 
+  document.getElementById('edm-fmt-font').value = '';
   markPreviewDirty();
+}
+
+function edmUpdateFontsUsed(html) {
+  const el = document.getElementById('edm-fonts-used');
+  if (!el) return;
+  const matches = [...html.matchAll(/font-family\s*:\s*([^;}"'<]{1,80})/gi)];
+  const seen = new Set();
+  matches.forEach(m => {
+    const first = m[1].split(',')[0].replace(/['"]/g, '').trim();
+    if (first && first.length < 40) seen.add(first);
+  });
+  if (seen.size === 0) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<span class="edm-fonts-label">Fonts in use:</span>' +
+    [...seen].map(f => `<span class="edm-font-chip">${f}</span>`).join('');
+}
+
+function edmSyncFontDropdown() {
+  const iframe = document.getElementById('edm-preview-frame');
+  const win = iframe?.contentWindow;
+  if (!win) return;
+  const sel = win.getSelection();
+  const node = sel?.anchorNode;
+  if (!node) return;
+  const el = node.nodeType === 3 ? node.parentElement : node;
+  if (!el) return;
+  const computed = win.getComputedStyle(el).fontFamily;
+  const first = computed.split(',')[0].replace(/['"]/g, '').trim().toLowerCase();
+  const select = document.getElementById('edm-fmt-font');
+  if (!select) return;
+  let matched = false;
+  for (const opt of select.options) {
+    if (opt.value && opt.value.split(',')[0].replace(/['"]/g, '').trim().toLowerCase() === first) {
+      select.value = opt.value;
+      matched = true;
+      break;
+    }
+  }
+  if (!matched) select.value = '';
 }
 
 function edmFmtSize(size) {
