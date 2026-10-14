@@ -5227,11 +5227,39 @@ function markPreviewDirty() {
 
 function edmFmt(cmd) {
   const iframe = document.getElementById('edm-preview-frame');
+  const win = iframe?.contentWindow;
   const doc = iframe?.contentDocument;
   if (!doc) return;
-  iframe.contentWindow.focus();
-  doc.execCommand('styleWithCSS', false, true);
-  doc.execCommand(cmd, false, null);
+  win.focus();
+
+  const sel = win.getSelection();
+  if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+
+  // Use extractContents+wrap instead of execCommand('bold/italic/underline').
+  // execCommand normalises bold state across the whole containing block and can
+  // strip <strong> tags outside the selection. extractContents only ever touches
+  // the selected range — nothing outside it is affected.
+  const styleMap = {
+    bold:      { fontWeight: 'bold' },
+    italic:    { fontStyle: 'italic' },
+    underline: { textDecoration: 'underline' },
+  };
+  const css = styleMap[cmd];
+  if (!css) return;
+
+  const range = sel.getRangeAt(0);
+  const frag = range.extractContents();
+  const span = doc.createElement('span');
+  Object.assign(span.style, css);
+  span.appendChild(frag);
+  range.insertNode(span);
+
+  // Keep the new span selected so the user can see what was formatted
+  const newRange = doc.createRange();
+  newRange.selectNodeContents(span);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+
   markPreviewDirty();
 }
 
