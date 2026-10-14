@@ -3122,7 +3122,7 @@ function toggleAiKeyPanel() {
   if (!isOpen) {
     // Show placeholder dots if key already saved
     const inp = document.getElementById('ai-key-input');
-    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'gsk_…';
+    if (inp) inp.placeholder = getAiKey() ? 'Key saved — paste new key to replace' : 'AIza…';
     inp.value = '';
     renderAiMeter();
   }
@@ -3190,14 +3190,14 @@ function renderAiMeter() {
 async function callClaude(systemPrompt, userMessage) {
   const key = getAiKey();
   if (!key) throw new Error('NO_KEY');
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'authorization': `Bearer ${key}`
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
+      model: 'gemini-2.0-flash',
       max_tokens: 4096,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -3240,7 +3240,7 @@ function aiSetBtn(btnId, loading, defaultLabel, loadingLabel) {
 }
 
 function aiNoKey(featureName) {
-  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Groq API key, and click Save.\n\nGet a free key at: console.groq.com → API Keys (no credit card needed).`);
+  alert(`No API key set.\n\nClick "AI Settings" in the sidebar, paste your Gemini API key, and click Save.\n\nGet a free key at: aistudio.google.com → Get API Key (no credit card needed).`);
 }
 
 // ── Feature 1: AI Email Drafter ──────────────────────────────────
@@ -3578,7 +3578,7 @@ function processEdmQaImage(file) {
 async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType) {
   const key = getAiKey();
   const body = {
-    model: 'llama-3.2-90b-vision-preview',
+    model: 'gemini-2.0-flash',
     messages: [
       { role: 'system', content: systemPrompt },
       {
@@ -3592,7 +3592,7 @@ async function callGroqVision(systemPrompt, userText, imageBase64, imageMimeType
     max_tokens: 2000,
     temperature: 0.1
   };
-  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -5091,7 +5091,7 @@ async function summariseEventCal() {
       </div>`).join('');
     out.hidden = false;
   } catch (err) {
-    if (err.message === 'NO_KEY') showAiToast('Set your Groq API key in AI Settings first.');
+    if (err.message === 'NO_KEY') showAiToast('Set your Gemini API key in AI Settings first.');
     else showAiToast('Error: ' + (err.message || err));
   } finally {
     aiSetBtn('evcal-btn', false, 'Summarise →', '');
@@ -7282,11 +7282,11 @@ async function sendSkillsMessage() {
     const apiMessages = [
       ...skillsChatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }))
     ];
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'gemini-2.0-flash',
         max_tokens: 512,
         messages: [{ role: 'system', content: buildSkillsSystemPrompt() }, ...apiMessages]
       })
