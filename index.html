@@ -267,6 +267,10 @@
         AI Write &amp; QC
         <span class="nav-badge ai-badge-nav">AI</span>
       </div>
+      <div class="nav-item" data-page="edmeditor">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/><line x1="3" y1="5" x2="5" y2="5"/><line x1="3" y1="7" x2="5" y2="7"/><line x1="3" y1="9" x2="5" y2="9"/></svg>
+        EDM Editor
+      </div>
     </div>
 
     <div class="nav-category-group" data-category="reference">
@@ -1680,38 +1684,6 @@
           </div>
         </div>
 
-        <!-- ── EDM Merge Field Converter ── -->
-        <div class="ai-feature-block" style="margin-top:16px">
-          <div class="section-block-header ai-feature-header">
-            <div class="sh-icon" style="background:var(--accent-dim)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M2 5h5M2 8h4M2 11h3"/><rect x="9" y="3" width="5" height="10" rx="1"/><line x1="11" y1="6" x2="13" y2="6"/><line x1="11" y1="9" x2="13" y2="9"/></svg>
-            </div>
-            <span class="sh-title">EDM Merge Field Converter</span>
-          </div>
-          <div class="ai-feature-body">
-            <p class="ai-feature-desc">Paste your HTML email — all merge fields are converted to the correct Salesforce Account Engagement syntax. Nothing else in the HTML is touched.</p>
-            <div class="ai-controls">
-              <div class="ai-field-row">
-                <label class="ai-label">HTML Input</label>
-                <textarea id="mfc-input" class="form-textarea" rows="8" style="height:160px;font-family:var(--font-mono);font-size:11px" placeholder="Paste full HTML email here…"></textarea>
-              </div>
-              <button class="btn-add" onclick="convertMergeFields()">Convert →</button>
-            </div>
-            <div id="mfc-output" hidden>
-              <div class="ai-output" style="display:flex;flex-direction:column;gap:12px">
-                <div>
-                  <div class="ai-output-label" style="margin-bottom:6px">Converted HTML</div>
-                  <textarea id="mfc-result" class="ai-result-text" rows="10" style="font-family:var(--font-mono);font-size:11px" readonly></textarea>
-                  <button class="ai-copy-btn" style="margin-top:6px" onclick="copyAiOutput('mfc-result')">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
-                    Copy HTML
-                  </button>
-                </div>
-                <div id="mfc-report"></div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- ── Event Summariser ── -->
         <div class="ai-feature-block" style="margin-top:16px">
@@ -1735,6 +1707,40 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- ── EDM HTML EDITOR ── -->
+      <div id="page-edmeditor" class="page edm-ed-page">
+        <div class="edm-ed-bar">
+          <div class="edm-ed-title">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px;vertical-align:-2px;margin-right:6px"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/></svg>
+            EDM HTML Editor
+          </div>
+          <div class="edm-ed-actions">
+            <button class="btn-add" onclick="convertMergeFields()">Convert Fields →</button>
+            <button class="btn-reset" onclick="copyEdmHtml()">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+              Copy HTML
+            </button>
+            <button class="btn-reset" onclick="clearEdmEditor()">Clear</button>
+          </div>
+        </div>
+
+        <div class="edm-ed-split">
+          <div class="edm-ed-pane">
+            <div class="edm-ed-pane-label">HTML Code</div>
+            <textarea id="mfc-input" class="edm-ed-code" placeholder="Paste full HTML email here…" oninput="updateEdmPreview()"></textarea>
+          </div>
+          <div class="edm-ed-pane">
+            <div class="edm-ed-pane-label">
+              Preview
+              <span class="edm-ed-preview-note">rendered in a sandboxed frame — links are inactive</span>
+            </div>
+            <iframe id="edm-preview-frame" class="edm-ed-preview" sandbox="allow-same-origin" title="HTML Preview"></iframe>
+          </div>
+        </div>
+
+        <div id="mfc-report" class="edm-ed-report" hidden></div>
       </div>
 
       <!-- ── INSTRUCTION ANALYZER + CAMPAIGN CLASSIFIER ── -->
@@ -2354,7 +2360,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';

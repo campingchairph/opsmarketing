@@ -5104,20 +5104,43 @@ function convertMergeFields() {
 
   const check = ok => ok ? '<span class="mfc-pass">✓ Pass</span>' : '<span class="mfc-fail">✗ Fail</span>';
 
-  document.getElementById('mfc-result').value = converted;
-  document.getElementById('mfc-report').innerHTML = `
+  document.getElementById('mfc-input').value = converted;
+  updateEdmPreview();
+  const report = document.getElementById('mfc-report');
+  report.innerHTML = `
     <div class="mfc-section"><div class="mfc-section-title">Change report (${changes.length} change${changes.length !== 1 ? 's' : ''})</div>${changeRows}</div>
     <div class="mfc-section"><div class="mfc-section-title">Unmapped fields</div>${unmappedHtml}</div>
     <div class="mfc-section"><div class="mfc-section-title">Checks</div>
       <ul class="mfc-checks">
         <li>${check(openTrackOk)} <code>{{$link.OpenTrackUrl}}</code> unchanged</li>
-        <li>${check(noDoubleBrace)} No <code>{{"{{"}}...{{"}}"}}</code>-style fields remain (except open-track pixel)</li>
+        <li>${check(noDoubleBrace)} No {{...}}-style fields remain (except open-track pixel)</li>
         <li>${check(signoffOk)} Sign-off has space between first and last name</li>
         <li>${check(unsubOk)} Unsubscribe <code>href</code> converted</li>
       </ul>
     </div>`;
-  document.getElementById('mfc-output').hidden = false;
+  report.hidden = false;
   showAiToast(`Done — ${changes.length} field${changes.length !== 1 ? 's' : ''} converted`);
+}
+
+function updateEdmPreview() {
+  const iframe = document.getElementById('edm-preview-frame');
+  if (!iframe) return;
+  const html = document.getElementById('mfc-input')?.value || '';
+  iframe.srcdoc = html || '<p style="padding:32px;color:#aaa;font-family:sans-serif;font-size:13px">Paste HTML to see a preview</p>';
+}
+
+function copyEdmHtml() {
+  const el = document.getElementById('mfc-input');
+  if (!el?.value) { showAiToast('Nothing to copy'); return; }
+  navigator.clipboard.writeText(el.value).then(() => showAiToast('✓ HTML copied'));
+}
+
+function clearEdmEditor() {
+  const inp = document.getElementById('mfc-input');
+  if (inp) inp.value = '';
+  const report = document.getElementById('mfc-report');
+  if (report) { report.innerHTML = ''; report.hidden = true; }
+  updateEdmPreview();
 }
 
 // ── Event Summariser ─────────────────────────────────────────────

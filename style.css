@@ -6791,3 +6791,97 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   font-family: var(--font-body);
 }
 .wp-commentary-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── EDM HTML Editor ──────────────────────────────────────────── */
+.edm-ed-page {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.edm-ed-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.edm-ed-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.edm-ed-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.edm-ed-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+.edm-ed-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.edm-ed-pane-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.edm-ed-preview-note {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 10px;
+  color: var(--text-3);
+  opacity: 0.7;
+}
+.edm-ed-code {
+  flex: 1;
+  resize: none;
+  font-family: var(--font-mono, monospace) !important;
+  font-size: 11px !important;
+  line-height: 1.6;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-2);
+  color: var(--text-1);
+  padding: 12px;
+}
+.edm-ed-code:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.edm-ed-preview {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #ffffff;
+  min-height: 0;
+  width: 100%;
+}
+.edm-ed-report {
+  flex-shrink: 0;
+  margin-top: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
