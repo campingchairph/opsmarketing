@@ -8751,6 +8751,11 @@ function fuFmtDate(iso) {
   } catch { return ''; }
 }
 
+function fuDateStamp(filename) {
+  const m = filename.match(/^(\d{6})_/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
 function fuSearch(query) {
   const q = (query || '').trim();
   const resultsEl = document.getElementById('fu-search-results');
@@ -8767,9 +8772,14 @@ function fuSearch(query) {
   resultsEl.innerHTML = `<div class="fu-search-label">Matching files</div>` +
     matches.map(entry => {
       const isSameBase = fuBaseName(entry.name).toLowerCase() === qBase;
+      const oldStamp = fuDateStamp(entry.name);
+      const newStamp = fuDateStamp(q);
+      const isOlder = oldStamp !== null && newStamp !== null && newStamp < oldStamp;
       return `<div class="fu-search-row">
         <span class="fu-search-filename">${escapeHtml(entry.name)}</span>
-        <button class="fu-overwrite-btn" onclick="fuConfirmOverwrite(${JSON.stringify(entry.name)}, ${JSON.stringify(q)})">
+        <button class="fu-overwrite-btn${isOlder ? ' fu-overwrite-warn' : ''}"
+          data-old="${escapeHtml(entry.name)}" data-new="${escapeHtml(q)}"
+          onclick="fuConfirmOverwrite(this.dataset.old, this.dataset.new)">
           ${isSameBase ? 'Overwrite' : 'Replace with this'}
         </button>
       </div>`;
@@ -8777,7 +8787,19 @@ function fuSearch(query) {
 }
 
 function fuConfirmOverwrite(oldName, newName) {
-  if (!confirm(`Replace:\n  ${oldName}\n\nwith:\n  ${newName}?`)) return;
+  const oldStamp = fuDateStamp(oldName);
+  const newStamp = fuDateStamp(newName);
+  const isOlder = oldStamp !== null && newStamp !== null && newStamp < oldStamp;
+
+  let message;
+  if (isOlder) {
+    message = `⚠️ Older file detected\n\nThe file you're adding (${newStamp}) is older than the one on record (${oldStamp}).\n\nOn record:  ${oldName}\nYou're adding:  ${newName}\n\nThis would replace a newer file with an older one. Are you sure?`;
+  } else {
+    message = `Replace on record:\n  ${oldName}\n\nwith:\n  ${newName}?`;
+  }
+
+  if (!confirm(message)) return;
+
   const all = fuGetAll();
   const idx = all.findIndex(e => e.name === oldName);
   if (idx !== -1) {
@@ -8818,7 +8840,7 @@ function fuAdd() {
 }
 
 function fuDelete(name) {
-  if (!confirm(`Remove "${name}" from the library?`)) return;
+  if (!confirm(`Remove from library:\n  ${name}`)) return;
   const all = fuGetAll().filter(e => e.name !== name);
   fuSaveAll(all);
   fuRenderList();
@@ -8855,7 +8877,7 @@ function fuRenderList() {
           ${updatedStr ? `<span class="fu-meta-item fu-meta-updated">Updated ${escapeHtml(updatedStr)}</span>` : ''}
         </div>
       </div>
-      <button class="fu-delete-btn" onclick="fuDelete(${JSON.stringify(entry.name)})" title="Remove">
+      <button class="fu-delete-btn" data-name="${escapeHtml(entry.name)}" onclick="fuDelete(this.dataset.name)" title="Remove">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
       </button>
     </div>`;

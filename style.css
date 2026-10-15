@@ -7223,6 +7223,12 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   transition: background 0.12s;
 }
 .fu-overwrite-btn:hover { background: var(--accent); color: #fff; }
+.fu-overwrite-btn.fu-overwrite-warn {
+  background: rgba(220,80,30,0.08);
+  color: #d04010;
+  border-color: #d04010;
+}
+.fu-overwrite-btn.fu-overwrite-warn:hover { background: #d04010; color: #fff; }
 .fu-list-header {
   display: flex;
   align-items: center;
