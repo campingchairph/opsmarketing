@@ -5162,6 +5162,7 @@ function edmCorrectSignature(html) {
 // reliable because it fires the moment the user finishes selecting — before
 // any click on the outer toolbar button can change focus.
 let edmSavedLinkRange = null;
+let edmEditingLink = null; // <a> element whose href we're editing (non-null = edit mode)
 
 function edmShowLinkBar() {
   if (!edmSavedLinkRange) {
@@ -5183,33 +5184,41 @@ function edmApplyLink() {
 
   const iframe = document.getElementById('edm-preview-frame');
   const doc = iframe?.contentDocument;
-  if (!doc || !edmSavedLinkRange) {
-    showAiToast('Selection lost — re-select the text and try again.');
-    edmCancelLink();
-    return;
-  }
 
   try {
-    const a = doc.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.setAttribute('style', 'color:#0176d3;');
-    a.appendChild(edmSavedLinkRange.extractContents());
-    edmSavedLinkRange.insertNode(a);
+    if (edmEditingLink) {
+      // Edit mode: just update the href on the existing <a>
+      edmEditingLink.href = url;
+    } else {
+      if (!doc || !edmSavedLinkRange) {
+        showAiToast('Selection lost — re-select the text and try again.');
+        edmCancelLink();
+        return;
+      }
+      const a = doc.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.setAttribute('style', 'color:#0176d3;');
+      a.appendChild(edmSavedLinkRange.extractContents());
+      edmSavedLinkRange.insertNode(a);
+    }
   } catch {
-    showAiToast('Selection lost — re-select the text and try again.');
+    showAiToast('Could not apply link — re-select the text and try again.');
+    edmEditingLink = null;
     edmCancelLink();
     return;
   }
 
   edmSavedLinkRange = null;
+  edmEditingLink = null;
   document.getElementById('edm-link-bar').hidden = true;
   markPreviewDirty();
 }
 
 function edmCancelLink() {
   edmSavedLinkRange = null;
+  edmEditingLink = null;
   document.getElementById('edm-link-bar').hidden = true;
 }
 
@@ -5332,12 +5341,40 @@ function updateEdmPreview() {
       doc.execCommand('insertText', false, text);
       markPreviewDirty();
     });
-    // Track selection for the link button: save the range the moment the user
-    // finishes selecting inside the iframe, before any outer-doc click can clear it.
+    // Track selection for the link button and auto-show/hide the link bar.
     doc.addEventListener('selectionchange', () => {
       const sel = iframe.contentWindow.getSelection();
+      const bar = document.getElementById('edm-link-bar');
+      const urlInput = document.getElementById('edm-link-url');
+
       if (sel && !sel.isCollapsed && sel.rangeCount) {
         edmSavedLinkRange = sel.getRangeAt(0).cloneRange();
+        // If selection is inside an existing <a>, show its URL in the bar
+        const node = sel.getRangeAt(0).commonAncestorContainer;
+        const el = node.nodeType === 3 ? node.parentElement : node;
+        const a = el?.closest?.('a');
+        if (a) {
+          edmEditingLink = a;
+          if (bar && urlInput) {
+            urlInput.value = a.getAttribute('href') || '';
+            bar.hidden = false;
+          }
+        } else {
+          edmEditingLink = null;
+        }
+      } else {
+        // Selection collapsed
+        edmEditingLink = null;
+        // If focus moved outside the iframe (e.g. user clicked a toolbar button)
+        // keep edmSavedLinkRange so the button can still use it.
+        // If focus stayed inside the iframe the user clicked/typed to deselect:
+        // clear the range and hide the bar.
+        if (document.activeElement === iframe) {
+          edmSavedLinkRange = null;
+        }
+        if (bar && !bar.hidden && document.activeElement !== urlInput) {
+          bar.hidden = true;
+        }
       }
     });
   };
