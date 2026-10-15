@@ -6799,10 +6799,12 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
 
 /* ── EDM HTML Editor ──────────────────────────────────────────── */
 .edm-ed-page {
-  display: flex !important;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+}
+.page.active.edm-ed-page {
+  display: flex;
 }
 .edm-ed-bar {
   display: flex;
@@ -7264,6 +7266,12 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
 .fu-file-info {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.fu-file-top {
+  display: flex;
   align-items: baseline;
   gap: 8px;
   min-width: 0;
@@ -7282,6 +7290,19 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.fu-file-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fu-meta-item {
+  font-size: 10px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.fu-meta-updated {
+  color: var(--accent);
 }
 .fu-delete-btn {
   width: 26px;

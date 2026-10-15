@@ -8728,6 +8728,7 @@ function exportWPData() {
 }
 
 // ── FILE UPDATES ────────────────────────────────────────────────────────────
+// Each entry: { name: "261015_AltX product guide", addedAt: ISO, updatedAt: ISO|null }
 const FU_KEY = 'msc_file_updates_v1';
 
 function fuGetAll() {
@@ -8742,6 +8743,14 @@ function fuBaseName(filename) {
   return filename.replace(/^\d{6}_/, '');
 }
 
+function fuFmtDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return ''; }
+}
+
 function fuSearch(query) {
   const q = (query || '').trim();
   const resultsEl = document.getElementById('fu-search-results');
@@ -8750,29 +8759,29 @@ function fuSearch(query) {
 
   const qBase = fuBaseName(q).toLowerCase();
   const all = fuGetAll();
-  const matches = all.filter(fn => fuBaseName(fn).toLowerCase().includes(qBase));
+  const matches = all.filter(entry => fuBaseName(entry.name).toLowerCase().includes(qBase));
 
   if (matches.length === 0) { resultsEl.hidden = true; return; }
 
   resultsEl.hidden = false;
   resultsEl.innerHTML = `<div class="fu-search-label">Matching files</div>` +
-    matches.map(fn => {
-      const isSameBase = fuBaseName(fn).toLowerCase() === qBase;
+    matches.map(entry => {
+      const isSameBase = fuBaseName(entry.name).toLowerCase() === qBase;
       return `<div class="fu-search-row">
-        <span class="fu-search-filename">${escapeHtml(fn)}</span>
-        <button class="fu-overwrite-btn" onclick="fuConfirmOverwrite(${JSON.stringify(fn)}, ${JSON.stringify(q)})">
+        <span class="fu-search-filename">${escapeHtml(entry.name)}</span>
+        <button class="fu-overwrite-btn" onclick="fuConfirmOverwrite(${JSON.stringify(entry.name)}, ${JSON.stringify(q)})">
           ${isSameBase ? 'Overwrite' : 'Replace with this'}
         </button>
       </div>`;
     }).join('');
 }
 
-function fuConfirmOverwrite(oldFn, newFn) {
-  if (!confirm(`Replace:\n  ${oldFn}\n\nwith:\n  ${newFn}?`)) return;
+function fuConfirmOverwrite(oldName, newName) {
+  if (!confirm(`Replace:\n  ${oldName}\n\nwith:\n  ${newName}?`)) return;
   const all = fuGetAll();
-  const idx = all.indexOf(oldFn);
+  const idx = all.findIndex(e => e.name === oldName);
   if (idx !== -1) {
-    all[idx] = newFn;
+    all[idx] = { name: newName, addedAt: all[idx].addedAt, updatedAt: new Date().toISOString() };
     fuSaveAll(all);
     fuRenderList();
     const resultsEl = document.getElementById('fu-search-results');
@@ -8790,13 +8799,14 @@ function fuAdd() {
 
   const all = fuGetAll();
   const base = fuBaseName(filename).toLowerCase();
-  const existingIdx = all.findIndex(fn => fuBaseName(fn).toLowerCase() === base);
+  const existingIdx = all.findIndex(e => fuBaseName(e.name).toLowerCase() === base);
+  const now = new Date().toISOString();
 
   if (existingIdx !== -1) {
-    if (!confirm(`A file with this base name already exists:\n  ${all[existingIdx]}\n\nReplace with:\n  ${filename}?`)) return;
-    all[existingIdx] = filename;
+    if (!confirm(`A file with this base name already exists:\n  ${all[existingIdx].name}\n\nReplace with:\n  ${filename}?`)) return;
+    all[existingIdx] = { name: filename, addedAt: all[existingIdx].addedAt, updatedAt: now };
   } else {
-    all.push(filename);
+    all.push({ name: filename, addedAt: now, updatedAt: null });
   }
 
   fuSaveAll(all);
@@ -8807,9 +8817,9 @@ function fuAdd() {
   showAiToast(existingIdx !== -1 ? 'File updated.' : 'File added.');
 }
 
-function fuDelete(filename) {
-  if (!confirm(`Remove "${filename}" from the library?`)) return;
-  const all = fuGetAll().filter(fn => fn !== filename);
+function fuDelete(name) {
+  if (!confirm(`Remove "${name}" from the library?`)) return;
+  const all = fuGetAll().filter(e => e.name !== name);
   fuSaveAll(all);
   fuRenderList();
   showAiToast('File removed.');
@@ -8827,17 +8837,25 @@ function fuRenderList() {
     return;
   }
 
-  const sorted = [...all].sort((a, b) => fuBaseName(a).localeCompare(fuBaseName(b)));
-  listEl.innerHTML = sorted.map(fn => {
-    const dateMatch = fn.match(/^(\d{6})_/);
+  const sorted = [...all].sort((a, b) => fuBaseName(a.name).localeCompare(fuBaseName(b.name)));
+  listEl.innerHTML = sorted.map(entry => {
+    const dateMatch = entry.name.match(/^(\d{6})_/);
     const dateStamp = dateMatch ? dateMatch[1] : '';
-    const base = fuBaseName(fn);
+    const base = fuBaseName(entry.name);
+    const addedStr = fuFmtDate(entry.addedAt);
+    const updatedStr = fuFmtDate(entry.updatedAt);
     return `<div class="fu-file-row">
       <div class="fu-file-info">
-        ${dateStamp ? `<span class="fu-file-date">${escapeHtml(dateStamp)}</span>` : ''}
-        <span class="fu-file-name">${escapeHtml(base)}</span>
+        <div class="fu-file-top">
+          ${dateStamp ? `<span class="fu-file-date">${escapeHtml(dateStamp)}</span>` : ''}
+          <span class="fu-file-name">${escapeHtml(base)}</span>
+        </div>
+        <div class="fu-file-meta">
+          ${addedStr ? `<span class="fu-meta-item">Added ${escapeHtml(addedStr)}</span>` : ''}
+          ${updatedStr ? `<span class="fu-meta-item fu-meta-updated">Updated ${escapeHtml(updatedStr)}</span>` : ''}
+        </div>
       </div>
-      <button class="fu-delete-btn" onclick="fuDelete(${JSON.stringify(fn)})" title="Remove">
+      <button class="fu-delete-btn" onclick="fuDelete(${JSON.stringify(entry.name)})" title="Remove">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
       </button>
     </div>`;
