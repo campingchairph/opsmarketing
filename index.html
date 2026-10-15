@@ -1750,6 +1750,9 @@
               <button class="edm-fmt-btn" onclick="edmFmt('bold')" title="Bold"><b>B</b></button>
               <button class="edm-fmt-btn edm-fmt-btn-i" onclick="edmFmt('italic')" title="Italic"><i>I</i></button>
               <button class="edm-fmt-btn edm-fmt-btn-u" onclick="edmFmt('underline')" title="Underline"><u>U</u></button>
+              <button class="edm-fmt-btn" onmousedown="edmSaveLinkSelection()" onclick="edmShowLinkBar()" title="Add hyperlink">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M6.5 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1"/><path d="M9.5 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1"/></svg>
+              </button>
               <div class="edm-fmt-sep"></div>
               <select class="edm-fmt-select edm-fmt-select-font" id="edm-fmt-font" onchange="edmFmtFont(this.value)" title="Font family">
                 <option value="">Font</option>
@@ -1789,6 +1792,13 @@
               </button>
             </div>
 
+            <div id="edm-link-bar" class="edm-link-bar" hidden>
+              <span class="edm-link-label">URL</span>
+              <input id="edm-link-url" class="edm-link-input" type="url" placeholder="https://…"
+                     onkeydown="if(event.key==='Enter'){event.preventDefault();edmApplyLink();}if(event.key==='Escape')edmCancelLink();">
+              <button class="edm-link-apply" onclick="edmApplyLink()">Add Link</button>
+              <button class="edm-link-cancel" onclick="edmCancelLink()">✕</button>
+            </div>
             <div id="edm-fonts-used" class="edm-fonts-used" hidden></div>
             <iframe id="edm-preview-frame" class="edm-ed-preview" sandbox="allow-same-origin allow-scripts" title="HTML Preview"></iframe>
           </div>
@@ -2422,7 +2432,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/dialog/dialog.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/searchcursor.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/search.min.js"></script>
-<script src="app.js?v=20"></script>
+<script src="app.js?v=21"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';

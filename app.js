@@ -5109,6 +5109,108 @@ function edmSyncSelection(text) {
   }
 }
 
+// ── Signature auto-correction ─────────────────────────────────────────────
+// Each block is identified by a unique CSS fingerprint on its innermost
+// <td dir="auto" class="darkTarget"> element. Only these three blocks are
+// touched; any disclaimer table between the offices block and the unsubscribe
+// block is left completely untouched.
+const EDM_SIG_BLOCKS = [
+  {
+    label: 'Sender name (orange)',
+    re: /(<td[^>]*\bdir="auto"\b[^>]*\bclass="darkTarget"\b[^>]*style="[^"]*text-align:left;color:#ed7d31[^"]*">)([\s\S]*?)(<\/td>)/,
+    content:
+      '\n                <strong>{!$sender.FirstName} {!$sender.LastName}</strong><br>\n            ',
+  },
+  {
+    label: 'Sender details & offices',
+    re: /(<td[^>]*\bdir="auto"\b[^>]*\bclass="darkTarget"\b[^>]*style="[^"]*text-align:left;color:#000000;font-family:'Times New Roman'[^"]*">)([\s\S]*?)(<\/td>)/,
+    content:
+      "\n                {!$sender.Title}<br>{!$sender.Email} | 1300 370 821 | {!$sender.Phone}<br>" +
+      '<a href="https://assetline.com.au" target="_blank" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="20675029-254f-47d1-9cda-cde96c0ea724">assetline.com.au</a>' +
+      ' | <a href="https://www.linkedin.com/company/assetline-capital/" target="_blank" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="20675029-254f-47d1-9cda-cde96c0ea724">LinkedIn</a>' +
+      '<br><br><strong>Sydney Office</strong> | Level 24, 101 Grafton Street, Bondi Junction, NSW 2022<br>' +
+      '<strong>Melbourne Office | </strong>3.38/425 Smith St, Fitzroy, VIC 3065<br>' +
+      '<strong>Brisbane Office</strong> | Level 1, Suite 106, 33 Longland Street, Newstead, QLD 4006<br>' +
+      '\n            ',
+  },
+  {
+    label: 'Unsubscribe',
+    re: /(<td[^>]*\bdir="auto"\b[^>]*\bclass="darkTarget"\b[^>]*style="[^"]*font-family:'Arial','Helvetica','sans-serif';font-size:10px[^"]*">)([\s\S]*?)(<\/td>)/,
+    content:
+      '\n                <br><br><br><a target="_blank" href="{!$other.Unsubscribe}" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="d23072b1-aafa-4923-998c-5e33c74e7bab">Unsubscribe</a>&nbsp;\n            ',
+  },
+];
+
+function edmCorrectSignature(html) {
+  let out = html;
+  const corrected = [];
+  EDM_SIG_BLOCKS.forEach(({ re, label, content }) => {
+    const prev = out;
+    out = out.replace(re, (_, open, _old, close) => open + content + close);
+    if (out !== prev) corrected.push(label);
+  });
+  return { html: out, corrected };
+}
+
+// ── Hyperlink ──────────────────────────────────────────────────────────────
+let edmSavedLinkRange = null;
+
+function edmSaveLinkSelection() {
+  const iframe = document.getElementById('edm-preview-frame');
+  const win = iframe?.contentWindow;
+  const sel = win?.getSelection();
+  if (sel && sel.rangeCount && !sel.isCollapsed) {
+    edmSavedLinkRange = sel.getRangeAt(0).cloneRange();
+  }
+}
+
+function edmShowLinkBar() {
+  if (!edmSavedLinkRange) {
+    showAiToast('Select text in the preview first, then click the link icon.');
+    return;
+  }
+  const bar = document.getElementById('edm-link-bar');
+  bar.hidden = false;
+  const input = document.getElementById('edm-link-url');
+  input.value = '';
+  input.focus();
+}
+
+function edmApplyLink() {
+  const urlInput = document.getElementById('edm-link-url');
+  let url = (urlInput?.value || '').trim();
+  if (!url) { showAiToast('Enter a URL.'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+  const iframe = document.getElementById('edm-preview-frame');
+  const doc = iframe?.contentDocument;
+  const win = iframe?.contentWindow;
+  if (!doc || !edmSavedLinkRange) return;
+
+  win.focus();
+  const sel = win.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(edmSavedLinkRange);
+
+  const frag = edmSavedLinkRange.extractContents();
+  const a = doc.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.color = '#0176d3';
+  a.appendChild(frag);
+  edmSavedLinkRange.insertNode(a);
+
+  edmSavedLinkRange = null;
+  document.getElementById('edm-link-bar').hidden = true;
+  markPreviewDirty();
+}
+
+function edmCancelLink() {
+  edmSavedLinkRange = null;
+  document.getElementById('edm-link-bar').hidden = true;
+}
+
 function convertMergeFields() {
   const input = getEdmHtml();
   if (!input.trim()) { showAiToast('Paste some HTML first.'); return; }
@@ -5138,6 +5240,10 @@ function convertMergeFields() {
 
   const converted = convertedLines.join('\n');
 
+  // Signature auto-correction
+  const sigResult = edmCorrectSignature(converted);
+  const finalHtml = sigResult.html;
+
   // Detect any remaining {{...}} fields (excluding the open-track pixel)
   const unmapped = [];
   const remainRe = /\{\{[^}]+\}\}/g;
@@ -5148,11 +5254,11 @@ function convertMergeFields() {
     }
   });
 
-  // Checks
-  const openTrackOk = converted.includes(MFC_NEVER_TOUCH);
-  const noDoubleBrace = !converted.replace(new RegExp(MFC_NEVER_TOUCH.replace(/[{}$!.]/g, c => '\\' + c), 'g'), '').match(/\{\{[^}]+\}\}/);
-  const signoffOk = !converted.match(/\{!\$sender\.FirstName\}\{!\$sender\.LastName\}/);
-  const unsubOk = !converted.match(/href=["'][^"']*\{\{[Uu]nsubscribe[^}]*\}\}/);
+  // Checks (run against finalHtml so signature corrections are included)
+  const openTrackOk = finalHtml.includes(MFC_NEVER_TOUCH);
+  const noDoubleBrace = !finalHtml.replace(new RegExp(MFC_NEVER_TOUCH.replace(/[{}$!.]/g, c => '\\' + c), 'g'), '').match(/\{\{[^}]+\}\}/);
+  const signoffOk = !finalHtml.match(/\{!\$sender\.FirstName\}\{!\$sender\.LastName\}/);
+  const unsubOk = !finalHtml.match(/href=["'][^"']*\{\{[Uu]nsubscribe[^}]*\}\}/);
 
   // Build report HTML
   const changeRows = changes.length
@@ -5167,12 +5273,17 @@ function convertMergeFields() {
 
   const check = ok => ok ? '<span class="mfc-pass">✓ Pass</span>' : '<span class="mfc-fail">✗ Fail</span>';
 
-  setEdmHtml(converted);
+  const sigHtml = sigResult.corrected.length
+    ? `<ul class="mfc-checks">${sigResult.corrected.map(l => `<li><span class="mfc-pass">✓ Fixed</span> ${l}</li>`).join('')}</ul>`
+    : '<p class="mfc-none">Signature blocks not found in this HTML.</p>';
+
+  setEdmHtml(finalHtml);
   updateEdmPreview();
   const report = document.getElementById('mfc-report');
   report.innerHTML = `
     <div class="mfc-section"><div class="mfc-section-title">Change report (${changes.length} change${changes.length !== 1 ? 's' : ''})</div>${changeRows}</div>
     <div class="mfc-section"><div class="mfc-section-title">Unmapped fields</div>${unmappedHtml}</div>
+    <div class="mfc-section"><div class="mfc-section-title">Signature</div>${sigHtml}</div>
     <div class="mfc-section"><div class="mfc-section-title">Checks</div>
       <ul class="mfc-checks">
         <li>${check(openTrackOk)} <code>{{$link.OpenTrackUrl}}</code> unchanged</li>
@@ -5182,7 +5293,7 @@ function convertMergeFields() {
       </ul>
     </div>`;
   report.hidden = false;
-  showAiToast(`Done — ${changes.length} field${changes.length !== 1 ? 's' : ''} converted`);
+  showAiToast(`Done — ${changes.length} field${changes.length !== 1 ? 's' : ''} converted${sigResult.corrected.length ? `, ${sigResult.corrected.length} signature block${sigResult.corrected.length !== 1 ? 's' : ''} corrected` : ''}`);
 }
 
 let _edmPreviewTimer;
