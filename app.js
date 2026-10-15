@@ -8740,11 +8740,21 @@ function exportWPData() {
 const FU_KEY = 'msc_file_updates_v1';
 
 function fuGetAll() {
-  try { return JSON.parse(localStorage.getItem(FU_KEY) || '[]'); } catch { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(FU_KEY) || '[]');
+    if (!Array.isArray(raw)) return [];
+    // Normalize: old format stored plain strings; new format stores objects
+    return raw.map(e => typeof e === 'string'
+      ? { name: e, addedAt: null, updatedAt: null }
+      : (e && typeof e.name === 'string' ? e : null)
+    ).filter(Boolean);
+  } catch { return []; }
 }
 
 function fuSaveAll(arr) {
-  try { localStorage.setItem(FU_KEY, JSON.stringify(arr)); } catch {}
+  try { localStorage.setItem(FU_KEY, JSON.stringify(arr)); } catch (err) {
+    console.error('File Updates: could not save', err);
+  }
 }
 
 function fuBaseName(filename) {
