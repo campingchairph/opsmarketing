@@ -5117,13 +5117,15 @@ function edmSyncSelection(text) {
 const EDM_SIG_BLOCKS = [
   {
     label: 'Sender name (orange)',
-    re: /(<td[^>]*\bdir="auto"\b[^>]*\bclass="darkTarget"\b[^>]*style="[^"]*text-align:left;color:#ed7d31[^"]*">)([\s\S]*?)(<\/td>)/,
+    re: /(<td[^>]*dir="auto"[^>]*class="darkTarget"[^>]*style="[^"]*text-align:left;color:#ed7d31[^"]*">)([\s\S]*?)(<\/td>)/,
     content:
       '\n                <strong>{!$sender.FirstName} {!$sender.LastName}</strong><br>\n            ',
   },
   {
     label: 'Sender details & offices',
-    re: /(<td[^>]*\bdir="auto"\b[^>]*\bclass="darkTarget"\b[^>]*style="[^"]*text-align:left;color:#000000;font-family:'Times New Roman'[^"]*">)([\s\S]*?)(<\/td>)/,
+    re: new RegExp(
+      '(<td[^>]*dir="auto"[^>]*class="darkTarget"[^>]*style="[^"]*text-align:left;color:#000000;font-family:\'Times New Roman\'[^"]*">)([\\s\\S]*?)(</td>)'
+    ),
     content:
       "\n                {!$sender.Title}<br>{!$sender.Email} | 1300 370 821 | {!$sender.Phone}<br>" +
       '<a href="https://assetline.com.au" target="_blank" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="20675029-254f-47d1-9cda-cde96c0ea724">assetline.com.au</a>' +
@@ -5135,7 +5137,9 @@ const EDM_SIG_BLOCKS = [
   },
   {
     label: 'Unsubscribe',
-    re: /(<td[^>]*\bdir="auto"\b[^>]*\bclass="darkTarget"\b[^>]*style="[^"]*font-family:'Arial','Helvetica','sans-serif';font-size:10px[^"]*">)([\s\S]*?)(<\/td>)/,
+    re: new RegExp(
+      "(<td[^>]*dir=\"auto\"[^>]*class=\"darkTarget\"[^>]*style=\"[^\"]*font-family:'Arial','Helvetica','sans-serif';font-size:10px[^\"]*\">)([\\s\\S]*?)(</td>)"
+    ),
     content:
       '\n                <br><br><br><a target="_blank" href="{!$other.Unsubscribe}" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="d23072b1-aafa-4923-998c-5e33c74e7bab">Unsubscribe</a>&nbsp;\n            ',
   },
@@ -5153,16 +5157,11 @@ function edmCorrectSignature(html) {
 }
 
 // ── Hyperlink ──────────────────────────────────────────────────────────────
+// edmSavedLinkRange is kept in sync by the selectionchange listener added in
+// updateEdmPreview. Capturing it there (inside the iframe document) is
+// reliable because it fires the moment the user finishes selecting — before
+// any click on the outer toolbar button can change focus.
 let edmSavedLinkRange = null;
-
-function edmSaveLinkSelection() {
-  const iframe = document.getElementById('edm-preview-frame');
-  const win = iframe?.contentWindow;
-  const sel = win?.getSelection();
-  if (sel && sel.rangeCount && !sel.isCollapsed) {
-    edmSavedLinkRange = sel.getRangeAt(0).cloneRange();
-  }
-}
 
 function edmShowLinkBar() {
   if (!edmSavedLinkRange) {
@@ -5184,22 +5183,25 @@ function edmApplyLink() {
 
   const iframe = document.getElementById('edm-preview-frame');
   const doc = iframe?.contentDocument;
-  const win = iframe?.contentWindow;
-  if (!doc || !edmSavedLinkRange) return;
+  if (!doc || !edmSavedLinkRange) {
+    showAiToast('Selection lost — re-select the text and try again.');
+    edmCancelLink();
+    return;
+  }
 
-  win.focus();
-  const sel = win.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(edmSavedLinkRange);
-
-  const frag = edmSavedLinkRange.extractContents();
-  const a = doc.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.style.color = '#0176d3';
-  a.appendChild(frag);
-  edmSavedLinkRange.insertNode(a);
+  try {
+    const a = doc.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.setAttribute('style', 'color:#0176d3;');
+    a.appendChild(edmSavedLinkRange.extractContents());
+    edmSavedLinkRange.insertNode(a);
+  } catch {
+    showAiToast('Selection lost — re-select the text and try again.');
+    edmCancelLink();
+    return;
+  }
 
   edmSavedLinkRange = null;
   document.getElementById('edm-link-bar').hidden = true;
@@ -5329,6 +5331,14 @@ function updateEdmPreview() {
       const text = (e.clipboardData || window.clipboardData).getData('text/plain');
       doc.execCommand('insertText', false, text);
       markPreviewDirty();
+    });
+    // Track selection for the link button: save the range the moment the user
+    // finishes selecting inside the iframe, before any outer-doc click can clear it.
+    doc.addEventListener('selectionchange', () => {
+      const sel = iframe.contentWindow.getSelection();
+      if (sel && !sel.isCollapsed && sel.rangeCount) {
+        edmSavedLinkRange = sel.getRangeAt(0).cloneRange();
+      }
     });
   };
   const btn = document.getElementById('edm-update-html-btn');
