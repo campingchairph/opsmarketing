@@ -5114,18 +5114,22 @@ function edmSyncSelection(text) {
 // <td dir="auto" class="darkTarget"> element. Only these three blocks are
 // touched; any disclaimer table between the offices block and the unsubscribe
 // block is left completely untouched.
+// Lookahead-based patterns are attribute-order-independent (works on both raw
+// SFMC HTML and browser-serialised HTML from updateHtmlFromPreview).
+// Style fingerprints use flexible whitespace/quote matching to survive CSS OM
+// normalisation (e.g. font-family:'Times New Roman' → "Times New Roman").
 const EDM_SIG_BLOCKS = [
   {
     label: 'Sender name (orange)',
-    re: /(<td[^>]*dir="auto"[^>]*class="darkTarget"[^>]*style="[^"]*text-align:left;color:#ed7d31[^"]*">)([\s\S]*?)(<\/td>)/,
+    // Unique fingerprint: color #ed7d31 (orange) — no other element uses this
+    re: /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="[^"]*color:\s*#ed7d31[^"]*">)([\s\S]*?)(<\/td>)/,
     content:
       '\n                <strong>{!$sender.FirstName} {!$sender.LastName}</strong><br>\n            ',
   },
   {
     label: 'Sender details & offices',
-    re: new RegExp(
-      '(<td[^>]*dir="auto"[^>]*class="darkTarget"[^>]*style="[^"]*text-align:left;color:#000000;font-family:\'Times New Roman\'[^"]*">)([\\s\\S]*?)(</td>)'
-    ),
+    // Fingerprint: black + Times New Roman (body uses Arial; orange block uses #ed7d31)
+    re: /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="[^"]*color:\s*#000000[^"]*Times New Roman[^"]*">)([\s\S]*?)(<\/td>)/,
     content:
       "\n                {!$sender.Title}<br>{!$sender.Email} | 1300 370 821 | {!$sender.Phone}<br>" +
       '<a href="https://assetline.com.au" target="_blank" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="20675029-254f-47d1-9cda-cde96c0ea724">assetline.com.au</a>' +
@@ -5137,9 +5141,8 @@ const EDM_SIG_BLOCKS = [
   },
   {
     label: 'Unsubscribe',
-    re: new RegExp(
-      "(<td[^>]*dir=\"auto\"[^>]*class=\"darkTarget\"[^>]*style=\"[^\"]*font-family:'Arial','Helvetica','sans-serif';font-size:10px[^\"]*\">)([\\s\\S]*?)(</td>)"
-    ),
+    // Fingerprint: Arial + 10px — unique combination in the email
+    re: /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="[^"]*Arial[^"]*10px[^"]*">)([\s\S]*?)(<\/td>)/,
     content:
       '\n                <br><br><br><a target="_blank" href="{!$other.Unsubscribe}" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="d23072b1-aafa-4923-998c-5e33c74e7bab">Unsubscribe</a>&nbsp;\n            ',
   },
