@@ -5156,6 +5156,26 @@ function edmCorrectSignature(html) {
   return { html: out, corrected };
 }
 
+function edmExtractLinks(html) {
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const links = [];
+    const seen = new Set();
+    doc.querySelectorAll('a[href]').forEach(a => {
+      const href = (a.getAttribute('href') || '').trim();
+      const text = a.textContent.trim();
+      if (!text || !href) return;
+      const key = href + '|' + text;
+      if (seen.has(key)) return;
+      seen.add(key);
+      links.push({ href, text });
+    });
+    return links;
+  } catch {
+    return [];
+  }
+}
+
 // ── Hyperlink ──────────────────────────────────────────────────────────────
 // edmSavedLinkRange is kept in sync by the selectionchange listener added in
 // updateEdmPreview. Capturing it there (inside the iframe document) is
@@ -5271,6 +5291,9 @@ function convertMergeFields() {
   const signoffOk = !finalHtml.match(/\{!\$sender\.FirstName\}\{!\$sender\.LastName\}/);
   const unsubOk = !finalHtml.match(/href=["'][^"']*\{\{[Uu]nsubscribe[^}]*\}\}/);
 
+  // Extract all links for the links table
+  const emailLinks = edmExtractLinks(finalHtml);
+
   // Build report HTML
   const changeRows = changes.length
     ? `<table class="mfc-table"><thead><tr><th>Line</th><th>Before</th><th>After</th></tr></thead><tbody>
@@ -5284,9 +5307,24 @@ function convertMergeFields() {
 
   const check = ok => ok ? '<span class="mfc-pass">✓ Pass</span>' : '<span class="mfc-fail">✗ Fail</span>';
 
-  const sigHtml = sigResult.corrected.length
-    ? `<ul class="mfc-checks">${sigResult.corrected.map(l => `<li><span class="mfc-pass">✓ Fixed</span> ${l}</li>`).join('')}</ul>`
-    : '<p class="mfc-none">Signature blocks not found in this HTML.</p>';
+  // Links table — one row per unique link in the email
+  const linksHtml = emailLinks.length
+    ? `<table class="mfc-table mfc-links-table"><thead><tr><th>Text</th><th>URL / Merge field</th></tr></thead><tbody>
+        ${emailLinks.map(l => {
+          const isMerge = /^\{!?\$/.test(l.href) || /^\{\{/.test(l.href);
+          const tag = isMerge
+            ? `<span class="mfc-link-merge">${escapeHtml(l.href)}</span>`
+            : `<a href="${escapeHtml(l.href)}" target="_blank" rel="noopener noreferrer" class="mfc-link-url">${escapeHtml(l.href)}</a>`;
+          return `<tr><td>${escapeHtml(l.text)}</td><td>${tag}</td></tr>`;
+        }).join('')}
+       </tbody></table>`
+    : '<p class="mfc-none">No links found.</p>';
+
+  // Signature checks — each block is guaranteed correct if it was found & replaced
+  const sigChecks = EDM_SIG_BLOCKS.map(b => {
+    const ok = sigResult.corrected.includes(b.label);
+    return `<li>${check(ok)} Signature — ${b.label}</li>`;
+  }).join('');
 
   setEdmHtml(finalHtml);
   updateEdmPreview();
@@ -5294,13 +5332,14 @@ function convertMergeFields() {
   report.innerHTML = `
     <div class="mfc-section"><div class="mfc-section-title">Change report (${changes.length} change${changes.length !== 1 ? 's' : ''})</div>${changeRows}</div>
     <div class="mfc-section"><div class="mfc-section-title">Unmapped fields</div>${unmappedHtml}</div>
-    <div class="mfc-section"><div class="mfc-section-title">Signature</div>${sigHtml}</div>
+    <div class="mfc-section"><div class="mfc-section-title">Links in email (${emailLinks.length})</div>${linksHtml}</div>
     <div class="mfc-section"><div class="mfc-section-title">Checks</div>
       <ul class="mfc-checks">
         <li>${check(openTrackOk)} <code>{{$link.OpenTrackUrl}}</code> unchanged</li>
         <li>${check(noDoubleBrace)} No {{...}}-style fields remain (except open-track pixel)</li>
         <li>${check(signoffOk)} Sign-off has space between first and last name</li>
         <li>${check(unsubOk)} Unsubscribe <code>href</code> converted</li>
+        ${sigChecks}
       </ul>
     </div>`;
   report.hidden = false;

@@ -2335,6 +2335,11 @@ body {
 .mfc-checks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; font-size: 12px; }
 .mfc-pass { color: #4caf50; font-weight: 600; }
 .mfc-fail { color: var(--accent); font-weight: 600; }
+.mfc-links-table td:first-child { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mfc-links-table td:last-child { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all; }
+.mfc-link-url { color: #0176d3; font-size: 11px; font-family: var(--font-mono); text-decoration: none; }
+.mfc-link-url:hover { text-decoration: underline; }
+.mfc-link-merge { color: #e67e22; font-size: 11px; font-family: var(--font-mono); }
 
 /* ── EDM Filename Generator output ── */
 .fn-filename {
