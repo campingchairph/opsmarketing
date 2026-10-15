@@ -220,11 +220,19 @@ function setBar(id, pct) {
 
 // ── NAVIGATION ──────────────────────────────────────────────────
 function navigate(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+    // Force-hide edm-ed-page when not active — its flex layout requires explicit override
+    if (p.classList.contains('edm-ed-page')) p.style.display = 'none';
+  });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
   const page = document.getElementById('page-' + pageId);
-  if (page) page.classList.add('active');
+  if (page) {
+    page.classList.add('active');
+    // Restore edm-ed-page display when it becomes active
+    if (page.classList.contains('edm-ed-page')) page.style.display = 'flex';
+  }
 
   const nav = document.querySelector(`[data-page="${pageId}"]`);
   if (nav) nav.classList.add('active');
