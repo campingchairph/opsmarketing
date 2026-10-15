@@ -5346,36 +5346,34 @@ function updateEdmPreview() {
       const sel = iframe.contentWindow.getSelection();
       const bar = document.getElementById('edm-link-bar');
       const urlInput = document.getElementById('edm-link-url');
+      if (!bar) return;
 
       if (sel && !sel.isCollapsed && sel.rangeCount) {
         edmSavedLinkRange = sel.getRangeAt(0).cloneRange();
-        // If selection is inside an existing <a>, show its URL in the bar
+        // Auto-show bar when selected text is inside an existing <a>
         const node = sel.getRangeAt(0).commonAncestorContainer;
         const el = node.nodeType === 3 ? node.parentElement : node;
         const a = el?.closest?.('a');
         if (a) {
           edmEditingLink = a;
-          if (bar && urlInput) {
-            urlInput.value = a.getAttribute('href') || '';
-            bar.hidden = false;
-          }
+          urlInput.value = a.getAttribute('href') || '';
+          bar.hidden = false;
         } else {
+          // Non-linked text selected — clear edit state and hide bar
           edmEditingLink = null;
+          if (!bar.hidden) bar.hidden = true;
         }
       } else {
-        // Selection collapsed
+        // Selection collapsed — hide bar
         edmEditingLink = null;
-        // If focus moved outside the iframe (e.g. user clicked a toolbar button)
-        // keep edmSavedLinkRange so the button can still use it.
-        // If focus stayed inside the iframe the user clicked/typed to deselect:
-        // clear the range and hide the bar.
-        if (document.activeElement === iframe) {
-          edmSavedLinkRange = null;
-        }
-        if (bar && !bar.hidden && document.activeElement !== urlInput) {
-          bar.hidden = true;
-        }
+        if (!bar.hidden) bar.hidden = true;
       }
+    });
+    // Click inside iframe without drag-selecting clears the saved range so the
+    // link button can't accidentally apply to a stale selection.
+    doc.addEventListener('click', () => {
+      const sel = iframe.contentWindow.getSelection();
+      if (!sel || sel.isCollapsed) edmSavedLinkRange = null;
     });
   };
   const btn = document.getElementById('edm-update-html-btn');
