@@ -254,6 +254,7 @@ function navigate(pageId) {
     goodlooks:    ['What Good Looks Like', 'Pass vs Good vs Impressive'],
     diffcheck:    ['Text Compare', 'Spot differences between two versions of any text'],
     edmeditor:    ['EDM HTML Editor', 'Code editor + live preview with merge field converter'],
+    fileupdates:  ['File Updates', 'Track the latest version of each collateral file'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];
@@ -281,6 +282,7 @@ function navigate(pageId) {
   // Task reminder panel — show on task pages, hide everywhere else
   if (TRP_PAGES && TRP_PAGES[pageId]) showTaskReminderPanel(pageId);
   else hideTaskReminderPanel();
+  if (pageId === 'fileupdates') { fuRenderList(); }
   if (pageId === 'skills')      { renderSkillsPage(); }
   if (pageId === 'timer')       { renderTimerTaskList(); }
   if (pageId === 'glossary')    { renderGlossaryList(); }
@@ -5188,14 +5190,10 @@ let edmSavedLinkRange = null;
 let edmEditingLink = null; // <a> element whose href we're editing (non-null = edit mode)
 
 function edmShowLinkBar() {
-  if (!edmSavedLinkRange) {
-    showAiToast('Select text in the preview first, then click the link icon.');
-    return;
-  }
   const bar = document.getElementById('edm-link-bar');
-  bar.hidden = false;
   const input = document.getElementById('edm-link-url');
-  input.value = '';
+  bar.hidden = false;
+  input.value = edmEditingLink ? (edmEditingLink.getAttribute('href') || '') : '';
   input.focus();
 }
 
@@ -5236,6 +5234,8 @@ function edmApplyLink() {
   edmSavedLinkRange = null;
   edmEditingLink = null;
   document.getElementById('edm-link-bar').hidden = true;
+  const linkBtn = document.getElementById('edm-link-btn');
+  if (linkBtn) linkBtn.disabled = true;
   markPreviewDirty();
 }
 
@@ -5243,6 +5243,8 @@ function edmCancelLink() {
   edmSavedLinkRange = null;
   edmEditingLink = null;
   document.getElementById('edm-link-bar').hidden = true;
+  const btn = document.getElementById('edm-link-btn');
+  if (btn) btn.disabled = true;
 }
 
 function convertMergeFields() {
@@ -5383,32 +5385,26 @@ function updateEdmPreview() {
       doc.execCommand('insertText', false, text);
       markPreviewDirty();
     });
-    // Track selection for the link button and auto-show/hide the link bar.
+    // Track selection to enable/disable the link button and hide the bar on deselect.
     doc.addEventListener('selectionchange', () => {
       const sel = iframe.contentWindow.getSelection();
       const bar = document.getElementById('edm-link-bar');
       const urlInput = document.getElementById('edm-link-url');
+      const linkBtn = document.getElementById('edm-link-btn');
       if (!bar) return;
 
       if (sel && !sel.isCollapsed && sel.rangeCount) {
         edmSavedLinkRange = sel.getRangeAt(0).cloneRange();
-        // Auto-show bar when selected text is inside an existing <a>
         const node = sel.getRangeAt(0).commonAncestorContainer;
         const el = node.nodeType === 3 ? node.parentElement : node;
         const a = el?.closest?.('a');
-        if (a) {
-          edmEditingLink = a;
-          urlInput.value = a.getAttribute('href') || '';
-          bar.hidden = false;
-        } else {
-          // Non-linked text selected — clear edit state and hide bar
-          edmEditingLink = null;
-          if (!bar.hidden) bar.hidden = true;
-        }
+        edmEditingLink = a || null;
+        if (linkBtn) linkBtn.disabled = false;
       } else {
-        // Selection collapsed — hide bar
+        // Selection collapsed — disable button and hide bar
         edmEditingLink = null;
-        if (!bar.hidden) bar.hidden = true;
+        if (linkBtn) linkBtn.disabled = true;
+        if (!bar.hidden) { bar.hidden = true; if (urlInput) urlInput.value = ''; }
       }
     });
     // Click inside iframe without drag-selecting clears the saved range so the
@@ -8729,4 +8725,121 @@ function exportWPData() {
     console.error('exportWPData error:', err);
     showAiToast('Export failed: ' + (err.message || err));
   }
+}
+
+// ── FILE UPDATES ────────────────────────────────────────────────────────────
+const FU_KEY = 'msc_file_updates_v1';
+
+function fuGetAll() {
+  try { return JSON.parse(localStorage.getItem(FU_KEY) || '[]'); } catch { return []; }
+}
+
+function fuSaveAll(arr) {
+  try { localStorage.setItem(FU_KEY, JSON.stringify(arr)); } catch {}
+}
+
+function fuBaseName(filename) {
+  return filename.replace(/^\d{6}_/, '');
+}
+
+function fuSearch(query) {
+  const q = (query || '').trim();
+  const resultsEl = document.getElementById('fu-search-results');
+  if (!resultsEl) return;
+  if (!q) { resultsEl.hidden = true; return; }
+
+  const qBase = fuBaseName(q).toLowerCase();
+  const all = fuGetAll();
+  const matches = all.filter(fn => fuBaseName(fn).toLowerCase().includes(qBase));
+
+  if (matches.length === 0) { resultsEl.hidden = true; return; }
+
+  resultsEl.hidden = false;
+  resultsEl.innerHTML = `<div class="fu-search-label">Matching files</div>` +
+    matches.map(fn => {
+      const isSameBase = fuBaseName(fn).toLowerCase() === qBase;
+      return `<div class="fu-search-row">
+        <span class="fu-search-filename">${escapeHtml(fn)}</span>
+        <button class="fu-overwrite-btn" onclick="fuConfirmOverwrite(${JSON.stringify(fn)}, ${JSON.stringify(q)})">
+          ${isSameBase ? 'Overwrite' : 'Replace with this'}
+        </button>
+      </div>`;
+    }).join('');
+}
+
+function fuConfirmOverwrite(oldFn, newFn) {
+  if (!confirm(`Replace:\n  ${oldFn}\n\nwith:\n  ${newFn}?`)) return;
+  const all = fuGetAll();
+  const idx = all.indexOf(oldFn);
+  if (idx !== -1) {
+    all[idx] = newFn;
+    fuSaveAll(all);
+    fuRenderList();
+    const resultsEl = document.getElementById('fu-search-results');
+    if (resultsEl) resultsEl.hidden = true;
+    const input = document.getElementById('fu-input');
+    if (input) input.value = '';
+    showAiToast('File updated.');
+  }
+}
+
+function fuAdd() {
+  const input = document.getElementById('fu-input');
+  const filename = (input?.value || '').trim();
+  if (!filename) { showAiToast('Enter a filename first.'); return; }
+
+  const all = fuGetAll();
+  const base = fuBaseName(filename).toLowerCase();
+  const existingIdx = all.findIndex(fn => fuBaseName(fn).toLowerCase() === base);
+
+  if (existingIdx !== -1) {
+    if (!confirm(`A file with this base name already exists:\n  ${all[existingIdx]}\n\nReplace with:\n  ${filename}?`)) return;
+    all[existingIdx] = filename;
+  } else {
+    all.push(filename);
+  }
+
+  fuSaveAll(all);
+  fuRenderList();
+  const resultsEl = document.getElementById('fu-search-results');
+  if (resultsEl) resultsEl.hidden = true;
+  if (input) input.value = '';
+  showAiToast(existingIdx !== -1 ? 'File updated.' : 'File added.');
+}
+
+function fuDelete(filename) {
+  if (!confirm(`Remove "${filename}" from the library?`)) return;
+  const all = fuGetAll().filter(fn => fn !== filename);
+  fuSaveAll(all);
+  fuRenderList();
+  showAiToast('File removed.');
+}
+
+function fuRenderList() {
+  const all = fuGetAll();
+  const listEl = document.getElementById('fu-list');
+  const countEl = document.getElementById('fu-count');
+  if (countEl) countEl.textContent = all.length;
+  if (!listEl) return;
+
+  if (all.length === 0) {
+    listEl.innerHTML = '<div class="fu-empty">No files yet. Paste a filename above to add your first entry.</div>';
+    return;
+  }
+
+  const sorted = [...all].sort((a, b) => fuBaseName(a).localeCompare(fuBaseName(b)));
+  listEl.innerHTML = sorted.map(fn => {
+    const dateMatch = fn.match(/^(\d{6})_/);
+    const dateStamp = dateMatch ? dateMatch[1] : '';
+    const base = fuBaseName(fn);
+    return `<div class="fu-file-row">
+      <div class="fu-file-info">
+        ${dateStamp ? `<span class="fu-file-date">${escapeHtml(dateStamp)}</span>` : ''}
+        <span class="fu-file-name">${escapeHtml(base)}</span>
+      </div>
+      <button class="fu-delete-btn" onclick="fuDelete(${JSON.stringify(fn)})" title="Remove">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>`;
+  }).join('');
 }

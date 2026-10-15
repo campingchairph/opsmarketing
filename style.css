@@ -6970,7 +6970,8 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   justify-content: center;
   transition: background 0.12s, border-color 0.12s;
 }
-.edm-fmt-btn:hover { background: var(--bg-3, var(--border)); border-color: var(--border); }
+.edm-fmt-btn:hover:not(:disabled) { background: var(--bg-3, var(--border)); border-color: var(--border); }
+.edm-fmt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .edm-fmt-btn b { font-size: 14px; }
 .edm-fmt-btn-i i { font-size: 13px; }
 .edm-fmt-btn-u u { text-decoration-thickness: 1.5px; font-size: 13px; }
@@ -7128,4 +7129,178 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
 .edm-ed-preview {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
+}
+
+/* ── FILE UPDATES ──────────────────────────────────────────────── */
+.fu-intro {
+  margin-bottom: 20px;
+}
+.fu-intro-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 6px;
+}
+.fu-intro-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+.fu-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.fu-input {
+  flex: 1;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border-md);
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--text-1);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+.fu-input:focus { border-color: var(--accent); }
+.fu-add-btn {
+  height: 36px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.fu-add-btn:hover { opacity: 0.88; }
+.fu-search-results {
+  background: var(--bg-2);
+  border: 1px solid var(--border-md);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.fu-search-label {
+  padding: 7px 14px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.fu-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+}
+.fu-search-filename {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+.fu-overwrite-btn {
+  padding: 4px 10px;
+  height: 26px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+.fu-overwrite-btn:hover { background: var(--accent); color: #fff; }
+.fu-list-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.fu-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--bg-3);
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.fu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fu-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.12s;
+}
+.fu-file-row:hover { border-color: var(--border-md); }
+.fu-file-info {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.fu-file-date {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.fu-file-name {
+  font-size: 13px;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fu-delete-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: color 0.12s, background 0.12s;
+}
+.fu-delete-btn:hover { color: #e44; background: rgba(220,50,50,0.08); }
+.fu-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
 }

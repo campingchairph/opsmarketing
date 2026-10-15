@@ -301,6 +301,10 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/><line x1="7" y1="8" x2="9" y2="8"/></svg>
         Text Compare
       </div>
+      <div class="nav-item" data-page="fileupdates">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="9" y2="9"/><line x1="5" y1="12" x2="7" y2="12"/></svg>
+        File Updates
+      </div>
     </div>
 
     <div class="nav-category-group" data-category="survival">
@@ -1750,7 +1754,7 @@
               <button class="edm-fmt-btn" onclick="edmFmt('bold')" title="Bold"><b>B</b></button>
               <button class="edm-fmt-btn edm-fmt-btn-i" onclick="edmFmt('italic')" title="Italic"><i>I</i></button>
               <button class="edm-fmt-btn edm-fmt-btn-u" onclick="edmFmt('underline')" title="Underline"><u>U</u></button>
-              <button class="edm-fmt-btn" onclick="edmShowLinkBar()" title="Add hyperlink">
+              <button id="edm-link-btn" class="edm-fmt-btn" onclick="edmShowLinkBar()" onmousedown="event.preventDefault()" title="Add hyperlink" disabled>
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M6.5 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1"/><path d="M9.5 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1"/></svg>
               </button>
               <div class="edm-fmt-sep"></div>
@@ -2186,6 +2190,24 @@
 
       </div>
 
+      <!-- ── FILE UPDATES ── -->
+      <div id="page-fileupdates" class="page">
+        <div class="fu-intro">
+          <div class="fu-intro-title">File Updates</div>
+          <div class="fu-intro-desc">Track the latest version of each collateral file. Files are named <code>YYMMDD_basename</code> — only one entry per base name is kept. Paste a filename to search or add; if a match exists, overwrite it with the newer date.</div>
+        </div>
+        <div class="fu-input-row">
+          <input type="text" id="fu-input" class="fu-input" placeholder="Paste or type filename — e.g. 261015_AltX product guide" oninput="fuSearch(this.value)" onpaste="setTimeout(()=>fuSearch(document.getElementById('fu-input').value),0)" onkeydown="if(event.key==='Enter'){event.preventDefault();fuAdd();}">
+          <button class="fu-add-btn" onclick="fuAdd()">Add File</button>
+        </div>
+        <div id="fu-search-results" class="fu-search-results" hidden></div>
+        <div class="fu-list-header">
+          <span>All files</span>
+          <span class="fu-count-badge" id="fu-count">0</span>
+        </div>
+        <div id="fu-list" class="fu-list"></div>
+      </div>
+
       <!-- page-mistakes and page-ninetydays moved to right-side drawers -->
       <div id="page-mistakes" class="page" style="display:none!important"></div>
       <div id="page-ninetydays" class="page" style="display:none!important"></div>
@@ -2432,7 +2454,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/dialog/dialog.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/searchcursor.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/search.min.js"></script>
-<script src="app.js?v=26"></script>
+<script src="app.js?v=27"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';
