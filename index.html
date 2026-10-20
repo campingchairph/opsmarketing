@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Assetline Capital — Marketing Command Centre</title>
-<link rel="stylesheet" href="style.css?v=28"/>
+<link rel="stylesheet" href="style.css?v=30"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/dialog/dialog.min.css">
 </head>
@@ -2194,11 +2194,11 @@
       <div id="page-fileupdates" class="page">
         <div class="fu-intro">
           <div class="fu-intro-title">File Updates</div>
-          <div class="fu-intro-desc">Track the latest version of each collateral file. Files are named <code>YYMMDD_basename</code> — only one entry per base name is kept. Paste a filename to search or add; if a match exists, overwrite it with the newer date.</div>
+          <div class="fu-intro-desc">Track the latest version of each collateral file. Files are named <code>YYMMDD_basename</code> — only one entry per base name is kept. Paste one or more filenames (one per line); the preview shows what will happen to each.</div>
         </div>
         <div class="fu-input-row">
-          <input type="text" id="fu-input" class="fu-input" placeholder="Paste or type filename — e.g. 261015_AltX product guide" oninput="fuSearch(this.value)" onpaste="setTimeout(()=>fuSearch(document.getElementById('fu-input').value),0)" onkeydown="if(event.key==='Enter'){event.preventDefault();fuAdd();}">
-          <button class="fu-add-btn" onclick="fuAdd()">Add File</button>
+          <textarea id="fu-input" class="fu-input" rows="3" placeholder="261015_AltX product guide&#10;261019_Campaign brief&#10;261012_Rate card" oninput="fuSearch(this.value)" onpaste="setTimeout(()=>fuSearch(document.getElementById('fu-input').value),0)"></textarea>
+          <button class="fu-add-btn" onclick="fuAdd()">Add Files</button>
         </div>
         <div id="fu-search-results" class="fu-search-results" hidden></div>
         <div class="fu-list-header">
@@ -2454,7 +2454,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/dialog/dialog.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/searchcursor.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/search.min.js"></script>
-<script src="app.js?v=28"></script>
+<script src="app.js?v=30"></script>
 <script>
   function openDashboard(page) {
     document.getElementById('home-page').style.display = 'none';

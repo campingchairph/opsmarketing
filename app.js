@@ -5131,41 +5131,51 @@ function edmSyncSelection(text) {
 const EDM_SIG_BLOCKS = [
   {
     label: 'Sender name (orange)',
-    // Unique fingerprint: color #ed7d31 (orange) — no other element uses this
-    re: /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="[^"]*color:\s*#ed7d31[^"]*">)([\s\S]*?)(<\/td>)/,
+    // td style has Times New Roman (only the sender name td carries TNR at td level; details td uses Arial at td level)
+    test: (style, _content) => /Times\s+New\s+Roman/i.test(style) && !/Arial/i.test(style),
     content:
-      '\n                <strong>{!$sender.FirstName} {!$sender.LastName}</strong><br>\n            ',
+      '\n                <font color="#ed7d31"><strong>{!$sender.FirstName} {!$sender.LastName}</strong></font>\n            ',
   },
   {
     label: 'Sender details & offices',
-    // Fingerprint: black + Times New Roman (body uses Arial; orange block uses #ed7d31)
-    re: /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="[^"]*color:\s*#000000[^"]*Times New Roman[^"]*">)([\s\S]*?)(<\/td>)/,
+    // td style has Arial AND content starts with <font face= (the Times New Roman wrapper on the details block)
+    test: (style, content) => /Arial/i.test(style) && /^\s*<font\s+face=/i.test(content),
     content:
-      "\n                {!$sender.Title}<br>{!$sender.Email} | 1300 370 821 | {!$sender.Phone}<br>" +
+      "\n                <font face=\"Times New Roman\">{!$sender.Title}<br>{!$sender.Email} | 1300 370 821 | {!$sender.Phone}<br>" +
       '<a href="https://assetline.com.au" target="_blank" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="20675029-254f-47d1-9cda-cde96c0ea724">assetline.com.au</a>' +
       ' | <a href="https://www.linkedin.com/company/assetline-capital/" target="_blank" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="20675029-254f-47d1-9cda-cde96c0ea724">LinkedIn</a>' +
       '<br><br><strong>Sydney Office</strong> | Level 24, 101 Grafton Street, Bondi Junction, NSW 2022<br>' +
-      '<strong>Melbourne Office | </strong>3.38/425 Smith St, Fitzroy, VIC 3065<br>' +
-      '<strong>Brisbane Office</strong> | Level 1, Suite 106, 33 Longland Street, Newstead, QLD 4006<br>' +
-      '\n            ',
+      '<strong>Melbourne Office </strong>| 3.38/425 Smith St, Fitzroy, VIC 3065<br>' +
+      '<strong>Brisbane Office</strong> | Level 1, Suite 106, 33 Longland Street, Newstead, QLD 4006' +
+      '</font>\n            ',
   },
   {
     label: 'Unsubscribe',
-    // Fingerprint: Arial + 10px — unique combination in the email
-    re: /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="[^"]*Arial[^"]*10px[^"]*">)([\s\S]*?)(<\/td>)/,
+    // td style has Arial AND content has a 10px font-size span (the 10px is on the inner span, not the td itself)
+    test: (style, content) => /Arial/i.test(style) && /<span[^>]*font-size:\s*10px/i.test(content),
     content:
-      '\n                <br><br><br><a target="_blank" href="{!$other.Unsubscribe}" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="d23072b1-aafa-4923-998c-5e33c74e7bab">Unsubscribe</a>&nbsp;\n            ',
+      '\n                <span style="font-size: 10px;"><br><br><br><a target="_blank" href="{!$other.Unsubscribe}" rel="noopener noreferrer" style="color:#0176d3;" data-component-id="d23072b1-aafa-4923-998c-5e33c74e7bab">Unsubscribe</a>&nbsp;</span>\n            ',
   },
 ];
 
 function edmCorrectSignature(html) {
-  let out = html;
+  // Single-pass replace: match every td[dir="auto"].darkTarget, classify by style + content, replace if matched.
+  // Using a replacement function so we can check both the td's style attribute AND its inner content.
+  const tdRe = /(<td(?=[^>]*\bdir="auto")(?=[^>]*\bclass="darkTarget")[^>]*style="([^"]*)"[^>]*>)([\s\S]*?)(<\/td>)/g;
   const corrected = [];
-  EDM_SIG_BLOCKS.forEach(({ re, label, content }) => {
-    const prev = out;
-    out = out.replace(re, (_, open, _old, close) => open + content + close);
-    if (out !== prev) corrected.push(label);
+  const applied = new Set();
+
+  const out = html.replace(tdRe, (_, open, style, content, close) => {
+    for (const block of EDM_SIG_BLOCKS) {
+      if (!applied.has(block.label) && block.test(style, content)) {
+        applied.add(block.label);
+        corrected.push(block.label);
+        return open + block.content + close;
+      }
+    }
+    return _;
   });
+
   return { html: out, corrected };
 }
 
@@ -8775,31 +8785,42 @@ function fuDateStamp(filename) {
 }
 
 function fuSearch(query) {
-  const q = (query || '').trim();
   const resultsEl = document.getElementById('fu-search-results');
   if (!resultsEl) return;
-  if (!q) { resultsEl.hidden = true; return; }
 
-  const qBase = fuBaseName(q).toLowerCase();
+  const lines = (query || '').split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length === 0) { resultsEl.hidden = true; return; }
+
   const all = fuGetAll();
-  const matches = all.filter(entry => fuBaseName(entry.name).toLowerCase().includes(qBase));
-
-  if (matches.length === 0) { resultsEl.hidden = true; return; }
 
   resultsEl.hidden = false;
-  resultsEl.innerHTML = `<div class="fu-search-label">Matching files</div>` +
-    matches.map(entry => {
-      const isSameBase = fuBaseName(entry.name).toLowerCase() === qBase;
-      const oldStamp = fuDateStamp(entry.name);
-      const newStamp = fuDateStamp(q);
-      const isOlder = oldStamp !== null && newStamp !== null && newStamp < oldStamp;
-      return `<div class="fu-search-row">
-        <span class="fu-search-filename">${escapeHtml(entry.name)}</span>
-        <button class="fu-overwrite-btn${isOlder ? ' fu-overwrite-warn' : ''}"
-          data-old="${escapeHtml(entry.name)}" data-new="${escapeHtml(q)}"
-          onclick="fuConfirmOverwrite(this.dataset.old, this.dataset.new)">
-          ${isSameBase ? 'Overwrite' : 'Replace with this'}
-        </button>
+  resultsEl.innerHTML = `<div class="fu-search-label">Preview</div>` +
+    lines.map(line => {
+      const base = fuBaseName(line).toLowerCase();
+      const existing = all.find(e => fuBaseName(e.name).toLowerCase() === base);
+
+      if (!existing) {
+        return `<div class="fu-preview-row fu-preview-new">
+          <span class="fu-preview-badge fu-badge-new">New</span>
+          <span class="fu-preview-name">${escapeHtml(line)}</span>
+        </div>`;
+      }
+
+      const incomingStamp = fuDateStamp(line);
+      const existingStamp = fuDateStamp(existing.name);
+      const isOlder = incomingStamp !== null && existingStamp !== null && incomingStamp < existingStamp;
+
+      if (isOlder) {
+        return `<div class="fu-preview-row fu-preview-older">
+          <span class="fu-preview-badge fu-badge-older">Older</span>
+          <span class="fu-preview-name">${escapeHtml(line)}</span>
+          <span class="fu-preview-current">on record: ${escapeHtml(existing.name)}</span>
+        </div>`;
+      }
+      return `<div class="fu-preview-row fu-preview-exists">
+        <span class="fu-preview-badge fu-badge-exists">Exists</span>
+        <span class="fu-preview-name">${escapeHtml(line)}</span>
+        <span class="fu-preview-current">on record: ${escapeHtml(existing.name)}</span>
       </div>`;
     }).join('');
 }
@@ -8834,19 +8855,37 @@ function fuConfirmOverwrite(oldName, newName) {
 
 function fuAdd() {
   const input = document.getElementById('fu-input');
-  const filename = (input?.value || '').trim();
-  if (!filename) { showAiToast('Enter a filename first.'); return; }
+  const lines = (input?.value || '').split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length === 0) { showAiToast('Enter at least one filename.'); return; }
 
   const all = fuGetAll();
-  const base = fuBaseName(filename).toLowerCase();
-  const existingIdx = all.findIndex(e => fuBaseName(e.name).toLowerCase() === base);
   const now = new Date().toISOString();
+  let added = 0, updated = 0, skipped = 0;
 
-  if (existingIdx !== -1) {
-    if (!confirm(`A file with this base name already exists:\n  ${all[existingIdx].name}\n\nReplace with:\n  ${filename}?`)) return;
-    all[existingIdx] = { name: filename, addedAt: all[existingIdx].addedAt, updatedAt: now };
-  } else {
-    all.push({ name: filename, addedAt: now, updatedAt: null });
+  for (const filename of lines) {
+    const base = fuBaseName(filename).toLowerCase();
+    const existingIdx = all.findIndex(e => fuBaseName(e.name).toLowerCase() === base);
+
+    if (existingIdx !== -1) {
+      const existing = all[existingIdx];
+      const incomingStamp = fuDateStamp(filename);
+      const existingStamp = fuDateStamp(existing.name);
+      const isOlder = incomingStamp !== null && existingStamp !== null && incomingStamp < existingStamp;
+
+      const msg = isOlder
+        ? `⚠️ Older file detected\n\nOn record:   ${existing.name}\nYou're adding:  ${filename}\n\nThis would replace a newer file with an older one. Replace anyway?`
+        : `Replace on record:\n  ${existing.name}\n\nwith:\n  ${filename}?`;
+
+      if (confirm(msg)) {
+        all[existingIdx] = { name: filename, addedAt: existing.addedAt, updatedAt: now };
+        updated++;
+      } else {
+        skipped++;
+      }
+    } else {
+      all.push({ name: filename, addedAt: now, updatedAt: null });
+      added++;
+    }
   }
 
   fuSaveAll(all);
@@ -8854,7 +8893,12 @@ function fuAdd() {
   const resultsEl = document.getElementById('fu-search-results');
   if (resultsEl) resultsEl.hidden = true;
   if (input) input.value = '';
-  showAiToast(existingIdx !== -1 ? 'File updated.' : 'File added.');
+
+  const parts = [];
+  if (added > 0) parts.push(`${added} added`);
+  if (updated > 0) parts.push(`${updated} updated`);
+  if (skipped > 0) parts.push(`${skipped} skipped`);
+  showAiToast(parts.length ? parts.join(', ') + '.' : 'Nothing changed.');
 }
 
 function fuDelete(name) {

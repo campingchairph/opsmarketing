@@ -7152,11 +7152,12 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  align-items: flex-start;
 }
 .fu-input {
   flex: 1;
-  height: 36px;
-  padding: 0 12px;
+  min-height: 80px;
+  padding: 9px 12px;
   border: 1px solid var(--border-md);
   border-radius: 8px;
   background: var(--bg-2);
@@ -7164,6 +7165,8 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   font-size: 13px;
   font-family: var(--font-ui);
   outline: none;
+  resize: vertical;
+  line-height: 1.6;
 }
 .fu-input:focus { border-color: var(--accent); }
 .fu-add-btn {
@@ -7178,6 +7181,7 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.15s;
+  flex-shrink: 0;
 }
 .fu-add-btn:hover { opacity: 0.88; }
 .fu-search-results {
@@ -7195,40 +7199,37 @@ mark.rich-word-ins { background: rgba(125,216,154,.25); color: #2a7a4a; border-r
   text-transform: uppercase;
   color: var(--text-3);
 }
-.fu-search-row {
+.fu-preview-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 14px;
   border-top: 1px solid var(--border);
 }
-.fu-search-filename {
-  flex: 1;
+.fu-preview-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.fu-preview-name {
   font-size: 12px;
-  color: var(--text-1);
   font-family: var(--font-mono);
   word-break: break-all;
+  flex: 1;
 }
-.fu-overwrite-btn {
-  padding: 4px 10px;
-  height: 26px;
-  background: var(--accent-dim);
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 6px;
+.fu-preview-current {
   font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
+  color: var(--text-3);
   white-space: nowrap;
-  transition: background 0.12s;
 }
-.fu-overwrite-btn:hover { background: var(--accent); color: #fff; }
-.fu-overwrite-btn.fu-overwrite-warn {
-  background: rgba(220,80,30,0.08);
-  color: #d04010;
-  border-color: #d04010;
-}
-.fu-overwrite-btn.fu-overwrite-warn:hover { background: #d04010; color: #fff; }
+.fu-badge-new { background: rgba(30,160,60,0.12); color: #1a9e42; }
+.fu-badge-exists { background: rgba(200,30,30,0.1); color: #c01f1f; border: 1px solid rgba(200,30,30,0.25); }
+.fu-badge-older { background: rgba(220,80,30,0.1); color: #c94010; border: 1px solid rgba(220,80,30,0.3); }
+.fu-preview-exists .fu-preview-name { color: #c01f1f; }
+.fu-preview-older .fu-preview-name { color: #c94010; }
 .fu-list-header {
   display: flex;
   align-items: center;
