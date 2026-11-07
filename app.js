@@ -7887,34 +7887,36 @@ function renderEdmReportPage() {
   const hasSpan = !!(d.end_month && d.end_month !== d.start_month);
 
   root.innerHTML = `
-    <div class="edr-page-header">
-      <div class="edr-page-title">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:18px;height:18px;flex-shrink:0"><rect x="2" y="2" width="12" height="12" rx="1"/><polyline points="5,6 8,9 11,5"/><line x1="5" y1="11" x2="11" y2="11"/></svg>
-        eDM Reporting
-      </div>
-      <div class="edr-page-controls">
-        <div class="edr-month-group">
-          <label class="edr-month-label">Month</label>
-          <input type="month" id="edr-start-month" class="edr-month-input" value="${d.start_month || ''}"
-            onchange="saveEdmReportStartMonth(this.value)"/>
-          <label class="edr-span-toggle" title="Select a date range">
-            <input type="checkbox" ${hasSpan ? 'checked' : ''} onchange="toggleEdmSpan(this.checked)"/>
-            <span>to</span>
-          </label>
-          <div id="edr-end-month-row" style="display:${hasSpan ? 'flex' : 'none'};align-items:center;gap:6px">
-            <input type="month" id="edr-end-month" class="edr-month-input" value="${d.end_month || ''}"
-              min="${d.start_month || ''}" onchange="saveEdmReportEndMonth(this.value)"/>
-          </div>
+    <div class="edr-sticky-bar">
+      <div class="edr-page-header">
+        <div class="edr-page-title">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="width:18px;height:18px;flex-shrink:0"><rect x="2" y="2" width="12" height="12" rx="1"/><polyline points="5,6 8,9 11,5"/><line x1="5" y1="11" x2="11" y2="11"/></svg>
+          eDM Reporting
         </div>
-        <button class="btn-add" onclick="addEdmReportEntry()">+ Add eDM</button>
-        <button class="edr-save-snap-btn" onclick="saveEdmSnapshot()" title="Save report">↓ Save</button>
-        <button class="edr-clear-btn" onclick="clearEdmReport()">Clear</button>
+        <div class="edr-page-controls">
+          <div class="edr-month-group">
+            <label class="edr-month-label">Month</label>
+            <input type="month" id="edr-start-month" class="edr-month-input" value="${d.start_month || ''}"
+              onchange="saveEdmReportStartMonth(this.value)"/>
+            <label class="edr-span-toggle" title="Select a date range">
+              <input type="checkbox" ${hasSpan ? 'checked' : ''} onchange="toggleEdmSpan(this.checked)"/>
+              <span>to</span>
+            </label>
+            <div id="edr-end-month-row" style="display:${hasSpan ? 'flex' : 'none'};align-items:center;gap:6px">
+              <input type="month" id="edr-end-month" class="edr-month-input" value="${d.end_month || ''}"
+                min="${d.start_month || ''}" onchange="saveEdmReportEndMonth(this.value)"/>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addEdmReportEntry()">+ Add eDM</button>
+          <button class="edr-save-snap-btn" onclick="saveEdmSnapshot()" title="Save report">↓ Save</button>
+          <button class="edr-clear-btn" onclick="clearEdmReport()">Clear</button>
+        </div>
       </div>
-    </div>
 
-    <div class="edr-saves-bar">
-      <span class="edr-saves-label">Saved reports</span>
-      <div id="edr-snapshot-panel" class="edr-snapshot-panel"></div>
+      <div class="edr-saves-bar">
+        <span class="edr-saves-label">Saved reports</span>
+        <div id="edr-snapshot-panel" class="edr-snapshot-panel"></div>
+      </div>
     </div>
 
     <div class="edr-layout">
