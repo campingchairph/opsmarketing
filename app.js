@@ -8912,6 +8912,138 @@ function fuDelete(name) {
   showAiToast('File removed.');
 }
 
+// ── WORKIVA ─────────────────────────────────────────────────────────────────
+
+function wkvToggle(id) {
+  const card = document.getElementById('wkv-card-' + id);
+  if (card) card.classList.toggle('open');
+}
+
+const WKV_SYSTEM_PROMPT = `You are a knowledgeable assistant helping an artworker on the Emperor CAB Payments AR 2026 job. Answer questions concisely and practically based on the following job notes:
+
+JOB OVERVIEW:
+- Emperor CAB Payments AR 2026 annual report
+- Lead artworker: Kev Bossell (available Wed–Fri only), on the Emperor email list
+- Kelly handles scheduling
+- Other artworkers: Pete and Lauren — coordinate via Kev if work overlaps
+
+NEXT STEPS:
+- Send Kev a contact email to introduce yourself
+- Check with Kelly when scheduled to start
+- Finish setting up LucidLink server access (required before opening any files)
+- Start on the Risk section (Kev is setting it aside)
+
+SERVER & FILES:
+- Path: Emperor Group Server › Studio › CAB › CAB Payments AR 2026
+  - Design folder: creative files (find latest by version marker or modified date)
+  - Artwork folder: master InDesign file + images/graphics folders
+- Work on master directly on server; only copy locally if connection is bad
+- If someone else has the master open: copy for exports only, not for edits
+- Save a backup before bringing pages in from the design file (design pages bring CMYK colours into the master's cleaned-up RGB swatch list)
+- Use your Mac for this job
+
+EXPORTING IMAGES:
+- JPEG: Select the frame in InDesign, export as JPEG using Selection (not Range). 300 ppi, RGB. Save in Artwork images/graphics folder with a recognisable name.
+- Bleed: 3mm — always include in background images. Workiva doesn't show bleed. Check Document properties › Page format. This catches everyone.
+- Colour: check tints match the master's RGB values. Use SVG where possible (colours controllable in PitStop). JPEG for pixel images. Backgrounds are JPEG for now; may convert to SVG later.
+- SVG: Export from Illustrator — always keep the .ai file (text is outlined in SVG, only editable in .ai). Settings: Export artboard (clipped) · Internal CSS · Convert to outlines · Preserve images · Layer names as Object IDs · Decimal 3 · Responsive (not minified). Use one artboard per variant with clear names, e.g. "Page tab – Financials white".
+- Keep InDesign updated with new images (can't package files from Workiva; clients sometimes ask for all images).
+
+BUILDING IN WORKIVA:
+- TEXT: Never copy text from the design file — always use live Workiva text as the client edits it. Don't add soft returns or manual line breaks.
+- STYLES: Put a style on everything including body, subheads, and bold body text (which has its own style). Fonts changed from Times to Merriweather — check sizes against design. Can create new styles when needed.
+- LAYOUT: Use the 4-column grid. Keep pages simple — client must edit everything. Use several small tables over a graphic rather than one huge complex table. Use coloured cells instead of graphics where possible. Place icons inline as SVGs. Left indent of −0.08 to push text to cell edge. Footnotes are manual with a footnote style (not automatic).
+- BACKGROUND/SECTIONS: Background images need a section break (right-click › promote/demote). Text won't flow between sections. Tab tints aren't part of the background — a background applies to the whole section. The Page JPEGs folder has position guides; update if design changes a lot. Alternative: draw pink boxes in InDesign and export as a guide JPEG.
+- FOOTER: Page number is a table in the footer. Headers only allow inline images. Default object style has rounded corners. Confirm whether pages should still be alternating.
+
+TOOLS & QUIRKS:
+- Lock objects: right-click › Lock object (locked objects can still be selected — that's normal)
+- Use design sections sparingly — don't use on long sections like Risk or when output is HTML
+- Turn on table rules to see how a page is built
+- Turn off attachments (yellow boxes) while working — these are source documents the client adds
+
+DAILY HABITS:
+- Export a PDF first thing every morning to see what the client changed overnight before starting work
+- Use the History panel to recover deleted content
+- Duplicate a page as non-printing for reference — delete when done, keep file clean
+- Avoid production comments — the client can read them
+- Every change is tracked to whoever made it; clients can accidentally drag sections in left panel — check History if something moves unexpectedly
+
+RISK SECTION TASKS (your assigned section):
+- Opening page: new background and graphics; put a placeholder where the photo was
+- Principal risks: restyle each table in the new colours (~5–6 tables in the live file, design only shows one)
+- Icons and trend arrow: separate SVGs placed inline in tables — icons need to be redone
+- Divider pages: ON HOLD — wait until design is final before touching
+
+Answer helpfully and concisely. If the user asks about something not covered in these notes, say so honestly.`;
+
+let wkvHistory = [];
+
+function wkvSend() {
+  const input = document.getElementById('wkv-input');
+  const btn = document.getElementById('wkv-send-btn');
+  const msgsEl = document.getElementById('wkv-msgs');
+  if (!input || !msgsEl) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  const key = getAiKey();
+  if (!key) { showAiToast('Add your Groq API key in Settings first.'); return; }
+
+  input.value = '';
+  btn.disabled = true;
+
+  wkvHistory.push({ role: 'user', content: text });
+  wkvRender();
+
+  const loaderId = 'wkv-loader';
+  const loader = document.createElement('div');
+  loader.className = 'wkv-msg wkv-msg-loading';
+  loader.id = loaderId;
+  loader.textContent = 'Thinking…';
+  msgsEl.appendChild(loader);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  const messages = wkvHistory.map(m => ({ role: m.role, content: m.content }));
+
+  fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'system', content: WKV_SYSTEM_PROMPT }, ...messages],
+      max_tokens: 600,
+      temperature: 0.3,
+    }),
+  })
+    .then(r => r.json())
+    .then(data => {
+      const reply = data?.choices?.[0]?.message?.content || 'No response.';
+      wkvHistory.push({ role: 'assistant', content: reply });
+    })
+    .catch(() => {
+      wkvHistory.push({ role: 'assistant', content: 'Error — check your API key or connection.' });
+    })
+    .finally(() => {
+      const loaderEl = document.getElementById(loaderId);
+      if (loaderEl) loaderEl.remove();
+      wkvRender();
+      btn.disabled = false;
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    });
+}
+
+function wkvRender() {
+  const msgsEl = document.getElementById('wkv-msgs');
+  if (!msgsEl) return;
+  msgsEl.innerHTML = wkvHistory.map(m => {
+    const cls = m.role === 'user' ? 'wkv-msg wkv-msg-user' : 'wkv-msg wkv-msg-ai';
+    return `<div class="${cls}">${escapeHtml(m.content)}</div>`;
+  }).join('');
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
 function fuRenderList() {
   const all = fuGetAll();
   const listEl = document.getElementById('fu-list');
