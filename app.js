@@ -263,6 +263,7 @@ function navigate(pageId) {
     diffcheck:    ['Text Compare', 'Spot differences between two versions of any text'],
     edmeditor:    ['EDM HTML Editor', 'Code editor + live preview with merge field converter'],
     fileupdates:  ['File Updates', 'Track the latest version of each collateral file'],
+    workiva:      ['Workiva', 'Emperor – CAB Payments AR 2026 artworker notes'],
   };
 
   const t = titles[pageId] || ['Dashboard', ''];

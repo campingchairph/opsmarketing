@@ -32,7 +32,10 @@
       "Bash(python)",
       "Bash(python -)",
       "Bash(python font_escape.py)",
-      "Bash(python patch_app.py)"
+      "Bash(python patch_app.py)",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "PowerShell(git -C C:\\\\Users\\\\josep\\\\OneDrive\\\\Documents\\\\GitHub\\\\report-design-academy status -sb)",
+      "PowerShell(git ls-remote https://github.com/campingchairph/report-design-academy.git refs/heads/main)"
     ]
   }
 }
